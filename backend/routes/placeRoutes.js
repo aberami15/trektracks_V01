@@ -1,4 +1,4 @@
-// routes/placeRoutes.js
+// src/routes/placeRoutes.js
 const express = require('express');
 const router = express.Router();
 const placeController = require('../controllers/placeController');
@@ -8,6 +8,12 @@ router.get('/', placeController.getAllPlaces);
 
 // GET /api/places/search - Search places
 router.get('/search', placeController.searchPlaces);
+
+// GET /api/places/category/:category - Get places by category
+router.get('/category/:category', placeController.getPlacesByCategory);
+
+// GET /api/places/nearby - Get nearby places
+router.get('/nearby', placeController.getNearbyPlaces);
 
 // GET /api/places/:id - Get a specific place
 router.get('/:id', placeController.getPlace);
