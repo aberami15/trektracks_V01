@@ -85,7 +85,7 @@ export default function Home() {
               source={require('../../assets/images/city.jpg')} 
               style={styles.destinationImage} 
             />
-            <Text style={styles.destinationName}>Mountain</Text>
+            <Text style={styles.destinationName}>City</Text>
           </View>
 
           {/* Forest Card */}
@@ -94,7 +94,7 @@ export default function Home() {
               source={require('../../assets/images/forest.jpg')} 
               style={styles.destinationImage} 
             />
-            <Text style={styles.destinationName}>Mountain</Text>
+            <Text style={styles.destinationName}>Forest</Text>
           </View>
 
           {/* Lake Card */}
@@ -103,7 +103,7 @@ export default function Home() {
               source={require('../../assets/images/lake.jpg')} 
               style={styles.destinationImage} 
             />
-            <Text style={styles.destinationName}>Mountain</Text>
+            <Text style={styles.destinationName}>Lake</Text>
           </View>
 
           {/* Ancient places Card */}
@@ -112,7 +112,7 @@ export default function Home() {
               source={require('../../assets/images/dalada.jpg')} 
               style={styles.destinationImage} 
             />
-            <Text style={styles.destinationName}>Mountain</Text>
+            <Text style={styles.destinationName}>Ancient Place</Text>
           </View>
 
           {/* Waterfall Card */}
@@ -121,7 +121,7 @@ export default function Home() {
               source={require('../../assets/images/waterfall.jpg')} 
               style={styles.destinationImage} 
             />
-            <Text style={styles.destinationName}>Mountain</Text>
+            <Text style={styles.destinationName}>Waterfall</Text>
           </View>
 
           {/* island */}
@@ -130,7 +130,7 @@ export default function Home() {
               source={require('../../assets/images/island.jpg')} 
               style={styles.destinationImage} 
             />
-            <Text style={styles.destinationName}>Mountain</Text>
+            <Text style={styles.destinationName}>island</Text>
           </View>
 
         </ScrollView>
