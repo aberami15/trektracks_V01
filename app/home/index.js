@@ -55,7 +55,7 @@ export default function Home() {
           {/* Beach Card */}
           <View style={styles.destinationCard}>
             <Image 
-              source={{uri: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1473&q=80"}} 
+              source={require('../../assets/images/beach.jpg')} 
               style={styles.destinationImage} 
             />
             <Text style={styles.destinationName}>Beach</Text>
@@ -64,7 +64,7 @@ export default function Home() {
           {/* Mountain Card */}
           <View style={styles.destinationCard}>
             <Image 
-              source={{uri: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"}} 
+              source={require('../../assets/images/mountain.webp')} 
               style={styles.destinationImage} 
             />
             <Text style={styles.destinationName}>Mountain</Text>
@@ -73,11 +73,66 @@ export default function Home() {
           {/* Sunset Card */}
           <View style={styles.destinationCard}>
             <Image 
-              source={{uri: "https://images.unsplash.com/photo-1514064019862-23e2a332a6a6?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1528&q=80"}} 
+              source={require('../../assets/images/sunset.jpg')}
               style={styles.destinationImage} 
             />
             <Text style={styles.destinationName}>Sunset</Text>
           </View>
+
+          {/* City Card */}
+          <View style={styles.destinationCard}>
+            <Image 
+              source={require('../../assets/images/city.jpg')} 
+              style={styles.destinationImage} 
+            />
+            <Text style={styles.destinationName}>Mountain</Text>
+          </View>
+
+          {/* Forest Card */}
+          <View style={styles.destinationCard}>
+            <Image 
+              source={require('../../assets/images/forest.jpg')} 
+              style={styles.destinationImage} 
+            />
+            <Text style={styles.destinationName}>Mountain</Text>
+          </View>
+
+          {/* Lake Card */}
+          <View style={styles.destinationCard}>
+            <Image 
+              source={require('../../assets/images/lake.jpg')} 
+              style={styles.destinationImage} 
+            />
+            <Text style={styles.destinationName}>Mountain</Text>
+          </View>
+
+          {/* Ancient places Card */}
+          <View style={styles.destinationCard}>
+            <Image 
+              source={require('../../assets/images/dalada.jpg')} 
+              style={styles.destinationImage} 
+            />
+            <Text style={styles.destinationName}>Mountain</Text>
+          </View>
+
+          {/* Waterfall Card */}
+          <View style={styles.destinationCard}>
+            <Image 
+              source={require('../../assets/images/waterfall.jpg')} 
+              style={styles.destinationImage} 
+            />
+            <Text style={styles.destinationName}>Mountain</Text>
+          </View>
+
+          {/* island */}
+          <View style={styles.destinationCard}>
+            <Image 
+              source={require('../../assets/images/island.jpg')} 
+              style={styles.destinationImage} 
+            />
+            <Text style={styles.destinationName}>Mountain</Text>
+          </View>
+
         </ScrollView>
       </View>
 
@@ -94,7 +149,7 @@ export default function Home() {
           {/* Sigiriya Rock Fortress Card */}
           <View style={styles.locationCard}>
             <Image 
-              source={{uri: "https://images.unsplash.com/photo-1586517285554-8c637f6e4f6c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"}} 
+              source={require('../../assets/images/sigiriya.jpg')} 
               style={styles.locationImage} 
             />
             <View style={styles.ratingContainer}>
@@ -113,7 +168,7 @@ export default function Home() {
           {/* Mirissa Beach Card */}
           <View style={styles.locationCard}>
             <Image 
-              source={{uri: "https://images.unsplash.com/photo-1590523741831-ab7e8b8f9c7f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80"}} 
+              source={require('../../assets/images/mirissa.jpg')} 
               style={styles.locationImage} 
             />
             <View style={styles.ratingContainer}>
@@ -132,7 +187,7 @@ export default function Home() {
           {/* Temple of the Sacred Tooth Relic Card */}
           <View style={styles.locationCard}>
             <Image 
-              source={{uri: "https://images.unsplash.com/photo-1586516382178-10acc152bed3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1074&q=80"}} 
+              source={require('../../assets/images/dalada.jpg')} 
               style={styles.locationImage} 
             />
             <View style={styles.ratingContainer}>
@@ -151,7 +206,7 @@ export default function Home() {
           {/* Galle Fort Card */}
           <View style={styles.locationCard}>
             <Image 
-              source={{uri: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1470&q=80"}} 
+              source={require('../../assets/images/gallefort.jpg')} 
               style={styles.locationImage} 
             />
             <View style={styles.ratingContainer}>
