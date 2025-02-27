@@ -27,6 +27,8 @@ export default function SignUp() {
 
     // In your auth/sign-up/index.js file, update the OnCreateAccount function:
 
+// In your auth/sign-up/index.js file, update the OnCreateAccount function:
+
 const OnCreateAccount = () => {
   if(!email || !password || !fullName) {
     ToastAndroid.show('Please Enter All Details', ToastAndroid.LONG);
@@ -39,8 +41,14 @@ const OnCreateAccount = () => {
       // Signed up 
       const user = userCredential.user;
       console.log(user);
-      // Navigate to home page
-      router.replace('/home');
+      
+      // Show success message
+      ToastAndroid.show("Account created successfully!", ToastAndroid.LONG);
+      
+      // Navigate to home page after a short delay so the user can see the toast
+      setTimeout(() => {
+        router.replace('auth/sign-in');
+      }, 1000);
     })
     .catch((error) => {
       const errorCode = error.code;
