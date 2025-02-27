@@ -25,30 +25,38 @@ export default function SignUp() {
       })
     },[]);
 
-    const OnCreateAccount=()=>{
+    // In your auth/sign-up/index.js file, update the OnCreateAccount function:
 
-      if(!email&&!email&&!password){
+const OnCreateAccount = () => {
+  if(!email || !password || !fullName) {
+    ToastAndroid.show('Please Enter All Details', ToastAndroid.LONG);
+    return;
+  }
 
-        ToastAndroid.show('Please Enter All Details',ToastAndroid.BOTTOM);
-          return ;
-        
+  console.log(email, password);
+  createUserWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed up 
+      const user = userCredential.user;
+      console.log(user);
+      // Navigate to home page
+      router.replace('/home');
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log("--", error, errorCode);
+      
+      // Show specific error messages
+      if(errorCode === 'auth/email-already-in-use') {
+        ToastAndroid.show("Email already in use", ToastAndroid.LONG);
+      } else if(errorCode === 'auth/weak-password') {
+        ToastAndroid.show("Password is too weak", ToastAndroid.LONG);
+      } else {
+        ToastAndroid.show("Failed to create account", ToastAndroid.LONG);
       }
-
-      console.log(email,password)
-      createUserWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
-    // Signed up 
-    const user = userCredential.user;
-    console.log(user);
-    // ...
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    console.log("--",error,errorCode);
-    // ..
-  });
-    }
+    });
+}
 
   return (
     <View

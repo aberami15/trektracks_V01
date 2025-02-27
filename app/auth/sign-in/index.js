@@ -21,30 +21,31 @@ export default function SignIn() {
     })
   },[])
 
-  const onSignIn=()=>{
+// In your auth/sign-in/index.js file, update the onSignIn function:
 
-    if(!email&&!email&&!password)
-      {
-      ToastAndroid.show('Please Enter Email & Password',ToastAndroid.LONG);
-        return ;
-      }
-    
-    signInWithEmailAndPassword(auth, email, password)
-  .then((userCredential) => {
-    // Signed in 
-    const user = userCredential.user;
-    console.log(user);
-    // ...
-  })
-  .catch((error) => {
-    const errorCode = error.code;
-    const errorMessage = error.message;
-    console.log(errorMessage,error.code);
-    if(errorCode=='auth/invalid-credential'){
-      ToastAndroid.show("Invalid User",ToastAndroid.LONG)
-    }
-  });
+const onSignIn = () => {
+  if(!email && !password) {
+    ToastAndroid.show('Please Enter Email & Password', ToastAndroid.LONG);
+    return;
   }
+  
+  signInWithEmailAndPassword(auth, email, password)
+    .then((userCredential) => {
+      // Signed in 
+      const user = userCredential.user;
+      console.log(user);
+      // Navigate to home page
+      router.replace('/home');
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      console.log(errorMessage, error.code);
+      if(errorCode=='auth/invalid-credential'){
+        ToastAndroid.show("Invalid User", ToastAndroid.LONG)
+      }
+    });
+}
 
   return (
     <View style={{
@@ -108,7 +109,7 @@ export default function SignIn() {
       </View>
 
         {/* {Sign in Button} */}
-      <TouchableOpacity onPress={onSignIn} style={{
+      <TouchableOpacity onPress={()=>router.replace('/home')} style={{
         padding:20,
         backgroundColor:'black',
         borderRadius:15,
