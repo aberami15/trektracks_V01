@@ -1,5 +1,6 @@
 import { Text, View } from "react-native";
 import Login from './../components/Login'
+// import Plandisplay from './../components/Plandisplay'
 
 export default function Index() {
   return (
@@ -11,6 +12,7 @@ export default function Index() {
       }}
     >
 
+    {/* <Plandisplay/> */}
     <Login/>  
     </View>
   );
