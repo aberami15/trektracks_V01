@@ -23,12 +23,17 @@ export default function Home() {
     });
   }
 
+  const handleProfilePress = () => {
+    // Navigate to profile page
+    router.push('/profile');
+  }
+
   return (
     <View style={styles.container}>
       {/* Header: Trektracks! title and profile icon */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Trektracks!</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={handleProfilePress}>
           <Ionicons name="person-circle" size={40} color="black" />
         </TouchableOpacity>
       </View>

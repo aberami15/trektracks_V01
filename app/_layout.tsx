@@ -50,6 +50,14 @@ export default function RootLayout() {
       <Stack.Screen name="home/index" />
       <Stack.Screen name="auth/sign-in/index" />
       <Stack.Screen name="auth/sign-up/index" />
+      <Stack.Screen name="profile/index" />
     </Stack>
   );
 }
+
+
+
+  
+
+
+  
