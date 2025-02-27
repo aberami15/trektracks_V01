@@ -47,7 +47,7 @@ const OnCreateAccount = () => {
       
       // Navigate to home page after a short delay so the user can see the toast
       setTimeout(() => {
-        router.replace('/home');
+        router.replace('auth/sign-in');
       }, 1000);
     })
     .catch((error) => {
