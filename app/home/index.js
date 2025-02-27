@@ -141,10 +141,10 @@ export default function Home() {
         </ScrollView>
       </View>
 
-      {/* Recently Visited Section */}
+      {/* recommendations */}
       <View style={styles.sectionContainer}>
         <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recently Visited</Text>
+          <Text style={styles.sectionTitle}>Recommended places</Text>
           <TouchableOpacity>
             <Text style={styles.viewAllText}>View all</Text>
           </TouchableOpacity>
