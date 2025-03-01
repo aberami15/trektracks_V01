@@ -26,6 +26,11 @@ export default function TripItinerary() {
     router.push('/recent-trips');
   }
 
+  const handleCreateItinerary = () => {
+    // Navigate to create itinerary form
+    router.push('/create-itinerary');
+  }
+
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -44,7 +49,10 @@ export default function TripItinerary() {
           <Text style={styles.emptyText}>
             Your upcoming trip itineraries will appear here. Plan your next adventure!
           </Text>
-          <TouchableOpacity style={styles.createButton}>
+          <TouchableOpacity 
+            style={styles.createButton}
+            onPress={handleCreateItinerary}
+          >
             <Text style={styles.createButtonText}>Create Itinerary</Text>
           </TouchableOpacity>
         </View>
