@@ -31,6 +31,13 @@ export default function Profile() {
     });
   }
 
+  const handleEmergencyContacts = () => {
+    // Navigate to emergency contacts page
+    // You can replace this with your actual navigation logic
+    console.log("Navigate to emergency contacts");
+    // Example: router.push('/emergency-contacts');
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header Section */}
@@ -100,6 +107,15 @@ export default function Profile() {
               <Text style={styles.value}>hchamad@gmail.com</Text>
             </View>
           </View>
+
+          {/* Emergency Contacts Button */}
+          <TouchableOpacity 
+            style={styles.emergencyButton} 
+            onPress={handleEmergencyContacts}
+          >
+            <Ionicons name="alert-circle" size={20} color="white" />
+            <Text style={styles.emergencyText}>Emergency Contacts</Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
@@ -150,7 +166,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 25,
-    paddingBottom: 80
+    paddingBottom: 100
   },
   profileImageContainer: {
     alignItems: 'center',
@@ -241,6 +257,28 @@ const styles = StyleSheet.create({
     color: '#333',
     fontSize: 16,
     fontFamily: 'outfit-medium'
+  },
+  emergencyButton: {
+    flexDirection: 'row',
+    backgroundColor: '#FF3B30',
+    padding: 16,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 15,
+    marginBottom: 30,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  emergencyText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'outfit-medium',
+    marginLeft: 8
   },
   logoutContainer: {
     position: 'absolute',
