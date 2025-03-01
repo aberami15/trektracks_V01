@@ -77,7 +77,7 @@ export default function Profile() {
   const handleEmergencyContacts = () => {
     // Navigate to emergency contacts page
     console.log("Navigate to emergency contacts");
-    // Example: router.push('/emergency-contacts');
+    router.push('/emergency-contacts');
   };
 
   // Show loading indicator while fetching user data
