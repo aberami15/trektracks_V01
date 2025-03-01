@@ -3,8 +3,9 @@ import React, { useEffect } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import { TextInput } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { createUserWithEmailAndPassword} from 'firebase/auth';
-import { auth } from './../../../configs/FirebaseConfig';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth, db } from './../../../configs/FirebaseConfig';
+import { doc, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
 
 
@@ -25,30 +26,47 @@ export default function SignUp() {
       })
     },[]);
 
-    // In your auth/sign-up/index.js file, update the OnCreateAccount function:
-
-// In your auth/sign-up/index.js file, update the OnCreateAccount function:
-
 const OnCreateAccount = () => {
   if(!email || !password || !fullName) {
     ToastAndroid.show('Please Enter All Details', ToastAndroid.LONG);
     return;
   }
 
-  console.log(email, password);
+  console.log(email, password, fullName);
   createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
+    .then(async (userCredential) => {
       // Signed up 
       const user = userCredential.user;
       console.log(user);
       
-      // Show success message
-      ToastAndroid.show("Account created successfully!", ToastAndroid.LONG);
-      
-      // Navigate to home page after a short delay so the user can see the toast
-      setTimeout(() => {
-        router.replace('auth/sign-in');
-      }, 1000);
+      try {
+        // 1. Update the auth profile with display name
+        await updateProfile(user, {
+          displayName: fullName
+        });
+        
+        // 2. Store additional user data in Firestore
+        const userDocRef = doc(db, "users", user.uid);
+        await setDoc(userDocRef, {
+          fullName: fullName,
+          email: email,
+          createdAt: new Date(),
+          userId: user.uid
+        });
+        
+        console.log("User data saved to Firestore");
+        
+        // Show success message
+        ToastAndroid.show("Account created successfully!", ToastAndroid.LONG);
+        
+        // Navigate to sign-in page after a short delay
+        setTimeout(() => {
+          router.replace('auth/sign-in');
+        }, 1000);
+      } catch (error) {
+        console.error("Error saving user data:", error);
+        ToastAndroid.show("Account created but failed to save profile data", ToastAndroid.LONG);
+      }
     })
     .catch((error) => {
       const errorCode = error.code;

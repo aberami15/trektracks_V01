@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   View, 
   Text, 
@@ -6,21 +6,58 @@ import {
   TouchableOpacity, 
   SafeAreaView,
   Image,
-  ScrollView
+  ScrollView,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons, Feather, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
-import { auth } from '../../configs/FirebaseConfig';
+import { auth, db } from '../../configs/FirebaseConfig';
+import { doc, getDoc } from 'firebase/firestore';
 
 export default function Profile() {
   const navigation = useNavigation();
   const router = useRouter();
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     navigation.setOptions({
       headerShown: false
-    })
+    });
+    
+    // Fetch user data
+    const fetchUserData = async () => {
+      try {
+        const currentUser = auth.currentUser;
+        if (currentUser) {
+          console.log("Auth user data:", currentUser);
+          
+          // Fetch user data from Firestore
+          const userRef = doc(db, "users", currentUser.uid);
+          const userSnap = await getDoc(userRef);
+          
+          if (userSnap.exists()) {
+            const firestoreData = userSnap.data();
+            console.log("Firestore user data:", firestoreData);
+            setUserData(firestoreData);
+          } else {
+            // If no document exists yet, use basic auth info
+            setUserData({
+              name: currentUser.displayName || "User",
+              email: currentUser.email,
+              phone: currentUser.phoneNumber || "Not provided"
+            });
+          }
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        setLoading(false);
+      }
+    };
+    
+    fetchUserData();
   }, []);
 
   const handleSignOut = () => {
@@ -31,12 +68,27 @@ export default function Profile() {
     });
   }
 
+  const handleBudgetPress = () => {
+    // Navigate to budget details page
+    console.log("Navigating to budget details page");
+    router.push('/trip-budget'); // This should match the route in _layout.tsx
+  };
+
   const handleEmergencyContacts = () => {
     // Navigate to emergency contacts page
-    // You can replace this with your actual navigation logic
     console.log("Navigate to emergency contacts");
     // Example: router.push('/emergency-contacts');
   };
+
+  // Show loading indicator while fetching user data
+  if (loading) {
+    return (
+      <SafeAreaView style={[styles.container, styles.loadingContainer]}>
+        <ActivityIndicator size="large" color="#3478F6" />
+        <Text style={styles.loadingText}>Loading profile...</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -61,15 +113,24 @@ export default function Profile() {
           <View style={styles.profileImageContainer}>
             <View style={styles.outerBorder}>
               <View style={styles.profileImage}>
-                <Image
-                  source={require('../../assets/images/profile.png')}
-                  style={styles.image}
-                />
+                {userData?.photoURL ? (
+                  <Image
+                    source={{ uri: userData.photoURL }}
+                    style={styles.image}
+                  />
+                ) : (
+                  <Image
+                    source={require('../../assets/images/profile.png')}
+                    style={styles.image}
+                  />
+                )}
               </View>
             </View>
             <View style={styles.nameContainer}>
               <Ionicons name="person" size={24} color="#333" />
-              <Text style={styles.nameText}>John</Text>
+              <Text style={styles.nameText}>
+                {userData?.fullName || userData?.name || auth.currentUser?.displayName || "User"}
+              </Text>
             </View>
           </View>
 
@@ -80,7 +141,7 @@ export default function Profile() {
               <Text style={styles.iconText}>Travel History</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.iconItem}>
+            <TouchableOpacity style={styles.iconItem} onPress={handleBudgetPress}>
               <Ionicons name="wallet" size={28} color="#333" />
               <Text style={styles.iconText}>Budget</Text>
             </TouchableOpacity>
@@ -96,7 +157,7 @@ export default function Profile() {
             <Ionicons name="call" size={20} color="#3478F6" />
             <View style={styles.detailText}>
               <Text style={styles.label}>Phone</Text>
-              <Text style={styles.value}>+94777342436</Text>
+              <Text style={styles.value}>{userData?.phone || userData?.phoneNumber || "Not provided"}</Text>
             </View>
           </View>
 
@@ -104,7 +165,7 @@ export default function Profile() {
             <Ionicons name="mail" size={20} color="#3478F6" />
             <View style={styles.detailText}>
               <Text style={styles.label}>Email</Text>
-              <Text style={styles.value}>hchamad@gmail.com</Text>
+              <Text style={styles.value}>{userData?.email || auth.currentUser?.email || "Not provided"}</Text>
             </View>
           </View>
 
@@ -134,6 +195,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#f2f2f2',
+  },
+  loadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#333',
+    fontFamily: 'outfit-medium',
   },
   headerContainer: {
     flexDirection: 'row',
