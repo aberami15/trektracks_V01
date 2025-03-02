@@ -37,14 +37,14 @@ export default function Login() {
 
 
 <TouchableOpacity style={styles.button}
-            onPress={()=>router.push('auth/sign-in')}
+            onPress={()=>router.push('review')}
         >
           <Text style={{
             textAlign:'center',
             fontFamily:'outfit',
             fontSize:17,
             color:'white'
-          }}>Get Started</Text>
+          }}>Review page</Text>
         </TouchableOpacity>
         
 
