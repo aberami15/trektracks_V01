@@ -3,8 +3,8 @@ import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity } from "rea
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import Button from "../../components/ui/button";
 import { useNavigation } from "@react-navigation/native";
-import profile1 from "../../assets/images/Pro1.png"; 
-import profile2 from "../../assets/images/pro2.png";  
+import profile1 from "../../assets/images/Pro1.jpg"; 
+import profile2 from "../../assets/images/pro2.jpg";  
 
 
 const reviews = [
