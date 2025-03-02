@@ -28,6 +28,21 @@
 //     router.push('/profile');
 //   }
 
+//   const navigateToHome = () => {
+//     // Stay on home page or navigate to it if coming from elsewhere
+//     router.push('/home');
+//   }
+
+//   const navigateToItinerary = () => {
+//     // Navigate to trip itinerary page
+//     router.push('/trip-itinerary');
+//   }
+
+//   const navigateToRecentTrips = () => {
+//     // Navigate to recent trips page
+//     router.push('/recent-trips');
+//   }
+
 //   return (
 //     <View style={styles.container}>
 //       {/* Header: Trektracks! title and profile icon */}
@@ -47,186 +62,216 @@
 //         />
 //       </View>
 
-//       {/* Popular Destinations Section */}
-//       <View style={styles.sectionContainer}>
-//         <View style={styles.sectionHeader}>
-//           <Text style={styles.sectionTitle}>Popular Destinations</Text>
-//           <TouchableOpacity>
-//             <Text style={styles.seeAllText}>See all</Text>
-//           </TouchableOpacity>
+//       {/* Main Scrollable Content */}
+//       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+//         {/* Popular Destinations Section */}
+//         <View style={styles.sectionContainer}>
+//           <View style={styles.sectionHeader}>
+//             <Text style={styles.sectionTitle}>Popular Destinations</Text>
+//             <TouchableOpacity>
+//               <Text style={styles.seeAllText}>See all</Text>
+//             </TouchableOpacity>
+//           </View>
+
+//           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.destinationsScroll}>
+//             {/* Beach Card */}
+//             <View style={styles.destinationCard}>
+//               <Image 
+//                 source={require('../../assets/images/beach.jpg')} 
+//                 style={styles.destinationImage} 
+//               />
+//               <Text style={styles.destinationName}>Beach</Text>
+//             </View>
+
+//             {/* Mountain Card */}
+//             <View style={styles.destinationCard}>
+//               <Image 
+//                 source={require('../../assets/images/mountain.webp')} 
+//                 style={styles.destinationImage} 
+//               />
+//               <Text style={styles.destinationName}>Mountain</Text>
+//             </View>
+
+//             {/* Sunset Card */}
+//             <View style={styles.destinationCard}>
+//               <Image 
+//                 source={require('../../assets/images/sunset.jpg')}
+//                 style={styles.destinationImage} 
+//               />
+//               <Text style={styles.destinationName}>Sunset</Text>
+//             </View>
+
+//             {/* City Card */}
+//             <View style={styles.destinationCard}>
+//               <Image 
+//                 source={require('../../assets/images/city.jpg')} 
+//                 style={styles.destinationImage} 
+//               />
+//               <Text style={styles.destinationName}>City</Text>
+//             </View>
+
+//             {/* Forest Card */}
+//             <View style={styles.destinationCard}>
+//               <Image 
+//                 source={require('../../assets/images/forest.jpg')} 
+//                 style={styles.destinationImage} 
+//               />
+//               <Text style={styles.destinationName}>Forest</Text>
+//             </View>
+
+//             {/* Lake Card */}
+//             <View style={styles.destinationCard}>
+//               <Image 
+//                 source={require('../../assets/images/lake.jpg')} 
+//                 style={styles.destinationImage} 
+//               />
+//               <Text style={styles.destinationName}>Lake</Text>
+//             </View>
+
+//             {/* Ancient places Card */}
+//             <View style={styles.destinationCard}>
+//               <Image 
+//                 source={require('../../assets/images/dalada.jpg')} 
+//                 style={styles.destinationImage} 
+//               />
+//               <Text style={styles.destinationName}>Ancient Place</Text>
+//             </View>
+
+//             {/* Waterfall Card */}
+//             <View style={styles.destinationCard}>
+//               <Image 
+//                 source={require('../../assets/images/waterfall.jpg')} 
+//                 style={styles.destinationImage} 
+//               />
+//               <Text style={styles.destinationName}>Waterfall</Text>
+//             </View>
+
+//             {/* island */}
+//             <View style={styles.destinationCard}>
+//               <Image 
+//                 source={require('../../assets/images/island.jpg')} 
+//                 style={styles.destinationImage} 
+//               />
+//               <Text style={styles.destinationName}>island</Text>
+//             </View>
+
+//           </ScrollView>
 //         </View>
 
-//         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.destinationsScroll}>
-//           {/* Beach Card */}
-//           <View style={styles.destinationCard}>
-//             <Image 
-//               source={require('../../assets/images/beach.jpg')} 
-//               style={styles.destinationImage} 
-//             />
-//             <Text style={styles.destinationName}>Beach</Text>
+//         {/* recommendations */}
+//         <View style={[styles.sectionContainer, { marginBottom: 80 }]}>
+//           <View style={styles.sectionHeader}>
+//             <Text style={styles.sectionTitle}>Recommended places</Text>
+//             <TouchableOpacity>
+//               <Text style={styles.viewAllText}>View all</Text>
+//             </TouchableOpacity>
 //           </View>
 
-//           {/* Mountain Card */}
-//           <View style={styles.destinationCard}>
-//             <Image 
-//               source={require('../../assets/images/mountain.webp')} 
-//               style={styles.destinationImage} 
-//             />
-//             <Text style={styles.destinationName}>Mountain</Text>
+//           <View style={styles.recentlyVisitedScroll}>
+//             {/* Sigiriya Rock Fortress Card */}
+//             <View style={styles.locationCard}>
+//               <Image 
+//                 source={require('../../assets/images/sigiriya.jpg')} 
+//                 style={styles.locationImage} 
+//               />
+//               <View style={styles.ratingContainer}>
+//                 <Ionicons name="star" size={16} color="#FFD700" />
+//                 <Text style={styles.ratingText}>4.9</Text>
+//               </View>
+//               <View style={styles.locationInfo}>
+//                 <Text style={styles.locationName}>Sigiriya Rock Fortress</Text>
+//                 <View style={styles.locationDetail}>
+//                   <View style={styles.locationDot} />
+//                   <Text style={styles.locationPlace}>Matale District, Central Province</Text>
+//                 </View>
+//               </View>
+//             </View>
+
+//             {/* Mirissa Beach Card */}
+//             <View style={styles.locationCard}>
+//               <Image 
+//                 source={require('../../assets/images/mirissa.jpg')} 
+//                 style={styles.locationImage} 
+//               />
+//               <View style={styles.ratingContainer}>
+//                 <Ionicons name="star" size={16} color="#FFD700" />
+//                 <Text style={styles.ratingText}>4.7</Text>
+//               </View>
+//               <View style={styles.locationInfo}>
+//                 <Text style={styles.locationName}>Mirissa Beach</Text>
+//                 <View style={styles.locationDetail}>
+//                   <View style={styles.locationDot} />
+//                   <Text style={styles.locationPlace}>Southern Province</Text>
+//                 </View>
+//               </View>
+//             </View>
+
+//             {/* Temple of the Sacred Tooth Relic Card */}
+//             <View style={styles.locationCard}>
+//               <Image 
+//                 source={require('../../assets/images/dalada.jpg')} 
+//                 style={styles.locationImage} 
+//               />
+//               <View style={styles.ratingContainer}>
+//                 <Ionicons name="star" size={16} color="#FFD700" />
+//                 <Text style={styles.ratingText}>4.8</Text>
+//               </View>
+//               <View style={styles.locationInfo}>
+//                 <Text style={styles.locationName}>Temple of the Sacred Tooth Relic</Text>
+//                 <View style={styles.locationDetail}>
+//                   <View style={styles.locationDot} />
+//                   <Text style={styles.locationPlace}>Kandy, Central Province</Text>
+//                 </View>
+//               </View>
+//             </View>
+
+//             {/* Galle Fort Card */}
+//             <View style={styles.locationCard}>
+//               <Image 
+//                 source={require('../../assets/images/gallefort.jpg')} 
+//                 style={styles.locationImage} 
+//               />
+//               <View style={styles.ratingContainer}>
+//                 <Ionicons name="star" size={16} color="#FFD700" />
+//                 <Text style={styles.ratingText}>4.7</Text>
+//               </View>
+//               <View style={styles.locationInfo}>
+//                 <Text style={styles.locationName}>Galle Fort</Text>
+//                 <View style={styles.locationDetail}>
+//                   <View style={styles.locationDot} />
+//                   <Text style={styles.locationPlace}>Galle, Southern Province</Text>
+//                 </View>
+//               </View>
+//             </View>
 //           </View>
-
-//           {/* Sunset Card */}
-//           <View style={styles.destinationCard}>
-//             <Image 
-//               source={require('../../assets/images/sunset.jpg')}
-//               style={styles.destinationImage} 
-//             />
-//             <Text style={styles.destinationName}>Sunset</Text>
-//           </View>
-
-//           {/* City Card */}
-//           <View style={styles.destinationCard}>
-//             <Image 
-//               source={require('../../assets/images/city.jpg')} 
-//               style={styles.destinationImage} 
-//             />
-//             <Text style={styles.destinationName}>City</Text>
-//           </View>
-
-//           {/* Forest Card */}
-//           <View style={styles.destinationCard}>
-//             <Image 
-//               source={require('../../assets/images/forest.jpg')} 
-//               style={styles.destinationImage} 
-//             />
-//             <Text style={styles.destinationName}>Forest</Text>
-//           </View>
-
-//           {/* Lake Card */}
-//           <View style={styles.destinationCard}>
-//             <Image 
-//               source={require('../../assets/images/lake.jpg')} 
-//               style={styles.destinationImage} 
-//             />
-//             <Text style={styles.destinationName}>Lake</Text>
-//           </View>
-
-//           {/* Ancient places Card */}
-//           <View style={styles.destinationCard}>
-//             <Image 
-//               source={require('../../assets/images/dalada.jpg')} 
-//               style={styles.destinationImage} 
-//             />
-//             <Text style={styles.destinationName}>Ancient Place</Text>
-//           </View>
-
-//           {/* Waterfall Card */}
-//           <View style={styles.destinationCard}>
-//             <Image 
-//               source={require('../../assets/images/waterfall.jpg')} 
-//               style={styles.destinationImage} 
-//             />
-//             <Text style={styles.destinationName}>Waterfall</Text>
-//           </View>
-
-//           {/* island */}
-//           <View style={styles.destinationCard}>
-//             <Image 
-//               source={require('../../assets/images/island.jpg')} 
-//               style={styles.destinationImage} 
-//             />
-//             <Text style={styles.destinationName}>island</Text>
-//           </View>
-
-//         </ScrollView>
-//       </View>
-
-//       {/* recommendations */}
-//       <View style={styles.sectionContainer}>
-//         <View style={styles.sectionHeader}>
-//           <Text style={styles.sectionTitle}>Recommended places</Text>
-//           <TouchableOpacity>
-//             <Text style={styles.viewAllText}>View all</Text>
-//           </TouchableOpacity>
 //         </View>
+//       </ScrollView>
 
-//         <ScrollView showsVerticalScrollIndicator={false} style={styles.recentlyVisitedScroll}>
-//           {/* Sigiriya Rock Fortress Card */}
-//           <View style={styles.locationCard}>
-//             <Image 
-//               source={require('../../assets/images/sigiriya.jpg')} 
-//               style={styles.locationImage} 
-//             />
-//             <View style={styles.ratingContainer}>
-//               <Ionicons name="star" size={16} color="#FFD700" />
-//               <Text style={styles.ratingText}>4.9</Text>
-//             </View>
-//             <View style={styles.locationInfo}>
-//               <Text style={styles.locationName}>Sigiriya Rock Fortress</Text>
-//               <View style={styles.locationDetail}>
-//                 <View style={styles.locationDot} />
-//                 <Text style={styles.locationPlace}>Matale District, Central Province</Text>
-//               </View>
-//             </View>
-//           </View>
-
-//           {/* Mirissa Beach Card */}
-//           <View style={styles.locationCard}>
-//             <Image 
-//               source={require('../../assets/images/mirissa.jpg')} 
-//               style={styles.locationImage} 
-//             />
-//             <View style={styles.ratingContainer}>
-//               <Ionicons name="star" size={16} color="#FFD700" />
-//               <Text style={styles.ratingText}>4.7</Text>
-//             </View>
-//             <View style={styles.locationInfo}>
-//               <Text style={styles.locationName}>Mirissa Beach</Text>
-//               <View style={styles.locationDetail}>
-//                 <View style={styles.locationDot} />
-//                 <Text style={styles.locationPlace}>Southern Province</Text>
-//               </View>
-//             </View>
-//           </View>
-
-//           {/* Temple of the Sacred Tooth Relic Card */}
-//           <View style={styles.locationCard}>
-//             <Image 
-//               source={require('../../assets/images/dalada.jpg')} 
-//               style={styles.locationImage} 
-//             />
-//             <View style={styles.ratingContainer}>
-//               <Ionicons name="star" size={16} color="#FFD700" />
-//               <Text style={styles.ratingText}>4.8</Text>
-//             </View>
-//             <View style={styles.locationInfo}>
-//               <Text style={styles.locationName}>Temple of the Sacred Tooth Relic</Text>
-//               <View style={styles.locationDetail}>
-//                 <View style={styles.locationDot} />
-//                 <Text style={styles.locationPlace}>Kandy, Central Province</Text>
-//               </View>
-//             </View>
-//           </View>
-
-//           {/* Galle Fort Card */}
-//           <View style={styles.locationCard}>
-//             <Image 
-//               source={require('../../assets/images/gallefort.jpg')} 
-//               style={styles.locationImage} 
-//             />
-//             <View style={styles.ratingContainer}>
-//               <Ionicons name="star" size={16} color="#FFD700" />
-//               <Text style={styles.ratingText}>4.7</Text>
-//             </View>
-//             <View style={styles.locationInfo}>
-//               <Text style={styles.locationName}>Galle Fort</Text>
-//               <View style={styles.locationDetail}>
-//                 <View style={styles.locationDot} />
-//                 <Text style={styles.locationPlace}>Galle, Southern Province</Text>
-//               </View>
-//             </View>
-//           </View>
-//         </ScrollView>
+//       {/* Footer Navigation */}
+//       <View style={styles.footer}>
+//         <TouchableOpacity 
+//           style={styles.footerItem} 
+//           onPress={navigateToHome}
+//         >
+//           <Ionicons name="home" size={24} color="#3478F6" />
+//           <Text style={[styles.footerText, { color: '#3478F6' }]}>Home</Text>
+//         </TouchableOpacity>
+        
+//         <TouchableOpacity 
+//           style={styles.footerItem}
+//           onPress={navigateToItinerary}
+//         >
+//           <Ionicons name="calendar" size={24} color="#777" />
+//           <Text style={styles.footerText}>Itinerary</Text>
+//         </TouchableOpacity>
+        
+//         <TouchableOpacity 
+//           style={styles.footerItem}
+//           onPress={navigateToRecentTrips}
+//         >
+//           <Ionicons name="time" size={24} color="#777" />
+//           <Text style={styles.footerText}>Recent</Text>
+//         </TouchableOpacity>
 //       </View>
 //     </View>
 //   )
@@ -374,6 +419,31 @@
 //     fontSize: 14,
 //     color: '#666',
 //   },
+//   footer: {
+//     position: 'absolute',
+//     bottom: 0,
+//     left: 0,
+//     right: 0,
+//     height: 60,
+//     backgroundColor: 'white',
+//     flexDirection: 'row',
+//     justifyContent: 'space-around',
+//     alignItems: 'center',
+//     borderTopWidth: 1,
+//     borderTopColor: '#e8e8e8',
+//     paddingBottom: 5,
+//   },
+//   footerItem: {
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//     paddingTop: 8,
+//   },
+//   footerText: {
+//     fontFamily: 'outfit',
+//     fontSize: 12,
+//     color: '#777',
+//     marginTop: 4,
+//   },
 // });
 
 import { View, Text, StyleSheet, TextInput, Image, ScrollView, TouchableOpacity } from 'react-native'
@@ -453,22 +523,28 @@ export default function Home() {
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.destinationsScroll}>
             {/* Beach Card */}
-            <View style={styles.destinationCard}>
-              <Image 
-                source={require('../../assets/images/beach.jpg')} 
-                style={styles.destinationImage} 
-              />
-              <Text style={styles.destinationName}>Beach</Text>
-            </View>
+            <TouchableOpacity 
+              style={styles.destinationCard}
+              onPress={() => router.push('/destinations/beaches')}
+            >
+            <Image 
+                  source={require('../../assets/images/beach.jpg')} 
+                  style={styles.destinationImage} 
+            />
+            <Text style={styles.destinationName}>Beach</Text>
+            </TouchableOpacity>
 
             {/* Mountain Card */}
-            <View style={styles.destinationCard}>
+            <TouchableOpacity 
+              style={styles.destinationCard}
+              onPress={() => router.push('/destinations/mountains')}
+            >
               <Image 
                 source={require('../../assets/images/mountain.webp')} 
                 style={styles.destinationImage} 
               />
               <Text style={styles.destinationName}>Mountain</Text>
-            </View>
+            </TouchableOpacity>
 
             {/* Sunset Card */}
             <View style={styles.destinationCard}>
