@@ -547,13 +547,16 @@ export default function Home() {
             </TouchableOpacity>
 
             {/* Sunset Card */}
-            <View style={styles.destinationCard}>
-              <Image 
-                source={require('../../assets/images/sunset.jpg')}
-                style={styles.destinationImage} 
-              />
-              <Text style={styles.destinationName}>Sunset</Text>
-            </View>
+<TouchableOpacity 
+  style={styles.destinationCard}
+  onPress={() => router.push('/destinations/sunsets')}
+>
+  <Image 
+    source={require('../../assets/images/sunset.jpg')}
+    style={styles.destinationImage} 
+  />
+  <Text style={styles.destinationName}>Sunset</Text>
+</TouchableOpacity>
 
             {/* City Card */}
             <View style={styles.destinationCard}>
