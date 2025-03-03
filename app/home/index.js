@@ -547,22 +547,29 @@ export default function Home() {
             </TouchableOpacity>
 
             {/* Sunset Card */}
-            <View style={styles.destinationCard}>
+            <TouchableOpacity 
+              style={styles.destinationCard}
+              onPress={() => router.push('/destinations/sunsets')}
+            >
               <Image 
-                source={require('../../assets/images/sunset.jpg')}
+                source={require('../../assets/images/sunset.jpg')} 
                 style={styles.destinationImage} 
               />
-              <Text style={styles.destinationName}>Sunset</Text>
-            </View>
+              <Text style={styles.destinationName}>sunset</Text>
+            </TouchableOpacity>
 
             {/* City Card */}
-            <View style={styles.destinationCard}>
-              <Image 
-                source={require('../../assets/images/city.jpg')} 
-                style={styles.destinationImage} 
-              />
-              <Text style={styles.destinationName}>City</Text>
-            </View>
+<TouchableOpacity 
+  style={styles.destinationCard}
+  onPress={() => router.push('/destinations/cities')}
+>
+  <Image 
+    source={require('../../assets/images/city.jpg')} 
+    style={styles.destinationImage} 
+  />
+  <Text style={styles.destinationName}>City</Text>
+</TouchableOpacity>
+
 
             {/* Forest Card */}
             <View style={styles.destinationCard}>

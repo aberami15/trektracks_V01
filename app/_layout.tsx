@@ -105,8 +105,10 @@ export default function RootLayout() {
       <Stack.Screen name="profile/index" />
       <Stack.Screen name="trip-itinerary/index" />
       <Stack.Screen name="recent-trips/index" />
-      <Stack.Screen name="destinations/mountains/index" />
+      <Stack.Screen name="mountains/index" />
       <Stack.Screen name="beaches/index" />
+      <Stack.Screen name="sunsets/index" />
+      <Stack.Screen name="cities/index" />
       <Stack.Screen name="budget-planner/index" />
     </Stack>
   );
