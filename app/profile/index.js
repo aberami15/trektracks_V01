@@ -70,8 +70,8 @@ export default function Profile() {
 
   const handleBudgetPress = () => {
     // Navigate to budget details page
-    console.log("Navigating to budget details page");
-    router.push('/trip-budget'); // This should match the route in _layout.tsx
+    console.log("Navigating to budget planner");
+    router.push('/budget-planner'); // Direct to the budget planner page
   };
 
   const handleEmergencyContacts = () => {
