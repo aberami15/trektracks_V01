@@ -609,22 +609,29 @@ export default function Home() {
 
 
             {/* Waterfall Card */}
-            <View style={styles.destinationCard}>
-              <Image 
-                source={require('../../assets/images/waterfall.jpg')} 
-                style={styles.destinationImage} 
-              />
-              <Text style={styles.destinationName}>Waterfall</Text>
-            </View>
+<TouchableOpacity 
+  style={styles.destinationCard}
+  onPress={() => router.push('/destinations/waterfalls')}
+>
+  <Image 
+    source={require('../../assets/images/waterfall.jpg')} 
+    style={styles.destinationImage} 
+  />
+  <Text style={styles.destinationName}>Waterfall</Text>
+</TouchableOpacity>
+
 
             {/* island */}
-            <View style={styles.destinationCard}>
-              <Image 
-                source={require('../../assets/images/island.jpg')} 
-                style={styles.destinationImage} 
-              />
-              <Text style={styles.destinationName}>island</Text>
-            </View>
+            <TouchableOpacity 
+  style={styles.destinationCard}
+  onPress={() => router.push('/destinations/islands')}
+>
+  <Image 
+    source={require('../../assets/images/island.jpg')} 
+    style={styles.destinationImage} 
+  />
+  <Text style={styles.destinationName}>Island</Text>
+</TouchableOpacity>
 
           </ScrollView>
         </View>
