@@ -595,14 +595,18 @@ export default function Home() {
   <Text style={styles.destinationName}>Lake</Text>
 </TouchableOpacity>
 
-            {/* Ancient places Card */}
-            <View style={styles.destinationCard}>
-              <Image 
-                source={require('../../assets/images/dalada.jpg')} 
-                style={styles.destinationImage} 
-              />
-              <Text style={styles.destinationName}>Ancient Place</Text>
-            </View>
+            {/* Ancient Places Card */}
+<TouchableOpacity 
+  style={styles.destinationCard}
+  onPress={() => router.push('/destinations/ancient-places')}
+>
+  <Image 
+    source={require('../../assets/images/dalada.jpg')} 
+    style={styles.destinationImage} 
+  />
+  <Text style={styles.destinationName}>Ancient Place</Text>
+</TouchableOpacity>
+
 
             {/* Waterfall Card */}
             <View style={styles.destinationCard}>
