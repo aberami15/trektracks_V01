@@ -39,21 +39,7 @@ const BudgetPlanner = () => {
         </TouchableOpacity>
       </View>
 
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <MaterialIcons name="pie-chart" size={24} color="#2cc3e5" />
-          <Text style={styles.cardTitle}>Transactions</Text>
-        </View>
-        <Text style={styles.subtitle}>Effortlessly Track Every Transaction</Text>
-        
-        {/* Progress Bars */}
-        <View style={styles.progressContainer}>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: '65%' }]} />
-          </View>
-          <Text style={styles.progressText}>LKR 45,000 / LKR 70,000</Text>
-        </View>
-      </View>
+      
 
       {/* Budget Summary */}
       <View style={styles.section}>
