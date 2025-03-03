@@ -104,7 +104,7 @@ export default function TripBudget() {
         style={styles.createBudgetButton}
         onPress={() => router.push('/create-trip-budget')}
       >
-        <Text style={styles.createBudgetButtonText}>Create New Budget</Text>
+        <Text style={styles.createBudgetButtonText}>Budget Planner</Text>
       </TouchableOpacity>
     </View>
   );

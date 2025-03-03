@@ -107,6 +107,7 @@ export default function RootLayout() {
       <Stack.Screen name="recent-trips/index" />
       <Stack.Screen name="destinations/mountains/index" />
       <Stack.Screen name="beaches/index" />
+      <Stack.Screen name="budget-planner/index" />
     </Stack>
   );
 }
