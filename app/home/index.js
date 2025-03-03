@@ -241,23 +241,26 @@ export default function Home() {
             </View>
 
             {/* Temple of the Sacred Tooth Relic Card */}
-            <View style={styles.locationCard}>
-              <Image 
-                source={require('../../assets/images/dalada.jpg')} 
-                style={styles.locationImage} 
-              />
-              <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={16} color="#FFD700" />
-                <Text style={styles.ratingText}>4.8</Text>
-              </View>
-              <View style={styles.locationInfo}>
-                <Text style={styles.locationName}>Temple of the Sacred Tooth Relic</Text>
-                <View style={styles.locationDetail}>
-                  <View style={styles.locationDot} />
-                  <Text style={styles.locationPlace}>Kandy, Central Province</Text>
+              <TouchableOpacity 
+                style={styles.locationCard}
+                onPress={() => router.push('/tooth-temple')}
+              >
+                <Image 
+                  source={require('../../assets/images/dalada.jpg')} 
+                  style={styles.locationImage} 
+                />
+                <View style={styles.ratingContainer}>
+                  <Ionicons name="star" size={16} color="#FFD700" />
+                  <Text style={styles.ratingText}>4.8</Text>
                 </View>
-              </View>
-            </View>
+                <View style={styles.locationInfo}>
+                  <Text style={styles.locationName}>Temple of the Sacred Tooth Relic</Text>
+                  <View style={styles.locationDetail}>
+                    <View style={styles.locationDot} />
+                    <Text style={styles.locationPlace}>Kandy, Central Province</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
 
             {/* Galle Fort Card */}
             <View style={styles.locationCard}>
