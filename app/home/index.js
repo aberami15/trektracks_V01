@@ -572,22 +572,28 @@ export default function Home() {
 
 
             {/* Forest Card */}
-            <View style={styles.destinationCard}>
-              <Image 
-                source={require('../../assets/images/forest.jpg')} 
-                style={styles.destinationImage} 
-              />
-              <Text style={styles.destinationName}>Forest</Text>
-            </View>
+<TouchableOpacity 
+  style={styles.destinationCard}
+  onPress={() => router.push('/destinations/forests')}
+>
+  <Image 
+    source={require('../../assets/images/forest.jpg')} 
+    style={styles.destinationImage} 
+  />
+  <Text style={styles.destinationName}>Forest</Text>
+</TouchableOpacity>
 
             {/* Lake Card */}
-            <View style={styles.destinationCard}>
-              <Image 
-                source={require('../../assets/images/lake.jpg')} 
-                style={styles.destinationImage} 
-              />
-              <Text style={styles.destinationName}>Lake</Text>
-            </View>
+<TouchableOpacity 
+  style={styles.destinationCard}
+  onPress={() => router.push('/destinations/lakes')}
+>
+  <Image 
+    source={require('../../assets/images/lake.jpg')} 
+    style={styles.destinationImage} 
+  />
+  <Text style={styles.destinationName}>Lake</Text>
+</TouchableOpacity>
 
             {/* Ancient places Card */}
             <View style={styles.destinationCard}>
