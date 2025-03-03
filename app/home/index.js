@@ -200,23 +200,26 @@ export default function Home() {
 
           <View style={styles.recentlyVisitedScroll}>
             {/* Sigiriya Rock Fortress Card */}
-            <View style={styles.locationCard}>
-              <Image 
-                source={require('../../assets/images/sigiriya.jpg')} 
-                style={styles.locationImage} 
-              />
-              <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={16} color="#FFD700" />
-                <Text style={styles.ratingText}>4.9</Text>
-              </View>
-              <View style={styles.locationInfo}>
-                <Text style={styles.locationName}>Sigiriya Rock Fortress</Text>
-                <View style={styles.locationDetail}>
-                  <View style={styles.locationDot} />
-                  <Text style={styles.locationPlace}>Matale District, Central Province</Text>
+              <TouchableOpacity 
+                style={styles.locationCard}
+                onPress={() => router.push('/sigiriya')}
+              >
+                <Image 
+                  source={require('../../assets/images/sigiriya.jpg')} 
+                  style={styles.locationImage} 
+                />
+                <View style={styles.ratingContainer}>
+                  <Ionicons name="star" size={16} color="#FFD700" />
+                  <Text style={styles.ratingText}>4.9</Text>
                 </View>
-              </View>
-            </View>
+                <View style={styles.locationInfo}>
+                  <Text style={styles.locationName}>Sigiriya Rock Fortress</Text>
+                  <View style={styles.locationDetail}>
+                    <View style={styles.locationDot} />
+                    <Text style={styles.locationPlace}>Matale District, Central Province</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
 
             {/* Mirissa Beach Card */}
             <View style={styles.locationCard}>

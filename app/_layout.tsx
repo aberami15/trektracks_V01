@@ -50,6 +50,8 @@ export default function RootLayout() {
       <Stack.Screen name="destinations/waterfalls/index" />
       <Stack.Screen name="destinations/islands/index" />
       <Stack.Screen name="budget-planner/index" />
+      <Stack.Screen name="sigiriya/index" />
+
     </Stack>
   );
 }
