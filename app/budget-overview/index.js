@@ -1,14 +1,23 @@
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Stack } from 'expo-router';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { Stack, useRouter } from 'expo-router';
 
 const BudgetOverview = () => {
+  const router = useRouter();
+
+  const handleBack = () => {
+    router.back(); // Navigate back to the previous screen (BudgetPlanner)
+  };
+
   return (
     <ScrollView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       
       {/* Header */}
       <View style={styles.header}>
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#2cc3e5" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Budget Overview</Text>
       </View>
 
@@ -32,7 +41,7 @@ const BudgetOverview = () => {
         <View style={styles.expensesContainer}>
           {/* Food */}
           <View style={styles.expenseItem}>
-            <MaterialCommunityIcons name="food" size={24} color="#5edfff" />
+            <MaterialCommunityIcons name="food" size={24} color="#2cc3e5" />
             <View style={styles.expenseDetails}>
               <Text style={styles.expenseCategory}>Food</Text>
               <Text style={styles.expenseAmount}>LKR 25,000</Text>
@@ -41,7 +50,7 @@ const BudgetOverview = () => {
 
           {/* Accommodation */}
           <View style={styles.expenseItem}>
-            <MaterialCommunityIcons name="home" size={24} color="#5edfff" />
+            <MaterialCommunityIcons name="home" size={24} color="#2cc3e5" />
             <View style={styles.expenseDetails}>
               <Text style={styles.expenseCategory}>Accommodation</Text>
               <Text style={styles.expenseAmount}>LKR 50,000</Text>
@@ -50,7 +59,7 @@ const BudgetOverview = () => {
 
           {/* Fuel */}
           <View style={styles.expenseItem}>
-            <MaterialCommunityIcons name="fuel" size={24} color="#5edfff" />
+            <MaterialCommunityIcons name="fuel" size={24} color="#2cc3e5" />
             <View style={styles.expenseDetails}>
               <Text style={styles.expenseCategory}>Fuel</Text>
               <Text style={styles.expenseAmount}>LKR 30,000</Text>
@@ -59,7 +68,7 @@ const BudgetOverview = () => {
 
           {/* Tickets */}
           <View style={styles.expenseItem}>
-            <MaterialCommunityIcons name="ticket" size={24} color="#5edfff" />
+            <MaterialCommunityIcons name="ticket" size={24} color="#2cc3e5" />
             <View style={styles.expenseDetails}>
               <Text style={styles.expenseCategory}>Tickets</Text>
               <Text style={styles.expenseAmount}>LKR 15,000</Text>
@@ -74,31 +83,41 @@ const BudgetOverview = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#031f2a',
+    backgroundColor: '#ffffff',
     padding: 20,
   },
   header: {
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 30,
   },
+  backButton: {
+    marginRight: 15,
+  },
   headerTitle: {
-    color: '#5edfff',
+    color: '#2cc3e5',
     fontSize: 28,
     fontWeight: 'bold',
   },
   budgetCard: {
-    backgroundColor: '#0a3a4a',
+    backgroundColor: '#f0f7fa',
     borderRadius: 15,
     padding: 20,
     marginBottom: 25,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   sectionTitle: {
-    color: '#5edfff',
+    color: '#1a4a5a',
     fontSize: 20,
     fontWeight: '600',
     marginBottom: 15,
   },
   budgetAmount: {
-    color: '#fff',
+    color: '#1a4a5a',
     fontSize: 32,
     fontWeight: 'bold',
     marginBottom: 20,
@@ -108,18 +127,21 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 8,
-    backgroundColor: '#1a4a5a',
+    backgroundColor: '#dbeef5',
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#5edfff',
+    backgroundColor: '#2cc3e5',
   },
   progressText: {
-    color: '#7d9ca5',
+    color: '#658998',
     fontSize: 14,
     marginTop: 8,
+  },
+  section: {
+    marginBottom: 30,
   },
   expensesContainer: {
     gap: 15,
@@ -127,21 +149,26 @@ const styles = StyleSheet.create({
   expenseItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0a3a4a',
+    backgroundColor: '#f0f7fa',
     padding: 15,
     borderRadius: 10,
     gap: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
   },
   expenseDetails: {
     flex: 1,
   },
   expenseCategory: {
-    color: '#fff',
+    color: '#1a4a5a',
     fontSize: 16,
     fontWeight: '600',
   },
   expenseAmount: {
-    color: '#7d9ca5',
+    color: '#658998',
     fontSize: 14,
   },
 });
