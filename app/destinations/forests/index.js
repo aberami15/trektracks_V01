@@ -27,7 +27,7 @@ export default function Forests() {
     { id: 11, name: "Kudawa Forest Reserve", location: "Sabaragamuwa Province", description: "Gateway to Sinharaja with high biodiversity", category: "Rainforests and Wet Zone Forests" },
     { id: 12, name: "Morapitiya-Runakanda Forest Reserve", location: "Western Province", description: "Valuable rainforest ecosystem", category: "Rainforests and Wet Zone Forests" },
     { id: 13, name: "Delwala Forest Reserve", location: "Sabaragamuwa Province", description: "Diverse rainforest with endemic species", category: "Rainforests and Wet Zone Forests" },
-    { id: 14, name: "Gilimale-Eratne Forest Reserve", location: "Sabaragamuwa Province", description: "Rich forest area with diverse habitats", category: "Rainforests and Wet Zone Forests" },
+    { id: 14, name: "Gilimmale-Eratne Forest Reserve", location: "Sabaragamuwa Province", description: "Rich forest area with diverse habitats", category: "Rainforests and Wet Zone Forests" },
 
     // Montane and Sub-montane Forests
     { id: 15, name: "Knuckles Forest Reserve", location: "Central Province", description: "UNESCO World Heritage Site also known as Dumbara Forest", category: "Montane and Sub-montane Forests" },

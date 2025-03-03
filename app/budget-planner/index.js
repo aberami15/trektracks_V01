@@ -1,187 +1,268 @@
-import React, { useEffect } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  SafeAreaView,
-  ScrollView
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRouter } from 'expo-router';
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
+import { Stack,useRouter } from 'expo-router';
+import { MaterialIcons, Feather } from '@expo/vector-icons';
 
-export default function BudgetPlanner() {
-  const navigation = useNavigation();
+const BudgetPlanner = () => {
   const router = useRouter();
-
-  useEffect(() => {
-    navigation.setOptions({
-      headerShown: false
-    });
-  }, []);
-
+  const handleBudgetOverview = () => {
+    // Navigate to budget details page
+    console.log("Navigating to budget planner");
+    router.push('/budget-overview'); // Direct to the budget planner page
+  };
+  
   return (
-    <SafeAreaView style={styles.container}>
+  
+
+    <ScrollView style={styles.container}>
+      <Stack.Screen options={{ headerShown: false }} />
+      
       {/* Header */}
-      <View style={styles.headerContainer}>
-        <View style={styles.leftHeader}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Budget Planner</Text>
-        </View>
+      <View style={styles.header}>
+        <Text style={styles.title}>Budget Planner</Text>
+        <Feather name="settings" size={24} color="#5edfff" />
       </View>
 
-      {/* Content */}
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Budget Overview Card */}
-        <View style={styles.card}>
+      {/* Budget Overview Card */}
+      <View style={styles.card}>
+      <TouchableOpacity style={styles.iconItem} onPress={handleBudgetOverview}>
+        <View style={styles.cardHeader}>
+          <MaterialIcons name="pie-chart" size={24} color="#5edfff" />
           <Text style={styles.cardTitle}>Budget Overview</Text>
-          <Text style={styles.cardSubtitle}>Stay on Top of Your Budget with Ease</Text>
-          
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => router.push('/budget-summary')}
-          >
-            <Text style={styles.actionButtonText}>Budget Summary</Text>
-          </TouchableOpacity>
         </View>
-
-        {/* Transactions Card */}
-        <View style={styles.card}>
-          <Text style={styles.cardTitle}>Transactions</Text>
-          <Text style={styles.cardSubtitle}>Effortlessly Track Every Transaction</Text>
-          
-          <TouchableOpacity 
-            style={styles.actionButton}
-            onPress={() => router.push('/money-moves')}
-          >
-            <Text style={styles.actionButtonText}>Money Moves</Text>
-          </TouchableOpacity>
+        <Text style={styles.subtitle}>Stay on Top of Your Budget with Ease</Text>
+        
+        {/* Progress Bars */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: '65%' }]} />
+          </View>
+          <Text style={styles.progressText}>LKR 45,000 / LKR 70,000</Text>
         </View>
-
-        {/* You can add more cards here following the same pattern */}
-      </ScrollView>
-
-      {/* Footer Navigation - Optional, based on your app's navigation pattern */}
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.footerItem} 
-          onPress={() => router.push('/home')}
-        >
-          <Ionicons name="home" size={24} color="#777" />
-          <Text style={styles.footerText}>Home</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={() => router.push('/trip-itinerary')}
-        >
-          <Ionicons name="calendar" size={24} color="#777" />
-          <Text style={styles.footerText}>Itinerary</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={() => router.push('/recent-trips')}
-        >
-          <Ionicons name="time" size={24} color="#777" />
-          <Text style={styles.footerText}>Recent</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <MaterialIcons name="pie-chart" size={24} color="#5edfff" />
+          <Text style={styles.cardTitle}>Transactions</Text>
+        </View>
+        <Text style={styles.subtitle}>Effortlessly Track Every Transaction</Text>
+        
+        {/* Progress Bars */}
+        <View style={styles.progressContainer}>
+          <View style={styles.progressBar}>
+            <View style={[styles.progressFill, { width: '65%' }]} />
+          </View>
+          <Text style={styles.progressText}>LKR 45,000 / LKR 70,000</Text>
+        </View>
+      </View>
+
+      {/* Budget Summary */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Budget Summary</Text>
+        <View style={styles.summaryContainer}>
+          <View style={styles.summaryItem}>
+            <Text style={styles.summaryLabel}>Total Budget</Text>
+            <Text style={styles.summaryValue}>LKR 150,000</Text>
+          </View>
+          <View style={styles.summaryItem}>
+            <Text style={styles.summaryLabel}>Spent</Text>
+            <Text style={styles.summaryValue}>LKR 45,000</Text>
+          </View>
+          <View style={styles.summaryItem}>
+            <Text style={styles.summaryLabel}>Remaining</Text>
+            <Text style={styles.summaryValue}>LKR 105,000</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Transactions Section */}
+      <View style={styles.section}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Transactions</Text>
+          <TouchableOpacity>
+            <Text style={styles.seeAll}>See All</Text>
+          </TouchableOpacity>
+        </View>
+        <Text style={styles.subtitle}>Effortlessly Track Every Transaction</Text>
+        
+        {/* Transaction List */}
+        <View style={styles.transactionList}>
+          {[1, 2, 3].map((item) => (
+            <View key={item} style={styles.transactionItem}>
+              <View style={styles.transactionIcon}>
+                <Feather name="dollar-sign" size={20} color="#fff" />
+              </View>
+              <View style={styles.transactionDetails}>
+                <Text style={styles.transactionTitle}>Food Delivery</Text>
+                <Text style={styles.transactionDate}>2023-07-17</Text>
+              </View>
+              <Text style={styles.transactionAmount}>- LKR 1,500</Text>
+            </View>
+          ))}
+        </View>
+      </View>
+
+      {/* Money Moves */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Money Moves</Text>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.actionButton}>
+            <Feather name="plus" size={20} color="#fff" />
+            <Text style={styles.buttonText}>Add Income</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton}>
+            <Feather name="minus" size={20} color="#fff" />
+            <Text style={styles.buttonText}>Add Expense</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#031f2a',
+    padding: 20,
   },
-  headerContainer: {
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e8e8e8',
-    paddingTop: 50, // Added to prevent content from being hidden under status bar
-    backgroundColor: 'white',
+    marginBottom: 30,
   },
-  leftHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-  },
-  headerTitle: {
-    color: '#333',
-    fontSize: 22,
-    fontWeight: '600',
-    fontFamily: 'outfit-bold'
-  },
-  content: {
-    padding: 20,
-    paddingBottom: 80, // Extra space for footer
+  title: {
+    color: '#5edfff',
+    fontSize: 28,
+    fontWeight: 'bold',
   },
   card: {
-    backgroundColor: '#E0E0E0', // Light gray background for cards
+    backgroundColor: '#0a3a4a',
     borderRadius: 15,
     padding: 20,
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    marginBottom: 25,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+    gap: 10,
   },
   cardTitle: {
-    fontFamily: 'outfit-bold',
-    fontSize: 18,
-    color: '#333',
-    marginBottom: 8,
-    textAlign: 'center',
+    color: '#5edfff',
+    fontSize: 20,
+    fontWeight: '600',
   },
-  cardSubtitle: {
-    fontFamily: 'outfit',
+  subtitle: {
+    color: '#7d9ca5',
     fontSize: 14,
-    color: '#3478F6', // Matches your app's primary blue color
-    marginBottom: 20,
-    textAlign: 'center',
+    marginBottom: 15,
+  },
+  progressContainer: {
+    marginTop: 10,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: '#1a4a5a',
+    borderRadius: 4,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    backgroundColor: '#5edfff',
+  },
+  progressText: {
+    color: '#fff',
+    marginTop: 8,
+    fontSize: 12,
+  },
+  section: {
+    marginBottom: 30,
+  },
+  sectionTitle: {
+    color: '#5edfff',
+    fontSize: 22,
+    fontWeight: '600',
+    marginBottom: 15,
+  },
+  summaryContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 15,
+  },
+  summaryItem: {
+    flex: 1,
+    backgroundColor: '#0a3a4a',
+    padding: 15,
+    borderRadius: 10,
+  },
+  summaryLabel: {
+    color: '#7d9ca5',
+    fontSize: 14,
+  },
+  summaryValue: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginTop: 5,
+  },
+  transactionList: {
+    gap: 12,
+    marginTop: 15,
+  },
+  transactionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#0a3a4a',
+    padding: 15,
+    borderRadius: 10,
+  },
+  transactionIcon: {
+    backgroundColor: '#1a4a5a',
+    padding: 10,
+    borderRadius: 8,
+    marginRight: 15,
+  },
+  transactionDetails: {
+    flex: 1,
+  },
+  transactionTitle: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  transactionDate: {
+    color: '#7d9ca5',
+    fontSize: 12,
+  },
+  transactionAmount: {
+    color: '#ff4444',
+    fontWeight: 'bold',
+  },
+  buttonRow: {
+    flexDirection: 'row',
+    gap: 15,
+    marginTop: 10,
   },
   actionButton: {
-    backgroundColor: '#3478F6', // Primary blue from your app
-    borderRadius: 10,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  actionButtonText: {
-    fontFamily: 'outfit-medium',
-    fontSize: 16,
-    color: 'white',
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    backgroundColor: 'white',
+    flex: 1,
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#e8e8e8',
-    paddingBottom: 5,
-  },
-  footerItem: {
+    backgroundColor: '#0a3a4a',
+    padding: 15,
+    borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingTop: 8,
+    gap: 10,
   },
-  footerText: {
-    fontFamily: 'outfit',
-    fontSize: 12,
-    color: '#777',
-    marginTop: 4,
+  buttonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  seeAll: {
+    color: '#5edfff',
+    fontWeight: '600',
   },
 });
+
+export default BudgetPlanner;
