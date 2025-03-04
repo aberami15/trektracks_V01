@@ -169,7 +169,7 @@ export default function CreateItinerary() {
         >
           {/* Search Text */}
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Where to?</Text>
+            <Text style={styles.inputLabel}>Current Location</Text>
             <View style={styles.searchInputContainer}>
               <TextInput
                 style={styles.searchInput}
