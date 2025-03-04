@@ -52,6 +52,8 @@ export default function RootLayout() {
       <Stack.Screen name="budget-planner/index" />
       <Stack.Screen name="sigiriya/index" />
       <Stack.Screen name="tooth-temple/index" />
+      <Stack.Screen name="galle-fort/index" />
+      <Stack.Screen name="mirissa-beach/index" />
 
     </Stack>
   );

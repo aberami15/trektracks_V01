@@ -222,23 +222,26 @@ export default function Home() {
               </TouchableOpacity>
 
             {/* Mirissa Beach Card */}
-            <View style={styles.locationCard}>
-              <Image 
-                source={require('../../assets/images/mirissa.jpg')} 
-                style={styles.locationImage} 
-              />
-              <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={16} color="#FFD700" />
-                <Text style={styles.ratingText}>4.7</Text>
-              </View>
-              <View style={styles.locationInfo}>
-                <Text style={styles.locationName}>Mirissa Beach</Text>
-                <View style={styles.locationDetail}>
-                  <View style={styles.locationDot} />
-                  <Text style={styles.locationPlace}>Southern Province</Text>
+              <TouchableOpacity 
+                style={styles.locationCard}
+                onPress={() => router.push('/mirissa-beach')}
+              >
+                <Image 
+                  source={require('../../assets/images/mirissa.jpg')} 
+                  style={styles.locationImage} 
+                />
+                <View style={styles.ratingContainer}>
+                  <Ionicons name="star" size={16} color="#FFD700" />
+                  <Text style={styles.ratingText}>4.7</Text>
                 </View>
-              </View>
-            </View>
+                <View style={styles.locationInfo}>
+                  <Text style={styles.locationName}>Mirissa Beach</Text>
+                  <View style={styles.locationDetail}>
+                    <View style={styles.locationDot} />
+                    <Text style={styles.locationPlace}>Southern Province</Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
 
             {/* Temple of the Sacred Tooth Relic Card */}
               <TouchableOpacity 
@@ -263,7 +266,10 @@ export default function Home() {
               </TouchableOpacity>
 
             {/* Galle Fort Card */}
-            <View style={styles.locationCard}>
+            <TouchableOpacity 
+              style={styles.locationCard}
+              onPress={() => router.push('/galle-fort')}
+            >
               <Image 
                 source={require('../../assets/images/gallefort.jpg')} 
                 style={styles.locationImage} 
@@ -279,7 +285,7 @@ export default function Home() {
                   <Text style={styles.locationPlace}>Galle, Southern Province</Text>
                 </View>
               </View>
-            </View>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
