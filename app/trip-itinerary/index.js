@@ -9,7 +9,9 @@ export default function TripItinerary() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerShown: false
+      headerShown: true,
+      headerTransparent:true,
+      headerTitle:""
     })
   }, []);
 
