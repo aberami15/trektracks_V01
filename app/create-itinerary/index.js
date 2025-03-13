@@ -263,7 +263,7 @@ export default function CreateItinerary() {
             </TouchableOpacity>
 
             <TouchableOpacity 
-              onPress={()=>router.push('/display-plan/generateTrip')}
+              onPress={()=>router.push('/plan-display/generate-trip')}
               style={styles.generatePlanButton}
               disabled={loading}
             >
