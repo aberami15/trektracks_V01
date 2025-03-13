@@ -14,13 +14,14 @@ export default function GenerateTrip() {
         fontFamily: 'outfit-bold',
         fontSize: 40,
         textAlign: 'center'
-      }}>Please Wait....</Text>
+      }}>Hold on!</Text>
 
 <Text style = {{
         fontFamily: 'outfit-medium',
         fontSize: 20,
-        textAlign: 'center'
-      }}>Hold on! We're crafting the perfect plan for you.</Text>
+        textAlign: 'center',
+        marginTop: 5
+      }}>We're crafting the perfect plan for you.</Text>
 
     </View>
   )
