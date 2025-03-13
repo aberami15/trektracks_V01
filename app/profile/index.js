@@ -7,13 +7,13 @@ import {
   SafeAreaView,
   Image,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { Ionicons, Feather, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
 import { signOut } from 'firebase/auth';
-import { auth, db } from '../../configs/FirebaseConfig';
-import { doc, getDoc } from 'firebase/firestore';
+import { auth } from '../../configs/FirebaseConfig';
 
 export default function Profile() {
   const navigation = useNavigation();
@@ -26,29 +26,30 @@ export default function Profile() {
       headerShown: false
     });
     
-    // Fetch user data
-    const fetchUserData = async () => {
+    // Fetch user data directly from auth
+    const fetchUserData = () => {
       try {
         const currentUser = auth.currentUser;
         if (currentUser) {
           console.log("Auth user data:", currentUser);
           
-          // Fetch user data from Firestore
-          const userRef = doc(db, "users", currentUser.uid);
-          const userSnap = await getDoc(userRef);
+          // Use auth info for profile
+          const data = {
+            name: currentUser.displayName || "User",
+            email: currentUser.email || "Not provided",
+            phone: currentUser.phoneNumber || "Not provided"
+          };
           
-          if (userSnap.exists()) {
-            const firestoreData = userSnap.data();
-            console.log("Firestore user data:", firestoreData);
-            setUserData(firestoreData);
-          } else {
-            // If no document exists yet, use basic auth info
-            setUserData({
-              name: currentUser.displayName || "User",
-              email: currentUser.email,
-              phone: currentUser.phoneNumber || "Not provided"
-            });
+          // If there's an email but no name, extract name from email
+          if (!data.name || data.name === "User") {
+            if (currentUser.email) {
+              const emailName = currentUser.email.split('@')[0];
+              // Capitalize first letter
+              data.name = emailName.charAt(0).toUpperCase() + emailName.slice(1);
+            }
           }
+          
+          setUserData(data);
         }
         setLoading(false);
       } catch (error) {
@@ -61,11 +62,26 @@ export default function Profile() {
   }, []);
 
   const handleSignOut = () => {
-    signOut(auth).then(() => {
-      router.replace('/');
-    }).catch((error) => {
-      console.error("Sign out error:", error);
-    });
+    Alert.alert(
+      "Sign Out",
+      "Are you sure you want to sign out?",
+      [
+        { 
+          text: "Cancel", 
+          style: "cancel" 
+        },
+        {
+          text: "Sign Out",
+          onPress: () => {
+            signOut(auth).then(() => {
+              router.replace('/');
+            }).catch((error) => {
+              console.error("Sign out error:", error);
+            });
+          }
+        }
+      ]
+    );
   }
 
   const handleBudgetPress = () => {
@@ -129,7 +145,7 @@ export default function Profile() {
             <View style={styles.nameContainer}>
               <Ionicons name="person" size={24} color="#333" />
               <Text style={styles.nameText}>
-                {userData?.fullName || userData?.name || auth.currentUser?.displayName || "User"}
+                {userData?.name || "User"}
               </Text>
             </View>
           </View>
@@ -157,7 +173,7 @@ export default function Profile() {
             <Ionicons name="call" size={20} color="#3478F6" />
             <View style={styles.detailText}>
               <Text style={styles.label}>Phone</Text>
-              <Text style={styles.value}>{userData?.phone || userData?.phoneNumber || "Not provided"}</Text>
+              <Text style={styles.value}>{userData?.phone || "Not provided"}</Text>
             </View>
           </View>
 
@@ -165,7 +181,7 @@ export default function Profile() {
             <Ionicons name="mail" size={20} color="#3478F6" />
             <View style={styles.detailText}>
               <Text style={styles.label}>Email</Text>
-              <Text style={styles.value}>{userData?.email || auth.currentUser?.email || "Not provided"}</Text>
+              <Text style={styles.value}>{userData?.email || "Not provided"}</Text>
             </View>
           </View>
 
