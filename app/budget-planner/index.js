@@ -10,6 +10,13 @@ const BudgetPlanner = () => {
     router.push('/budget-overview'); // Direct to the budget planner page
   };
   
+    const handleAddTransation = () => {
+    // Navigate to budget details page
+    console.log("Navigating to budget planner");
+    router.push('/add-transactions'); // Direct to the budget planner page
+  };
+  
+  
   return (
     <ScrollView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -92,7 +99,7 @@ const BudgetPlanner = () => {
         <Text style={styles.sectionTitle}>Money Moves</Text>
         <View style={styles.buttonRow}>
           
-          <TouchableOpacity style={styles.actionButton}>
+<TouchableOpacity style={styles.actionButton} onPress={handleAddTransation}>
             <Feather name="plus" size={20} color="#fff" />
             <Text style={styles.buttonText}>Add Transactions</Text>
           </TouchableOpacity>

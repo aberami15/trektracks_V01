@@ -55,6 +55,9 @@ export default function RootLayout() {
       <Stack.Screen name="galle-fort/index" />
       <Stack.Screen name="mirissa-beach/index" />
 
+      <Stack.Screen name="add-transactions/index" />
+
+
     </Stack>
   );
 }
