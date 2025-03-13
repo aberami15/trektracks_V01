@@ -46,7 +46,7 @@ export default function CreateItinerary() {
   const daysOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "14", "21", "30"];
   const travelerCategories = ["Solo", "Couple", "Family", "Friends", "Group Tour"];
   const tripTypes = ["Adventure", "Relaxation", "Cultural", "Devotional", "Food & Cuisine", "Nature", "Photography"];
-  const vehicleOptions = ["Car", "Public Transport", "Bike", "Walking", "Plane", "Train", "Bus"];
+  const vehicleOptions = ["Car", "Bike", "Walking", "Train", "Bus"];
 
   const handleSaveItinerary = async () => {
     if (!destination) {
