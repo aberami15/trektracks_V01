@@ -8,11 +8,13 @@ import {
   Image,
   ScrollView,
   ActivityIndicator,
-  Alert
+  Alert,
+  TextInput,
+  Modal
 } from 'react-native';
 import { Ionicons, Feather, MaterialIcons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
-import { signOut } from 'firebase/auth';
+import { signOut, updateProfile } from 'firebase/auth';
 import { auth } from '../../configs/FirebaseConfig';
 
 export default function Profile() {
@@ -20,6 +22,8 @@ export default function Profile() {
   const router = useRouter();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [phoneModalVisible, setPhoneModalVisible] = useState(false);
+  const [newPhoneNumber, setNewPhoneNumber] = useState('');
 
   useEffect(() => {
     navigation.setOptions({
@@ -96,6 +100,40 @@ export default function Profile() {
     router.push('/emergency-contacts');
   };
 
+  const handleEditPhone = () => {
+    setNewPhoneNumber(userData?.phone !== "Not provided" ? userData.phone : "");
+    setPhoneModalVisible(true);
+  };
+
+  const handleSavePhone = async () => {
+    try {
+      // Basic validation
+      if (!newPhoneNumber || newPhoneNumber.trim() === "") {
+        Alert.alert("Invalid Input", "Please enter a valid phone number");
+        return;
+      }
+
+      // Update the phone number in user data
+      setUserData({
+        ...userData,
+        phone: newPhoneNumber
+      });
+
+      // In a real app, you would also update this in Firebase
+      // Note: Updating phone number in Firebase Auth requires SMS verification,
+      // so this is just a local update for demonstration
+
+      // Close the modal
+      setPhoneModalVisible(false);
+
+      // Show success message
+      Alert.alert("Success", "Phone number updated successfully");
+    } catch (error) {
+      console.error("Error updating phone:", error);
+      Alert.alert("Error", "Failed to update phone number");
+    }
+  };
+
   // Show loading indicator while fetching user data
   if (loading) {
     return (
@@ -168,13 +206,16 @@ export default function Profile() {
             </TouchableOpacity>
           </View>
 
-          {/* Contact Info Section */}
+          {/* Contact Info Section with Edit Button */}
           <View style={styles.detailItem}>
             <Ionicons name="call" size={20} color="#3478F6" />
             <View style={styles.detailText}>
               <Text style={styles.label}>Phone</Text>
               <Text style={styles.value}>{userData?.phone || "Not provided"}</Text>
             </View>
+            <TouchableOpacity onPress={handleEditPhone} style={styles.editButton}>
+              <Feather name="edit-2" size={18} color="#3478F6" />
+            </TouchableOpacity>
           </View>
 
           <View style={styles.detailItem}>
@@ -203,6 +244,44 @@ export default function Profile() {
           <Ionicons name="exit-outline" size={20} color="white" style={{ marginLeft: 8 }}/>
         </TouchableOpacity>
       </View>
+
+      {/* Edit Phone Number Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={phoneModalVisible}
+        onRequestClose={() => setPhoneModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Update Phone Number</Text>
+            
+            <TextInput
+              style={styles.modalInput}
+              placeholder="Enter your phone number"
+              value={newPhoneNumber}
+              onChangeText={setNewPhoneNumber}
+              keyboardType="phone-pad"
+            />
+            
+            <View style={styles.modalButtonContainer}>
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.cancelButton]} 
+                onPress={() => setPhoneModalVisible(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={[styles.modalButton, styles.saveButton]} 
+                onPress={handleSavePhone}
+              >
+                <Text style={styles.saveButtonText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 };
@@ -345,6 +424,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'outfit-medium'
   },
+  editButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: '#f0f0f0',
+  },
   emergencyButton: {
     flexDirection: 'row',
     backgroundColor: '#FF3B30',
@@ -387,6 +471,67 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'outfit-medium'
+  },
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)'
+  },
+  modalContent: {
+    width: '80%',
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontFamily: 'outfit-medium',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center'
+  },
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 16,
+    fontFamily: 'outfit',
+    marginBottom: 20
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  modalButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginHorizontal: 5
+  },
+  cancelButton: {
+    backgroundColor: '#f2f2f2',
+  },
+  saveButton: {
+    backgroundColor: '#3478F6',
+  },
+  cancelButtonText: {
+    color: '#333',
+    fontSize: 16,
+    fontFamily: 'outfit-medium'
+  },
+  saveButtonText: {
+    color: 'white',
+    fontSize: 16,
     fontFamily: 'outfit-medium'
   }
 });
