@@ -6,7 +6,7 @@ export default function GenerateTrip() {
   return (
     <View style={{
         padding: 25,
-        paddingTop: 75,
+        paddingTop: '70%',
         backgroundColor: Colors.WHITE,
         height: '100%'
     }}>
@@ -15,6 +15,13 @@ export default function GenerateTrip() {
         fontSize: 40,
         textAlign: 'center'
       }}>Please Wait....</Text>
+
+<Text style = {{
+        fontFamily: 'outfit-medium',
+        fontSize: 20,
+        textAlign: 'center'
+      }}>Hold on! We're crafting the perfect plan for you.</Text>
+
     </View>
   )
 }
