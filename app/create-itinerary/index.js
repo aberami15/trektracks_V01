@@ -19,6 +19,7 @@ import { useNavigation, useRouter } from 'expo-router';
 
 export default function CreateItinerary() {
   const navigation = useNavigation();
+  
   const router = useRouter();
   
   // Form state
@@ -262,8 +263,8 @@ export default function CreateItinerary() {
             </TouchableOpacity>
 
             <TouchableOpacity 
+              onPress={()=>router.push('/display-plan/generateTrip')}
               style={styles.generatePlanButton}
-              onPress={handleGeneratePlan}
               disabled={loading}
             >
               <Text style={styles.generatePlanText}>
