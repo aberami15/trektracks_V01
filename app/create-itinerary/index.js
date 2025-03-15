@@ -42,6 +42,8 @@ export default function CreateItinerary() {
     });
   }, []);
 
+
+
   // Options for dropdowns
   const daysOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "14", "21", "30"];
   const travelerCategories = ["Solo", "Couple", "Family", "Friends", "Group Tour"];
@@ -147,6 +149,12 @@ export default function CreateItinerary() {
 
   return (
     <SafeAreaView style={styles.container}>
+
+ {/* Back Button to Homepage */}
+       <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
+        <Ionicons name="arrow-back" size={24} color="#333" />
+       </TouchableOpacity>
+
       {/* Header with profile photo */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Preference</Text>
@@ -319,6 +327,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
+  backButton: {
+         position: 'absolute',
+          top: 50, 
+         left: 20, 
+         zIndex: 10,
+       },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -469,3 +483,153 @@ const styles = StyleSheet.create({
     color: 'white',
   },
 });
+
+
+// import React, { useState, useEffect } from 'react';
+// import {
+//   View,
+//   Text,
+//   StyleSheet,
+//   TouchableOpacity,
+//   SafeAreaView,
+//   TextInput,
+//   ScrollView,
+//   ToastAndroid,
+//   KeyboardAvoidingView,
+//   Platform,
+//   Modal,
+//   FlatList,
+//   Image
+// } from 'react-native';
+// import { Ionicons } from '@expo/vector-icons';
+// import { useNavigation, useRouter } from 'expo-router';
+
+// export default function CreateItinerary() {
+//   const navigation = useNavigation();
+//   const router = useRouter();
+  
+//   // Form state
+//   const [destination, setDestination] = useState('');
+//   const [days, setDays] = useState('');
+//   const [travelerCategory, setTravelerCategory] = useState('');
+//   const [tripType, setTripType] = useState('');
+//   const [vehicle, setVehicle] = useState('');
+//   const [loading, setLoading] = useState(false);
+//   const [searchText, setSearchText] = useState('');
+
+//   // Modal visibility states
+//   const [daysModalVisible, setDaysModalVisible] = useState(false);
+//   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+//   const [tripTypeModalVisible, setTripTypeModalVisible] = useState(false);
+//   const [vehicleModalVisible, setVehicleModalVisible] = useState(false);
+
+//   useEffect(() => {
+//     navigation.setOptions({
+//       headerShown: false
+//     });
+//   }, []);
+
+//   return (
+//     <SafeAreaView style={styles.container}>
+      
+//       {/* Back Button to Homepage */}
+//       <TouchableOpacity onPress={() => router.push('/')} style={styles.backButton}>
+//         <Ionicons name="arrow-back" size={24} color="#333" />
+//       </TouchableOpacity>
+
+//       {/* Header with profile photo */}
+//       <View style={styles.header}>
+//         <Text style={styles.headerTitle}>My Preference</Text>
+//         <TouchableOpacity onPress={() => router.push('/profile')}>
+//           <Image
+//             source={require('../../assets/images/profile.png')}
+//             style={styles.profileImage}
+//           />
+//         </TouchableOpacity>
+//       </View>
+
+//       {/* Rest of your existing code remains unchanged */}
+//       <KeyboardAvoidingView 
+//         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+//         style={{ flex: 1 }}
+//       >
+//         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+//           <View style={styles.inputContainer}>
+//             <Text style={styles.inputLabel}>Current Location</Text>
+//             <View style={styles.searchInputContainer}>
+//               <TextInput
+//                 style={styles.searchInput}
+//                 placeholder="Search destination"
+//                 value={searchText}
+//                 onChangeText={setSearchText}
+//               />
+//               <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+//             </View>
+//           </View>
+//         </ScrollView>
+//       </KeyboardAvoidingView>
+
+//     </SafeAreaView>
+//   );
+// }
+
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     backgroundColor: 'white',
+//   },
+//   backButton: {
+//     position: 'absolute',
+//     top: 50, 
+//     left: 20, 
+//     zIndex: 10,
+//   },
+//   header: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     padding: 20,
+//     paddingTop: 50,
+//   },
+//   headerTitle: {
+//     color: '#333',
+//     fontSize: 20,
+//     fontWeight: '600',
+//     fontFamily: 'outfit-bold'
+//   },
+//   profileImage: {
+//     width: 40,
+//     height: 40,
+//     borderRadius: 20,
+//   },
+//   content: {
+//     padding: 20,
+//     paddingBottom: 100,
+//   },
+//   inputContainer: {
+//     marginBottom: 20,
+//   },
+//   inputLabel: {
+//     fontFamily: 'outfit-medium',
+//     fontSize: 16,
+//     marginBottom: 8,
+//     color: '#333',
+//   },
+//   searchInputContainer: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     backgroundColor: '#f2f2f2',
+//     borderRadius: 10,
+//     paddingHorizontal: 12,
+//   },
+//   searchInput: {
+//     flex: 1,
+//     paddingVertical: 12,
+//     fontSize: 16,
+//     fontFamily: 'outfit',
+//   },
+//   searchIcon: {
+//     marginLeft: 10,
+//   },
+// });
+
