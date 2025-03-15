@@ -5,11 +5,13 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
 
+
 export default function Beaches() {
   const navigation = useNavigation();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredBeaches, setFilteredBeaches] = useState([]);
+  
 
   // Define beach data from the comprehensive list
   const beachesData = [
@@ -121,6 +123,24 @@ export default function Beaches() {
     { id: 106, name: "Thalaramba Beach", location: "Southern Province", description: "Quiet beach in the deep south" },
     { id: 107, name: "Ussangoda Beach", location: "Southern Province", description: "Beach near an ancient meteorite crater site" },
     { id: 108, name: "Kappalady Lagoon Beach", location: "Kalpitiya", description: "Kite surfing destination in Kalpitiya" }
+  ];
+
+  const filterCategories = [
+    {
+      id: 'location',
+      title: 'Location',
+      options: ['Southern Province', 'Eastern Province', 'Northern Province', 'Western Province', 'North Western Province']
+    },
+    {
+      id: 'activity',
+      title: 'Activities',
+      options: ['Surfing', 'Turtle Watching', 'Dolphin Watching', 'Kitesurfing', 'Swimming']
+    },
+    {
+      id: 'popularity',
+      title: 'Popularity',
+      options: ['Popular', 'Hidden Gem']
+    }
   ];
 
   useEffect(() => {
