@@ -9,9 +9,7 @@ export default function TripItinerary() {
 
   useEffect(() => {
     navigation.setOptions({
-      headerShown: true,
-      headerTransparent:true,
-      headerTitle:""
+      headerShown: false  // Changed from true to false to avoid conflicts
     })
   }, []);
 
@@ -28,6 +26,12 @@ export default function TripItinerary() {
     router.push('/recent-trips');
   }
 
+  const navigateToProfile = () => {
+    // Explicit function for profile navigation
+    console.log("Navigating to profile");
+    router.push('/profile');
+  }
+
   const handleCreateItinerary = () => {
     // Navigate to create itinerary form
     router.push('/create-itinerary');
@@ -38,7 +42,10 @@ export default function TripItinerary() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Trip Itinerary</Text>
-        <TouchableOpacity onPress={() => router.push('/profile')}>
+        <TouchableOpacity 
+          onPress={navigateToProfile} 
+          style={styles.profileButton} // Added specific style for better touch area
+        >
           <Ionicons name="person-circle" size={40} color="black" />
         </TouchableOpacity>
       </View>
@@ -107,6 +114,10 @@ const styles = StyleSheet.create({
     fontFamily: 'outfit-bold',
     fontSize: 28,
     color: '#333',
+  },
+  profileButton: {
+    padding: 10,  // Added padding to increase touch area
+    zIndex: 10,   // Ensure it's above other elements
   },
   content: {
     flex: 1,

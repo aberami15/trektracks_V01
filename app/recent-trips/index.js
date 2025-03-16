@@ -28,9 +28,14 @@ export default function RecentTrips() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
+      {/* Header with Back Button */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Recent Trips</Text>
+        <View style={styles.headerLeft}>
+          <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
+            <Ionicons name="arrow-back" size={24} color="#333" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Recent Trips</Text>
+        </View>
         <TouchableOpacity onPress={() => router.push('/profile')}>
           <Ionicons name="person-circle" size={40} color="black" />
         </TouchableOpacity>
@@ -125,6 +130,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     marginBottom: 20,
+    paddingTop: 10,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backButton: {
+    marginRight: 15,
+    padding: 5,
   },
   headerTitle: {
     fontFamily: 'outfit-bold',

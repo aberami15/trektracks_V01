@@ -42,6 +42,8 @@ export default function CreateItinerary() {
     });
   }, []);
 
+
+
   // Options for dropdowns
   const daysOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "14", "21", "30"];
   const travelerCategories = ["Solo", "Couple", "Family", "Friends", "Group Tour"];
@@ -147,6 +149,12 @@ export default function CreateItinerary() {
 
   return (
     <SafeAreaView style={styles.container}>
+
+ {/* Back Button to Homepage */}
+       <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
+        <Ionicons name="arrow-back" size={24} color="#333" />
+       </TouchableOpacity>
+
       {/* Header with profile photo */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Preference</Text>
@@ -319,6 +327,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'white',
   },
+  backButton: {
+         position: 'absolute',
+          top: 50, 
+         left: 20, 
+         zIndex: 10,
+       },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -469,3 +483,5 @@ const styles = StyleSheet.create({
     color: 'white',
   },
 });
+
+
