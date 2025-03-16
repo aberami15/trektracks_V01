@@ -320,7 +320,7 @@ export default function Home() {
                 {/* Sigiriya Rock Fortress Card */}
                 <TouchableOpacity 
                   style={styles.locationCard}
-                  onPress={() => router.push('/place-details/sigiriya')}
+                  onPress={() => router.push('/sigiriya')}
                 >
                   <Image 
                     source={require('../../assets/images/sigiriya.jpg')} 
@@ -342,7 +342,7 @@ export default function Home() {
                 {/* Mirissa Beach Card */}
                 <TouchableOpacity 
                   style={styles.locationCard}
-                  onPress={() => router.push('/place-details/67bdd18ef1b5d45e4173aa81')}
+                  onPress={() => router.push('/mirissa-beach')}
                 >
                   <Image 
                     source={require('../../assets/images/mirissa.jpg')} 
@@ -364,7 +364,7 @@ export default function Home() {
                 {/* Temple of the Sacred Tooth Relic Card */}
                 <TouchableOpacity 
                   style={styles.locationCard}
-                  onPress={() => router.push('/place-details/tooth-temple')}
+                  onPress={() => router.push('/tooth-temple')}
                 >
                   <Image 
                     source={require('../../assets/images/dalada.jpg')} 
@@ -386,7 +386,7 @@ export default function Home() {
                 {/* Galle Fort Card */}
                 <TouchableOpacity 
                   style={styles.locationCard}
-                  onPress={() => router.push('/place-details/galle-fort')}
+                  onPress={() => router.push('/galle-fort')}
                 >
                   <Image 
                     source={require('../../assets/images/gallefort.jpg')} 

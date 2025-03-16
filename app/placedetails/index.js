@@ -200,7 +200,7 @@ export default function PlaceDetails() {
           <Text style={styles.title}>{place.name}</Text>
           <View style={styles.locationContainer}>
             <Ionicons name="location" size={16} color="#3478F6" />
-            <Text style={styles.locationText}>{place.location}</Text>
+            <Text style={styles.locationText}>{place.location.coordinates.lat}</Text>
           </View>
         </View>
         
