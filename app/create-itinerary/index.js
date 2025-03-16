@@ -27,6 +27,7 @@ export default function CreateItinerary() {
   const [travelerCategory, setTravelerCategory] = useState('');
   const [tripType, setTripType] = useState('');
   const [vehicle, setVehicle] = useState('');
+  const [budget, setBudget] = useState('');
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
 
@@ -71,19 +72,13 @@ export default function CreateItinerary() {
         travelerCategory,
         tripType,
         vehicle,
+        budget,
         createdAt: new Date()
       };
 
       console.log("Creating itinerary:", itineraryData);
       
-      // TODO: Save to Firestore if needed
-      // For now, we'll just simulate success
       
-      setTimeout(() => {
-        ToastAndroid.show('Itinerary created successfully!', ToastAndroid.SHORT);
-        router.push('/trip-itinerary');
-        setLoading(false);
-      }, 1000);
       
     } catch (error) {
       console.error("Error creating itinerary: ", error);
@@ -135,6 +130,10 @@ export default function CreateItinerary() {
   const handleGeneratePlan = () => {
     // First save the itinerary
     handleSaveItinerary();
+
+    // Navigate to budget overview page
+    router.push('/budget-planner');
+
   };
 
   const handleSaveForLater = () => {
@@ -157,7 +156,7 @@ export default function CreateItinerary() {
 
       {/* Header with profile photo */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Preference</Text>
+        <Text style={styles.headerTitle}></Text>
         <TouchableOpacity onPress={() => router.push('/profile')}>
           <Image
             source={require('../../assets/images/profile.png')}
@@ -217,6 +216,21 @@ export default function CreateItinerary() {
             </TouchableOpacity>
           </View>
 
+          {/* Budget - New field */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Budget (LKR)</Text>
+            <View style={styles.dropdownField}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your budget"
+                value={budget}
+                onChangeText={setBudget}
+                keyboardType="numeric"
+              />
+              <Ionicons name="wallet-outline" size={20} color="#999" style={styles.dropdownIcon} />
+            </View>
+          </View> 
+
           {/* Traveler Category */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Traveller Category</Text>
@@ -269,14 +283,12 @@ export default function CreateItinerary() {
               <Text style={styles.saveForLaterText}>Save for Later</Text>
             </TouchableOpacity>
 
+            
             <TouchableOpacity 
               style={styles.generatePlanButton}
-              onPress={handleGeneratePlan}
-              disabled={loading}
+              onPress={() => router.push('/budget-planner')}
             >
-              <Text style={styles.generatePlanText}>
-                {loading ? 'Generating...' : 'Generate Plan'}
-              </Text>
+              <Text style={styles.generatePlanText}>Create Trip</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>

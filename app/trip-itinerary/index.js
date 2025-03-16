@@ -62,7 +62,7 @@ export default function TripItinerary() {
             style={styles.createButton}
             onPress={handleCreateItinerary}
           >
-            <Text style={styles.createButtonText}>Create Itinerary</Text>
+            <Text style={styles.createButtonText}>Create Trip</Text>
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -82,7 +82,7 @@ export default function TripItinerary() {
           onPress={navigateToItinerary}
         >
           <Ionicons name="calendar" size={24} color="#3478F6" />
-          <Text style={[styles.footerText, { color: '#3478F6' }]}>Itinerary</Text>
+          <Text style={[styles.footerText, { color: '#3478F6' }]}>Expence Tracker</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 

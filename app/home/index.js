@@ -425,7 +425,7 @@ export default function Home() {
           onPress={navigateToItinerary}
         >
           <Ionicons name="calendar" size={24} color="#777" />
-          <Text style={styles.footerText}>Itinerary</Text>
+          <Text style={styles.footerText}>Expence Tracker</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 

@@ -50,11 +50,12 @@ export default function RootLayout() {
       <Stack.Screen name="destinations/waterfalls/index" />
       <Stack.Screen name="destinations/islands/index" />
       <Stack.Screen name="budget-planner/index" />
+      <Stack.Screen name="budget-overview/index" />
       <Stack.Screen name="sigiriya/index" />
       <Stack.Screen name="tooth-temple/index" />
       <Stack.Screen name="galle-fort/index" />
       <Stack.Screen name="mirissa-beach/index" />
-
+      <Stack.Screen name="create-itinerary/index" />
       <Stack.Screen name="add-transactions/index" />
 
 

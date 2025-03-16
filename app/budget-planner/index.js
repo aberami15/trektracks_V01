@@ -23,7 +23,7 @@ const BudgetPlanner = () => {
       
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Budget Planner</Text>
+        <Text style={styles.title}>Expence Planner</Text>
         <Feather name="settings" size={24} color="#2cc3e5" />
       </View>
 

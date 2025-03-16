@@ -1,9 +1,20 @@
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Platform } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Platform, Modal } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 const ExpenseEntry = () => {
-  const [expenses, setExpenses] = useState({ food: '', accommodation: '', fuel: '', ticket: '' });
+  const [expense, setExpense] = useState({
+    date: new Date(),
+    category: '',
+    description: '',
+    amount: ''
+  });
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Categories for expenses
+  const categories = ['Food', 'Accommodation', 'Fuel', 'Ticket'];
 
   // Configure API URL based on where the app is running
   const API_URL = Platform.select({
@@ -13,13 +24,38 @@ const ExpenseEntry = () => {
   });
 
   const handleInputChange = (name, value) => {
-    setExpenses({ ...expenses, [name]: value });
+    setExpense({ ...expense, [name]: value });
+  };
+
+  const handleDateChange = (event, selectedDate) => {
+    setShowDatePicker(false);
+    if (selectedDate) {
+      setExpense({ ...expense, date: selectedDate });
+    }
+  };
+
+  const handleCategorySelect = (category) => {
+    setExpense({ ...expense, category });
+    setShowCategoryModal(false);
+  };
+
+  const formatDate = (date) => {
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   const handleSubmit = async () => {
     // Validate inputs
-    if (Object.values(expenses).some(value => value === '' || isNaN(Number(value)))) {
-      Alert.alert('Error', 'Please enter valid numbers for all fields');
+    if (!expense.category) {
+      Alert.alert('Error', 'Please select a category');
+      return;
+    }
+
+    if (!expense.amount || isNaN(Number(expense.amount))) {
+      Alert.alert('Error', 'Please enter a valid amount');
       return;
     }
 
@@ -27,13 +63,13 @@ const ExpenseEntry = () => {
     try {
       const expenseData = {
         userId: '64f1a2b3c4d5e6f7a8b9c0d1',
-        food: Number(expenses.food),
-        accommodation: Number(expenses.accommodation),
-        fuel: Number(expenses.fuel),
-        ticket: Number(expenses.ticket),
+        date: expense.date.toISOString(),
+        category: expense.category.toLowerCase(),
+        description: expense.description,
+        amount: Number(expense.amount),
       };
 
-      console.log('Attempting to connect to:', `${API_URL}/api/expenses`); // Debug log
+      console.log('Submitting expense:', expenseData); // Debug log
 
       const response = await fetch(`${API_URL}/api/expenses`, {
         method: 'POST',
@@ -44,21 +80,25 @@ const ExpenseEntry = () => {
         body: JSON.stringify(expenseData),
       });
 
-      console.log('Response status:', response.status); // Debug log
-
       const responseData = await response.json();
       if (!response.ok) {
         throw new Error(responseData.message || 'Failed to save expense');
       }
 
-      setExpenses({ food: '', accommodation: '', fuel: '', ticket: '' });
+      // Reset form
+      setExpense({
+        date: new Date(),
+        category: '',
+        description: '',
+        amount: ''
+      });
+      
       Alert.alert('Success', 'Expense added successfully!');
     } catch (error) {
       console.error('Network Error Details:', error);
       Alert.alert(
         'Error',
-        'Failed to save expense. Please check your network connection and try again.\n' +
-        'Make sure your device is connected to the same network as the server.'
+        'Failed to save expense. Please check your network connection and try again.'
       );
     } finally {
       setIsLoading(false);
@@ -69,28 +109,106 @@ const ExpenseEntry = () => {
     <ScrollView style={styles.container}>
       <Text style={styles.title}>Expense Entry</Text>
       <View style={styles.formContainer}>
-        {Object.keys(expenses).map((key) => (
-          <View key={key} style={styles.inputGroup}>
-            <Text style={styles.label}>{key.charAt(0).toUpperCase() + key.slice(1)}</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType="numeric"
-              placeholder={`Enter ${key} cost`}
-              value={expenses[key]}
-              onChangeText={(value) => handleInputChange(key, value)}
+        {/* Date Field */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Date</Text>
+          <TouchableOpacity 
+            style={styles.input} 
+            onPress={() => setShowDatePicker(true)}
+          >
+            <Text style={styles.inputText}>{formatDate(expense.date)}</Text>
+          </TouchableOpacity>
+
+          {showDatePicker && (
+            <DateTimePicker
+              value={expense.date}
+              mode="date"
+              display="default"
+              onChange={handleDateChange}
             />
-          </View>
-        ))}
+          )}
+        </View>
+
+        {/* Category Field */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Category</Text>
+          <TouchableOpacity 
+            style={styles.input} 
+            onPress={() => setShowCategoryModal(true)}
+          >
+            <Text style={[styles.inputText, !expense.category && styles.placeholderText]}>
+              {expense.category || 'Select a category'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Description Field */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Description (Optional)</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Enter a short description"
+            placeholderTextColor="#aaa"
+            value={expense.description}
+            onChangeText={(value) => handleInputChange('description', value)}
+          />
+        </View>
+
+        {/* Amount Field */}
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Amount</Text>
+          <TextInput
+            style={styles.input}
+            keyboardType="numeric"
+            placeholder="Enter amount"
+            placeholderTextColor="#aaa"
+            value={expense.amount}
+            onChangeText={(value) => handleInputChange('amount', value)}
+          />
+        </View>
+
+        {/* Submit Button */}
         <TouchableOpacity
           style={[styles.button, isLoading && styles.disabledButton]}
           onPress={handleSubmit}
           disabled={isLoading}
         >
           <Text style={styles.buttonText}>
-            {isLoading ? 'Saving...' : 'Add Entry'}
+            {isLoading ? 'Adding...' : 'Add Entry'}
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Category Selection Modal */}
+      <Modal
+        visible={showCategoryModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowCategoryModal(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Select Category</Text>
+            
+            {categories.map((category) => (
+              <TouchableOpacity
+                key={category}
+                style={styles.categoryItem}
+                onPress={() => handleCategorySelect(category)}
+              >
+                <Text style={styles.categoryText}>{category}</Text>
+              </TouchableOpacity>
+            ))}
+            
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={() => setShowCategoryModal(false)}
+            >
+              <Text style={styles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -114,18 +232,25 @@ const styles = StyleSheet.create({
     borderRadius: 15,
   },
   inputGroup: {
-    marginBottom: 15,
+    marginBottom: 20,
   },
   label: {
     color: '#5edfff',
     fontSize: 16,
-    marginBottom: 5,
+    marginBottom: 8,
   },
   input: {
     backgroundColor: '#1a4a5a',
     color: '#fff',
-    padding: 10,
+    padding: 15,
     borderRadius: 8,
+    justifyContent: 'center',
+  },
+  inputText: {
+    color: '#fff',
+  },
+  placeholderText: {
+    color: '#aaa',
   },
   button: {
     backgroundColor: '#5edfff',
@@ -139,6 +264,47 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#031f2a',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    backgroundColor: '#0a3a4a',
+    borderRadius: 15,
+    padding: 20,
+    width: '80%',
+  },
+  modalTitle: {
+    color: '#5edfff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  categoryItem: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: '#1a4a5a',
+  },
+  categoryText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  cancelButton: {
+    marginTop: 15,
+    padding: 12,
+    alignItems: 'center',
+    backgroundColor: '#1a4a5a',
+    borderRadius: 8,
+  },
+  cancelButtonText: {
+    color: '#5edfff',
     fontWeight: 'bold',
   },
 });
