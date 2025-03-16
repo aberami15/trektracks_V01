@@ -1,29 +1,34 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useEffect } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
+// Make sure this file is saved as save-favourite/index.js for proper Expo Router file-based routing
 
-export default function TripItinerary() {
+export default function SaveFavourite() {
   const navigation = useNavigation();
   const router = useRouter();
+  const [favorites, setFavorites] = useState([]);
 
   useEffect(() => {
     navigation.setOptions({
-      headerShown: false  // Changed from true to false to avoid conflicts
+      headerShown: false  // Hide the header
     })
+    
+    // This would typically fetch saved favorites from storage or API
+    // For now we'll use dummy data
+    setFavorites([]);
   }, []);
 
   const navigateToHome = () => {
     router.push('/home');
   }
 
-  const navigateToExpenseTracker = () => {
-    // Navigate to the budget planner page
-    router.push('/budget-planner');
+  const navigateToItinerary = () => {
+    router.push('/trip-itinerary');
   }
 
   const navigateToFav = () => {
-    // Navigate to favorites page
+    // Stay on favorites page
     router.push('/save-favourite');
   }
 
@@ -32,24 +37,23 @@ export default function TripItinerary() {
   }
 
   const navigateToProfile = () => {
-    // Explicit function for profile navigation
     console.log("Navigating to profile");
     router.push('/profile');
   }
 
-  const handleCreateItinerary = () => {
-    // Navigate to create itinerary form
-    router.push('/create-itinerary');
+  const handleAddFavorite = () => {
+    // Navigate to search or add favorite place
+    router.push('/search-places');
   }
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Trip</Text>
+        <Text style={styles.headerTitle}>Favorite Places</Text>
         <TouchableOpacity 
           onPress={navigateToProfile} 
-          style={styles.profileButton} // Added specific style for better touch area
+          style={styles.profileButton}
         >
           <Ionicons name="person-circle" size={40} color="black" />
         </TouchableOpacity>
@@ -57,19 +61,32 @@ export default function TripItinerary() {
 
       {/* Content */}
       <ScrollView style={styles.content}>
-        <View style={styles.emptyState}>
-          <Ionicons name="calendar-outline" size={80} color="#ccc" />
-          <Text style={styles.emptyTitle}>No Upcoming Trips</Text>
-          <Text style={styles.emptyText}>
-            Your upcoming trip itineraries will appear here. Plan your next adventure!
-          </Text>
-          <TouchableOpacity 
-            style={styles.createButton}
-            onPress={handleCreateItinerary}
-          >
-            <Text style={styles.createButtonText}>Create Trip</Text>
-          </TouchableOpacity>
-        </View>
+        {favorites.length > 0 ? (
+          <FlatList
+            data={favorites}
+            renderItem={({ item }) => (
+              <View style={styles.favoriteItem}>
+                <Text style={styles.favoriteName}>{item.name}</Text>
+                <Text style={styles.favoriteLocation}>{item.location}</Text>
+              </View>
+            )}
+            keyExtractor={(item) => item.id.toString()}
+          />
+        ) : (
+          <View style={styles.emptyState}>
+            <Ionicons name="heart-outline" size={80} color="#ccc" />
+            <Text style={styles.emptyTitle}>No Favorite Places</Text>
+            <Text style={styles.emptyText}>
+              Save your favorite destinations, restaurants, and attractions for easy access.
+            </Text>
+            <TouchableOpacity 
+              style={styles.createButton}
+              onPress={handleAddFavorite}
+            >
+              <Text style={styles.createButtonText}>Add Favorite</Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </ScrollView>
 
       {/* Footer Navigation */}
@@ -84,18 +101,18 @@ export default function TripItinerary() {
         
         <TouchableOpacity 
           style={styles.footerItem}
-          onPress={navigateToExpenseTracker}
+          onPress={navigateToItinerary}
         >
-          <Ionicons name="wallet" size={24} color="#3478F6" />
-          <Text style={[styles.footerText, { color: '#3478F6' }]}>Expense</Text>
+          <Ionicons name="calendar" size={24} color="#777" />
+          <Text style={styles.footerText}>Expence Tracker</Text>
         </TouchableOpacity>
-
+        
         <TouchableOpacity 
           style={styles.footerItem}
           onPress={navigateToFav}
         >
-          <Ionicons name="heart" size={24} color="#777" />
-          <Text style={styles.footerText}>Favourites</Text>
+          <Ionicons name="heart" size={24} color="#3478F6" />
+          <Text style={[styles.footerText, { color: '#3478F6' }]}>Favorites</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 
@@ -129,8 +146,8 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   profileButton: {
-    padding: 10,  // Added padding to increase touch area
-    zIndex: 10,   // Ensure it's above other elements
+    padding: 10,
+    zIndex: 10,
   },
   content: {
     flex: 1,
@@ -167,6 +184,28 @@ const styles = StyleSheet.create({
     fontFamily: 'outfit-medium',
     color: 'white',
     fontSize: 16,
+  },
+  favoriteItem: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  favoriteName: {
+    fontFamily: 'outfit-medium',
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 6,
+  },
+  favoriteLocation: {
+    fontFamily: 'outfit',
+    fontSize: 14,
+    color: '#777',
   },
   footer: {
     position: 'absolute',

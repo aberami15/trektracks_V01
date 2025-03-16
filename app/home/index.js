@@ -131,6 +131,11 @@ export default function Home() {
     router.push('/trip-itinerary');
   }
 
+  const navigateToFav = () => {
+    // Navigate to trip Favoutites page
+    router.push('/save-favourite');
+  }
+
   const navigateToRecentTrips = () => {
     // Navigate to recent trips page
     router.push('/recent-trips');
@@ -426,6 +431,14 @@ export default function Home() {
         >
           <Ionicons name="calendar" size={24} color="#777" />
           <Text style={styles.footerText}>Expence Tracker</Text>
+        </TouchableOpacity>
+        
+        <TouchableOpacity 
+          style={styles.footerItem}
+          onPress={navigateToFav}
+        >
+          <Ionicons name="heart" size={24} color="#777" />
+          <Text style={styles.footerText}>Favourites</Text>
         </TouchableOpacity>
         
         <TouchableOpacity 

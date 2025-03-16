@@ -40,6 +40,7 @@ export default function RootLayout() {
       <Stack.Screen name="auth/sign-up/index" />
       <Stack.Screen name="profile/index" />
       <Stack.Screen name="trip-itinerary/index" />
+      <Stack.Screen name="save-favourite/index" />
       <Stack.Screen name="recent-trips/index" />
       <Stack.Screen name="destinations/mountains/index" />
       <Stack.Screen name="destinations/beaches/index" />
