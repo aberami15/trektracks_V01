@@ -6,7 +6,7 @@ import { useNavigation, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 
-export default function Islands() {
+export default function Island() {
   const navigation = useNavigation();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');

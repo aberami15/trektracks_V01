@@ -6,7 +6,7 @@ import { useNavigation, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 
-export default function Beaches() {
+export default function Beach() {
   const navigation = useNavigation();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');

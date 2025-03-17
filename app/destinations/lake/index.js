@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
 
-export default function Lakes() {
+export default function Lake() {
   const navigation = useNavigation();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');

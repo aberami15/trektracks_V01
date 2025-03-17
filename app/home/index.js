@@ -432,6 +432,8 @@ export default function Home() {
           <Ionicons name="calendar" size={24} color="#777" />
           <Text style={styles.footerText}>Expence Tracker</Text>
         </TouchableOpacity>
+
+        
         
         <TouchableOpacity 
           style={styles.footerItem}
