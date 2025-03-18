@@ -19,6 +19,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
 import { API_BASE_URL, fetchApi } from '../../configs/apiConfig';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CreateItinerary() {
   const navigation = useNavigation();
@@ -106,6 +107,47 @@ export default function CreateItinerary() {
     } catch (error) {
       console.error("Error creating itinerary:", error);
       ToastAndroid.show('Failed to create itinerary', ToastAndroid.SHORT);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add this function where the other handler functions are defined
+  const handleSaveForLater = async () => {
+    if (!destination) {
+      ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
+      return;
+    }
+
+    try {
+      setLoading(true);
+    
+      // Create itinerary data object
+      const itineraryData = {
+        destination,
+        days,
+        travelerCategory,
+        tripType,
+        vehicle,
+        budget,
+        status: 'draft',
+        createdAt: new Date()
+      };
+
+      console.log("Saving itinerary for later:", itineraryData);
+    
+      // For now, just save to local storage
+      // You could also save to your MongoDB if you want persistence
+      const existingDrafts = JSON.parse(await AsyncStorage.getItem('draftItineraries') || '[]');
+      existingDrafts.push(itineraryData);
+      await AsyncStorage.setItem('draftItineraries', JSON.stringify(existingDrafts));
+    
+      ToastAndroid.show('Itinerary saved for later', ToastAndroid.SHORT);
+      router.push('/trip-itinerary');
+    
+    } catch (error) {
+      console.error("Error saving itinerary:", error);
+      ToastAndroid.show('Failed to save itinerary', ToastAndroid.SHORT);
     } finally {
       setLoading(false);
     }
@@ -240,11 +282,10 @@ export default function CreateItinerary() {
           {/* Action Buttons */}
           <View style={styles.actionButtonsContainer}>
             <TouchableOpacity 
-              style={styles.saveForLaterButton}
+              style={styles.saveForLaterButton} 
               onPress={handleSaveForLater}
-            >
-              <Ionicons name="bookmark-outline" size={18} color="#333" />
-              <Text style={styles.saveForLaterText}>Save for Later</Text>
+>
+              <Text style={styles.saveForLaterButtonText}>Save for Later</Text>
             </TouchableOpacity>
 
             
