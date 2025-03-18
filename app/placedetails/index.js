@@ -1,8 +1,10 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, StatusBar, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, StatusBar, ActivityIndicator,TextInput } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useNavigation, useRouter, useLocalSearchParams } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { MaterialIcons } from '@expo/vector-icons';
+
+
 
 export default function PlaceDetails() {
   const navigation = useNavigation();
@@ -10,10 +12,13 @@ export default function PlaceDetails() {
   const params = useLocalSearchParams();
   const id = params.q;
   
+  
   const [place, setPlace] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [text, setText] = useState('');
   
+
   useEffect(() => {
     navigation.setOptions({
       headerShown: false
@@ -306,12 +311,31 @@ export default function PlaceDetails() {
             </View>
           ))}
         </View>
+           {/* Text Box for Review */}
+        <View style={styles.textBoxContainer}>
+          <TextInput
+            style={styles.textInput}
+            placeholder="Write your review here..."
+            value={text}
+            onChangeText={(newText) => setText(newText)}
+            multiline
+          />
+        </View>
+
+          
+        {/* Add Review Button */}
+        <TouchableOpacity style={styles.addReview}>
+          <Text style={styles.addReviewText}>Add your review</Text>
+          <Ionicons name="add-circle-outline" size={20} color="black" style={styles.addIcon} />
+        </TouchableOpacity>
         
         {/* Add to Itinerary Button */}
         <TouchableOpacity style={styles.addButton}>
           <Text style={styles.addButtonText}>Add to Itinerary</Text>
           <Ionicons name="add-circle-outline" size={20} color="white" style={styles.addIcon} />
         </TouchableOpacity>
+
+
         
         <View style={styles.footer} />
       </ScrollView>
@@ -323,6 +347,23 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  textBoxContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F0F0F0',
+  },
+  textInput: {
+    height: 100,
+    borderColor: '#ccc',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingLeft: 10,
+    paddingTop: 10,
+    fontSize: 16,
+    fontFamily: 'outfit',
+    color: '#444',
   },
   loadingContainer: {
     flex: 1,
@@ -510,10 +551,26 @@ const styles = StyleSheet.create({
     marginTop: 25,
     marginBottom: 15,
   },
+  addReview:{
+    backgroundColor: '#34C760',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 15,
+    borderRadius: 12,
+    marginHorizontal: 20,
+    marginTop: 25,
+    marginBottom: 15,
+  },
   addButtonText: {
     fontFamily: 'outfit-medium',
     fontSize: 16,
     color: 'white',
+  },
+  addReviewText:{
+    fontFamily: 'outfit-medium',
+    fontSize: 16,
+    color: 'black',
   },
   addIcon: {
     marginLeft: 8,

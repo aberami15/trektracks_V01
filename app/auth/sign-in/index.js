@@ -23,31 +23,42 @@ export default function SignIn() {
 
 // In your auth/sign-in/index.js file, update the onSignIn function:
 
-const onSignIn = () => {
-  if(!email || !password) { // Changed && to || to check if EITHER is missing
+const onSignIn = async() => {
+  if(!email || !password) {
     ToastAndroid.show('Please Enter Email & Password', ToastAndroid.LONG);
     return;
   }
   
-  signInWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      // Success case - no need to check for errors here
-      const user = userCredential.user;
-      console.log(user);
-      router.replace('/home');
-    })
-    .catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      console.log(errorMessage, error.code);
-      if(errorCode=='auth/invalid-credential'){
-        ToastAndroid.show("Invalid User", ToastAndroid.LONG)
-      } else {
-        // Handle any other errors
-        ToastAndroid.show("Sign in failed: " + errorMessage, ToastAndroid.LONG)
-      }
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: email,
+        password: password
+      })
     });
-}
+    console.log(response)
+    if (!response.ok) {
+      const errorData =await response.json();
+      throw new Error(errorData.message || 'Authentication failed');
+    }
+    console.log(response)
+    const data = await response.json();
+    console.log(response)
+    const token = data.token;
+    
+    // Store the token - for web
+    localStorage.setItem('token', token);
+    router.replace('/home');
+  } catch (error) {
+    console.error('Login error:', error);
+    ToastAndroid.show(error.message || "Sign in failed", ToastAndroid.LONG);
+  }
+};
+
 
   return (
     <View style={{

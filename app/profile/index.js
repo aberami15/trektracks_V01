@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { 
   View, 
   Text, 
@@ -31,33 +33,36 @@ export default function Profile() {
     });
     
     // Fetch user data directly from auth
-    const fetchUserData = () => {
+    const fetchUserData = async () => {
       try {
-        const currentUser = auth.currentUser;
-        if (currentUser) {
-          console.log("Auth user data:", currentUser);
-          
-          // Use auth info for profile
-          const data = {
-            name: currentUser.displayName || "User",
-            email: currentUser.email || "Not provided",
-            phone: currentUser.phoneNumber || "Not provided"
-          };
-          
-          // If there's an email but no name, extract name from email
-          if (!data.name || data.name === "User") {
-            if (currentUser.email) {
-              const emailName = currentUser.email.split('@')[0];
-              // Capitalize first letter
-              data.name = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-            }
-          }
-          
-          setUserData(data);
+        const token = localStorage.getItem('token');
+        
+        if (!token) {
+          console.error("No authentication token found");
+          setLoading(false);
+          return;
         }
-        setLoading(false);
+
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const decodedToken = JSON.parse(window.atob(base64));
+        
+        const userId = decodedToken.id;
+        
+        // Make API call to fetch user data
+        const response = await fetch(`http://localhost:5000/api/auth/user/${userId}`);
+        console.log(response)
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
+        
+        const userData = await response.json();
+        console.log(userData);
+        setUserData(userData);
+        
       } catch (error) {
         console.error("Error fetching user data:", error);
+      } finally {
         setLoading(false);
       }
     };
@@ -65,27 +70,15 @@ export default function Profile() {
     fetchUserData();
   }, []);
 
-  const handleSignOut = () => {
-    Alert.alert(
-      "Sign Out",
-      "Are you sure you want to sign out?",
-      [
-        { 
-          text: "Cancel", 
-          style: "cancel" 
-        },
-        {
-          text: "Sign Out",
-          onPress: () => {
-            signOut(auth).then(() => {
-              router.replace('/');
-            }).catch((error) => {
-              console.error("Sign out error:", error);
-            });
-          }
-        }
-      ]
-    );
+  const handleSignOut = async() => {
+    try {
+      console.log("Signing out...");
+      await AsyncStorage.removeItem('token');
+      router.replace('/');
+    }
+    catch(error) {
+      console.error("Sign out error:", error);
+    }
   }
 
   const handleBudgetPress = () => {
@@ -183,7 +176,7 @@ export default function Profile() {
             <View style={styles.nameContainer}>
               <Ionicons name="person" size={24} color="#333" />
               <Text style={styles.nameText}>
-                {userData?.name || "User"}
+                {userData?.user.username || "User"}
               </Text>
             </View>
           </View>
@@ -195,10 +188,6 @@ export default function Profile() {
               <Text style={styles.iconText}>Travel History</Text>
             </TouchableOpacity>
             
-            <TouchableOpacity style={styles.iconItem} onPress={handleBudgetPress}>
-              <Ionicons name="wallet" size={28} color="#333" />
-              <Text style={styles.iconText}>Budget</Text>
-            </TouchableOpacity>
 
             <TouchableOpacity style={styles.iconItem}>
               <Ionicons name="star" size={28} color="#333" />
@@ -211,7 +200,7 @@ export default function Profile() {
             <Ionicons name="call" size={20} color="#3478F6" />
             <View style={styles.detailText}>
               <Text style={styles.label}>Phone</Text>
-              <Text style={styles.value}>{userData?.phone || "Not provided"}</Text>
+              <Text style={styles.value}>{userData?.user.phoneNumber || "Not provided"}</Text>
             </View>
             <TouchableOpacity onPress={handleEditPhone} style={styles.editButton}>
               <Feather name="edit-2" size={18} color="#3478F6" />
@@ -222,7 +211,7 @@ export default function Profile() {
             <Ionicons name="mail" size={20} color="#3478F6" />
             <View style={styles.detailText}>
               <Text style={styles.label}>Email</Text>
-              <Text style={styles.value}>{userData?.email || "Not provided"}</Text>
+              <Text style={styles.value}>{userData?.user.email || "Not provided"}</Text>
             </View>
           </View>
 
