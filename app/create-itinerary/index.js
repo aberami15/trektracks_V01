@@ -107,8 +107,10 @@ export default function CreateTrip() {
     }
 
     try {
+      setLoading(true); // Set loading to true
+      
+      // First save the trip to the database
       const token = localStorage.getItem('token');
-      setLoading(true);
       const response = await fetch('http://localhost:5000/api/trips', {
         method: 'POST',
         headers: {
@@ -127,25 +129,66 @@ export default function CreateTrip() {
           description: description
         })
       });
-
-      if (!response.ok) {
-        throw new Error(`API request failed with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      console.log("Creating itinerary:", data);
       
-      // If plan was generated, navigate to plan view
-      if (showPlan) {
-        router.push('/trip-itinerary');
-      } else {
-        router.push('/budget-planner');
+      if (!response.ok) {
+        throw new Error('Failed to save trip');
       }
+      
+      const savedTrip = await response.json();
+      console.log("Trip saved:", savedTrip);
+      
+      // Calculate the number of days for the trip
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+      
+      // Now call Gemini API to generate a travel plan
+      const geminiResponse = await fetch('http://localhost:5000/api/gemini/generate-plan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          travelerCategory: travelerCategory || "Solo",  // Default to Solo if not specified
+          tripType: tripType || "Adventure",  // Default to Adventure if not specified
+          destination: destination,
+          from: currentLocation,
+          days: days.toString(),
+          budget: budget,
+          vehicle: vehicle || "Car"  // Default to Car if not specified
+        })
+      });
+      
+      if (!geminiResponse.ok) {
+        console.error("Failed to generate plan, but trip was saved");
+        // Continue anyway since the trip was saved
+      } else {
+        const planData = await geminiResponse.json();
+        console.log("Generated plan:", planData);
+        
+        // Optionally update the trip with the generated plan
+        if (savedTrip.data && savedTrip.data._id) {
+          const updateResponse = await fetch(`http://localhost:5000/api/trips/${savedTrip.data._id}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              generatedPlan: planData.data.plan
+            })
+          });
+          console.log("Updated trip with plan:", await updateResponse.json());
+        }
+      }
+      
+      setLoading(false);
+      router.push('/trip-itinerary');
       
     } catch (error) {
       console.error("Error creating itinerary: ", error);
       ToastAndroid.show('Failed to create itinerary', ToastAndroid.SHORT);
-    } finally {
       setLoading(false);
     }
   };
