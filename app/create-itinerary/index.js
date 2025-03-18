@@ -427,6 +427,44 @@ export default function CreateTrip() {
             )}
           </TouchableOpacity>
 
+          <TouchableOpacity 
+            style={styles.aiSuggestButton}
+            onPress={() => {
+              // Call the AI API for suggestions
+              if (destination) {
+                // Logic to fetch AI suggestions for the selected destination
+                fetch(`http://localhost:5000/api/gemini/generate-plan`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  destination: destination,
+                  days: startDate && endDate ? 
+                    Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) : 3,
+                  tripType: tripType || 'General',
+                  vehicle: vehicle || 'Mixed'
+                })
+              })
+              .then(response => response.json())
+              .then(data => {
+                // Show suggestions to the user
+                alert("AI Suggestions: " + data.data.plan.substring(0, 200) + "...");
+                // You could show this in a modal or dedicated section
+              })
+              .catch(error => {
+                console.error("Error getting AI suggestions:", error);
+              });
+            } else {
+              alert("Please enter a destination first");
+            }
+          }}
+        >
+          <Ionicons name="bulb-outline" size={18} color="#3478F6" />
+          <Text style={styles.aiSuggestText}>Get AI Suggestions</Text>
+        </TouchableOpacity>
+
+
           {/* Action Buttons */}
           <View style={styles.actionButtonsContainer}>
             <TouchableOpacity 
@@ -775,5 +813,22 @@ const styles = StyleSheet.create({
     fontFamily: 'outfit-medium',
     fontSize: 16,
     color: 'white',
+  },
+  aiSuggestButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f0f7ff',
+    borderWidth: 1,
+    borderColor: '#3478F6',
+    borderRadius: 10,
+    paddingVertical: 12,
+    marginTop: 15,
+  },
+  aiSuggestText: {
+    color: '#3478F6',
+    fontFamily: 'outfit-medium',
+    fontSize: 15,
+    marginLeft: 8,
   },
 });
