@@ -12,14 +12,10 @@ import {
   Platform,
   Modal,
   FlatList,
-  Image,
-  ActivityIndicator,
-  Alert
+  Image
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
-import { API_BASE_URL, fetchApi } from '../../configs/apiConfig';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CreateItinerary() {
   const navigation = useNavigation();
@@ -58,12 +54,12 @@ export default function CreateItinerary() {
       ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
       return;
     }
-  
+
     if (!days) {
       ToastAndroid.show('Please select number of days', ToastAndroid.SHORT);
       return;
     }
-  
+
     try {
       setLoading(true);
       
@@ -77,84 +73,84 @@ export default function CreateItinerary() {
         budget,
         createdAt: new Date()
       };
-  
+
       console.log("Creating itinerary:", itineraryData);
+      // Here you would typically save to database
+      // For now we just log the data
       
-      // Send data to AI planning endpoint
-      const response = await fetch('http://localhost:5000/api/ai-plan/generate', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(itineraryData)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to generate plan');
-      }
-      
-      const data = await response.json();
-      
-      // Navigate to the generated plan view
-      router.push({
-        pathname: '/generated-plan',
-        params: { 
-          planId: data.data.planId 
-        }
-      });
+      setLoading(false);
+      ToastAndroid.show('Itinerary created successfully!', ToastAndroid.SHORT);
       
     } catch (error) {
-      console.error("Error creating itinerary:", error);
+      console.error("Error creating itinerary: ", error);
       ToastAndroid.show('Failed to create itinerary', ToastAndroid.SHORT);
-    } finally {
       setLoading(false);
     }
   };
 
-  // Add this function where the other handler functions are defined
-  const handleSaveForLater = async () => {
+  const renderDropdownItem = (item, setSelected, closeModal) => (
+    <TouchableOpacity
+      style={styles.dropdownItem}
+      onPress={() => {
+        setSelected(item);
+        closeModal();
+      }}
+    >
+      <Text style={styles.dropdownItemText}>{item}</Text>
+    </TouchableOpacity>
+  );
+
+  // Generic dropdown modal
+  const renderDropdownModal = (visible, setVisible, title, data, selectedValue, setSelectedValue) => {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={visible}
+        onRequestClose={() => setVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{title}</Text>
+              <TouchableOpacity onPress={() => setVisible(false)}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              data={data}
+              renderItem={({ item }) => renderDropdownItem(item, setSelectedValue, () => setVisible(false))}
+              keyExtractor={(item) => item}
+              style={styles.dropdownList}
+            />
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  const handleGeneratePlan = () => {
+    // First save the itinerary
+    handleSaveItinerary();
+
+    // Navigate to AI Plan Generator page instead of budget planner
+    router.push('/ai-plan-generator');
+  };
+
+  const handleSaveForLater = () => {
     if (!destination) {
       ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
       return;
     }
 
-    try {
-      setLoading(true);
-    
-      // Create itinerary data object
-      const itineraryData = {
-        destination,
-        days,
-        travelerCategory,
-        tripType,
-        vehicle,
-        budget,
-        status: 'draft',
-        createdAt: new Date()
-      };
-
-      console.log("Saving itinerary for later:", itineraryData);
-    
-      // For now, just save to local storage
-      // You could also save to your MongoDB if you want persistence
-      const existingDrafts = JSON.parse(await AsyncStorage.getItem('draftItineraries') || '[]');
-      existingDrafts.push(itineraryData);
-      await AsyncStorage.setItem('draftItineraries', JSON.stringify(existingDrafts));
-    
-      ToastAndroid.show('Itinerary saved for later', ToastAndroid.SHORT);
-      router.push('/trip-itinerary');
-    
-    } catch (error) {
-      console.error("Error saving itinerary:", error);
-      ToastAndroid.show('Failed to save itinerary', ToastAndroid.SHORT);
-    } finally {
-      setLoading(false);
-    }
+    ToastAndroid.show('Saved for later!', ToastAndroid.SHORT);
+    // Implement save for later functionality
   };
 
   return (
     <SafeAreaView style={styles.container}>
+
       {/* Back Button to Homepage */}
       <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
         <Ionicons name="arrow-back" size={24} color="#333" />
@@ -282,23 +278,19 @@ export default function CreateItinerary() {
           {/* Action Buttons */}
           <View style={styles.actionButtonsContainer}>
             <TouchableOpacity 
-              style={styles.saveForLaterButton} 
+              style={styles.saveForLaterButton}
               onPress={handleSaveForLater}
->
-              <Text style={styles.saveForLaterButtonText}>Save for Later</Text>
+            >
+              <Ionicons name="bookmark-outline" size={18} color="#333" />
+              <Text style={styles.saveForLaterText}>Save for Later</Text>
             </TouchableOpacity>
 
             
             <TouchableOpacity 
               style={styles.generatePlanButton}
               onPress={handleGeneratePlan}
-              disabled={loading}
             >
-              {loading ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <Text style={styles.generatePlanText}>Create Trip</Text>
-              )}
+              <Text style={styles.generatePlanText}>Create Trip</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -376,6 +368,7 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 100,
+    paddingTop: 70, // Add padding to account for the back button
   },
   inputContainer: {
     marginBottom: 20,
