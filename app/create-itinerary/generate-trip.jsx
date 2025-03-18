@@ -1,41 +1,47 @@
-import { View, Text } from 'react-native'
-import React, { useState, useEffect } from 'react'
-import { Colors } from 'react-native/Libraries/NewAppScreen'
+import { View, Text, ActivityIndicator, Button } from 'react-native';
+import React, { useState } from 'react';
+import axios from 'axios';
 
-export default function GenerateTrip() {
-  const [dots, setDots] = useState(".");
+export default function GenerateTrip({ route }) {
+  const [loading, setLoading] = useState(false);
+  const [tripPlan, setTripPlan] = useState('');
+  const [error, setError] = useState(null); // Add error state
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDots(prev => (prev.length < 3 ? prev + "." : "."));
-    }, 500); // Changes every 500ms
+  const { destination, days, travelerCategory, tripType, vehicle } = route.params;
 
-    return () => clearInterval(interval);
-  }, []);
+  const fetchTripPlan = async () => {
+    setLoading(true);
+    setError(null); // Clear previous errors
+    try {
+      const response = await axios.post('http://your-backend-url.com/api/generate-trip', {
+        destination,
+        days,
+        travelerCategory,
+        tripType,
+        vehicle,
+      });
+      setTripPlan(response.data);
+    } catch (err) {
+      console.error('Error fetching trip plan:', err);
+      setError('Failed to generate trip plan. Please try again.'); // Set error message
+    }
+    setLoading(false);
+  };
 
   return (
-    <View style={{
-        padding: 25,
-        paddingTop: 75,
-        backgroundColor: Colors.WHITE,
-        height:'100%'
-    }}>
-      <Text style={{
-        fontFamily: 'outfit-bold',
-        fontSize: 35,
-        textAlign: 'center',
-        marginTop: '30%'
-      }}>
-        Hold On!
-      </Text>
-
-      <Text style={{
-        fontFamily: 'outfit-medium',
-        fontSize: 20,
-        textAlign: 'center'
-      }}>
-        We’re curating the best travel experience for you{dots}
-      </Text>
+    <View style={{ padding: 20 }}>
+      <Text style={{ fontSize: 24, fontWeight: 'bold' }}>AI-Generated Trip Plan</Text>
+      {loading ? (
+        <View style={{ alignItems: 'center', marginTop: 20 }}>
+          <ActivityIndicator size="large" />
+          <Text style={{ marginTop: 10 }}>Generating your trip plan...</Text>
+        </View>
+      ) : error ? (
+        <Text style={{ color: 'red', marginTop: 20 }}>{error}</Text>
+      ) : (
+        <Text style={{ marginTop: 20 }}>{tripPlan}</Text>
+      )}
+      <Button title="Generate Plan" onPress={fetchTripPlan} />
     </View>
-  )
+  );
 }
