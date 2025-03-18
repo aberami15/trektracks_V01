@@ -117,6 +117,8 @@ const onSignIn = async() => {
         secureTextEntry={true}
         style={styles.input}
         onChangeText={(value)=>setPassword(value)}
+        onSubmitEditing={onSignIn}
+        returnKeyType="go"
         placeholder='Enter Password'/>
         
       </View>
