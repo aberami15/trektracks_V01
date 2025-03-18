@@ -12,14 +12,16 @@ import {
   Platform,
   Modal,
   FlatList,
-  Image
+  Image,
+  ActivityIndicator,
+  Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
+import { API_BASE_URL, fetchApi } from '../../configs/apiConfig';
 
 export default function CreateItinerary() {
   const navigation = useNavigation();
-  
   const router = useRouter();
   
   // Form state
@@ -28,6 +30,7 @@ export default function CreateItinerary() {
   const [travelerCategory, setTravelerCategory] = useState('');
   const [tripType, setTripType] = useState('');
   const [vehicle, setVehicle] = useState('');
+  const [budget, setBudget] = useState('');
   const [loading, setLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
 
@@ -47,9 +50,10 @@ export default function CreateItinerary() {
   const daysOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "14", "21", "30"];
   const travelerCategories = ["Solo", "Couple", "Family", "Friends", "Group Tour"];
   const tripTypes = ["Adventure", "Relaxation", "Cultural", "Devotional", "Food & Cuisine", "Nature", "Photography"];
-  const vehicleOptions = ["Car", "Bike", "Walking", "Train", "Bus"];
+  const vehicleOptions = ["Car", "Public Transport", "Bike", "Walking", "Plane", "Train", "Bus"];
 
   const handleSaveItinerary = async () => {
+    // Validate required fields
     if (!destination) {
       ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
       return;
@@ -59,34 +63,58 @@ export default function CreateItinerary() {
       ToastAndroid.show('Please select number of days', ToastAndroid.SHORT);
       return;
     }
-
+    
     try {
       setLoading(true);
       
-      // Create itinerary data object
-      const itineraryData = {
+      // Create trip data
+      const tripData = {
+        name: `Trip to ${destination}`,
         destination,
-        days,
+        startDate: new Date().toISOString(), // Default to current date
+        endDate: new Date(Date.now() + (parseInt(days) * 24 * 60 * 60 * 1000)).toISOString(), // Add days
+        days: parseInt(days),
         travelerCategory,
         tripType,
-        vehicle,
-        createdAt: new Date()
+        transportation: vehicle,
+        budget: {
+          amount: budget ? parseFloat(budget) : 0,
+          currency: 'LKR'
+        },
+        notes: `${travelerCategory || 'Trip'} ${tripType ? `for ${tripType}` : ''}`,
+        isActive: true
       };
 
-      console.log("Creating itinerary:", itineraryData);
+      console.log("Creating trip with data:", tripData);
       
-      // TODO: Save to Firestore if needed
-      // For now, we'll just simulate success
+      // Send request to create trip
+      const response = await fetchApi('/api/trips', {
+        method: 'POST',
+        body: JSON.stringify(tripData)
+      });
       
-      setTimeout(() => {
-        ToastAndroid.show('Itinerary created successfully!', ToastAndroid.SHORT);
-        router.push('/trip-itinerary');
-        setLoading(false);
-      }, 1000);
-      
+      if (response.status === 'success') {
+        // Show success message
+        ToastAndroid.show('Trip created successfully!', ToastAndroid.LONG);
+        
+        // Navigate to budget planner
+        router.push({
+          pathname: '/budget-planner',
+          params: { tripId: response.data._id }
+        });
+      } else {
+        throw new Error(response.message || 'Failed to create trip');
+      }
     } catch (error) {
-      console.error("Error creating itinerary: ", error);
-      ToastAndroid.show('Failed to create itinerary', ToastAndroid.SHORT);
+      console.error("Error creating trip:", error);
+      
+      // Show error message
+      Alert.alert(
+        "Error",
+        `Failed to create trip: ${error.message}`,
+        [{ text: "OK" }]
+      );
+    } finally {
       setLoading(false);
     }
   };
@@ -148,9 +176,14 @@ export default function CreateItinerary() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Back Button to Homepage */}
+      <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
+        <Ionicons name="arrow-back" size={24} color="#333" />
+      </TouchableOpacity>
+
       {/* Header with profile photo */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Preference</Text>
+        <Text style={styles.headerTitle}></Text>
         <TouchableOpacity onPress={() => router.push('/profile')}>
           <Image
             source={require('../../assets/images/profile.png')}
@@ -210,6 +243,21 @@ export default function CreateItinerary() {
             </TouchableOpacity>
           </View>
 
+          {/* Budget - New field */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Budget (LKR)</Text>
+            <View style={styles.dropdownField}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your budget"
+                value={budget}
+                onChangeText={setBudget}
+                keyboardType="numeric"
+              />
+              <Ionicons name="wallet-outline" size={20} color="#999" style={styles.dropdownIcon} />
+            </View>
+          </View> 
+
           {/* Traveler Category */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Traveller Category</Text>
@@ -262,14 +310,17 @@ export default function CreateItinerary() {
               <Text style={styles.saveForLaterText}>Save for Later</Text>
             </TouchableOpacity>
 
+            
             <TouchableOpacity 
-              onPress={()=>router.push('/create-itinerary/generate-trip')}
               style={styles.generatePlanButton}
+              onPress={handleGeneratePlan}
               disabled={loading}
             >
-              <Text style={styles.generatePlanText}>
-                {loading ? 'Generating...' : 'Generate Plan'}
-              </Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="#FFFFFF" />
+              ) : (
+                <Text style={styles.generatePlanText}>Create Trip</Text>
+              )}
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -319,6 +370,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+  },
+  backButton: {
+    position: 'absolute',
+    top: 50, 
+    left: 20, 
+    zIndex: 10,
   },
   header: {
     flexDirection: 'row',
