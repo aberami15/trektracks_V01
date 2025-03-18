@@ -53,125 +53,62 @@ export default function CreateItinerary() {
   const vehicleOptions = ["Car", "Public Transport", "Bike", "Walking", "Plane", "Train", "Bus"];
 
   const handleSaveItinerary = async () => {
-    // Validate required fields
     if (!destination) {
       ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
       return;
     }
-
+  
     if (!days) {
       ToastAndroid.show('Please select number of days', ToastAndroid.SHORT);
       return;
     }
-    
+  
     try {
       setLoading(true);
       
-      // Create trip data
-      const tripData = {
-        name: `Trip to ${destination}`,
+      // Create itinerary data object
+      const itineraryData = {
         destination,
-        startDate: new Date().toISOString(), // Default to current date
-        endDate: new Date(Date.now() + (parseInt(days) * 24 * 60 * 60 * 1000)).toISOString(), // Add days
-        days: parseInt(days),
+        days,
         travelerCategory,
         tripType,
-        transportation: vehicle,
-        budget: {
-          amount: budget ? parseFloat(budget) : 0,
-          currency: 'LKR'
-        },
-        notes: `${travelerCategory || 'Trip'} ${tripType ? `for ${tripType}` : ''}`,
-        isActive: true
+        vehicle,
+        budget,
+        createdAt: new Date()
       };
-
-      console.log("Creating trip with data:", tripData);
+  
+      console.log("Creating itinerary:", itineraryData);
       
-      // Send request to create trip
-      const response = await fetchApi('/api/trips', {
+      // Send data to AI planning endpoint
+      const response = await fetch('http://localhost:5000/api/ai-plan/generate', {
         method: 'POST',
-        body: JSON.stringify(tripData)
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(itineraryData)
       });
       
-      if (response.status === 'success') {
-        // Show success message
-        ToastAndroid.show('Trip created successfully!', ToastAndroid.LONG);
-        
-        // Navigate to budget planner
-        router.push({
-          pathname: '/budget-planner',
-          params: { tripId: response.data._id }
-        });
-      } else {
-        throw new Error(response.message || 'Failed to create trip');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to generate plan');
       }
-    } catch (error) {
-      console.error("Error creating trip:", error);
       
-      // Show error message
-      Alert.alert(
-        "Error",
-        `Failed to create trip: ${error.message}`,
-        [{ text: "OK" }]
-      );
+      const data = await response.json();
+      
+      // Navigate to the generated plan view
+      router.push({
+        pathname: '/generated-plan',
+        params: { 
+          planId: data.data.planId 
+        }
+      });
+      
+    } catch (error) {
+      console.error("Error creating itinerary:", error);
+      ToastAndroid.show('Failed to create itinerary', ToastAndroid.SHORT);
     } finally {
       setLoading(false);
     }
-  };
-
-  const renderDropdownItem = (item, setSelected, closeModal) => (
-    <TouchableOpacity
-      style={styles.dropdownItem}
-      onPress={() => {
-        setSelected(item);
-        closeModal();
-      }}
-    >
-      <Text style={styles.dropdownItemText}>{item}</Text>
-    </TouchableOpacity>
-  );
-
-  // Generic dropdown modal
-  const renderDropdownModal = (visible, setVisible, title, data, selectedValue, setSelectedValue) => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={visible}
-      onRequestClose={() => setVisible(false)}
-    >
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{title}</Text>
-            <TouchableOpacity onPress={() => setVisible(false)}>
-              <Ionicons name="close" size={24} color="#333" />
-            </TouchableOpacity>
-          </View>
-
-          <FlatList
-            data={data}
-            renderItem={({ item }) => renderDropdownItem(item, setSelectedValue, () => setVisible(false))}
-            keyExtractor={(item) => item}
-            style={styles.dropdownList}
-          />
-        </View>
-      </View>
-    </Modal>
-  );
-
-  const handleGeneratePlan = () => {
-    // First save the itinerary
-    handleSaveItinerary();
-  };
-
-  const handleSaveForLater = () => {
-    if (!destination) {
-      ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
-      return;
-    }
-
-    ToastAndroid.show('Saved for later!', ToastAndroid.SHORT);
-    // Implement save for later functionality
   };
 
   return (
