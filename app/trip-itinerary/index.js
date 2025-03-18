@@ -27,7 +27,6 @@ export default function TripItinerary() {
 
   const fetchTrips = async () => {
     try {
-      setLoading(true);
       const token = localStorage.getItem('token');
       const response = await fetch(`http://localhost:5000/api/trips/mytrip`, {
         method: 'GET',
@@ -36,23 +35,24 @@ export default function TripItinerary() {
           'Authorization': `Bearer ${token}`
         },
       });
-      
+        
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
-      
+        
       const data = await response.json();
-      
-      if (data.status === 'success' && Array.isArray(data.data)) {
+      console.log("Fetched trips:", data);
+        
+      // Make sure to set the correct data structure
+      if (data && data.data) {
         setTrips(data.data);
       } else {
+        console.warn("Unexpected data structure:", data);
         setTrips([]);
       }
     } catch (error) {
       console.error('Error fetching trips:', error);
       setTrips([]);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -73,7 +73,7 @@ export default function TripItinerary() {
 
   const handleCreateItinerary = () => {
     // Navigate to create itinerary form
-    router.push('/create-trip');
+    router.push('/ai-planning');
   }
 
   const handleViewTrip = (tripId) => {
