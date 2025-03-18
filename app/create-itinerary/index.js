@@ -12,30 +12,42 @@ import {
   Platform,
   Modal,
   FlatList,
-  Image
+  Image,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
 
-export default function CreateItinerary() {
+export default function CreateTrip() {
   const navigation = useNavigation();
   const router = useRouter();
   
   // Form state
   const [destination, setDestination] = useState('');
-  const [days, setDays] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [travelerCategory, setTravelerCategory] = useState('');
   const [tripType, setTripType] = useState('');
   const [vehicle, setVehicle] = useState('');
   const [budget, setBudget] = useState('');
+  const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
-  const [searchText, setSearchText] = useState('');
+  const [currentLocation, setCurrentLocation] = useState('');
+  const [days, setDays] = useState('');
+
+  // Plan state
+  const [showPlan, setShowPlan] = useState(false);
+  const [plan, setPlan] = useState('');
+  const [generatingPlan, setGeneratingPlan] = useState(false);
 
   // Modal visibility states
-  const [daysModalVisible, setDaysModalVisible] = useState(false);
+  const [startDateModalVisible, setStartDateModalVisible] = useState(false);
+  const [endDateModalVisible, setEndDateModalVisible] = useState(false);
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [tripTypeModalVisible, setTripTypeModalVisible] = useState(false);
   const [vehicleModalVisible, setVehicleModalVisible] = useState(false);
+  const [daysModalVisible, setDaysModalVisible] = useState(false);
+  const [planModalVisible, setPlanModalVisible] = useState(false);
 
   useEffect(() => {
     navigation.setOptions({
@@ -44,10 +56,39 @@ export default function CreateItinerary() {
   }, []);
 
   // Options for dropdowns
-  const daysOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "14", "21", "30"];
   const travelerCategories = ["Solo", "Couple", "Family", "Friends", "Group Tour"];
-  const tripTypes = ["Adventure", "Relaxation", "Cultural", "Devotional", "Food & Cuisine", "Nature", "Photography"];
+  const tripTypes = ["Adventure", "Relaxation", "Cultural", "Devotional", "Food & Cuisine", "Nature", "Photography", "Religious"];
   const vehicleOptions = ["Car", "Public Transport", "Bike", "Walking", "Plane", "Train", "Bus"];
+
+  // Generate date options for next 365 days
+  const generateDateOptions = () => {
+    const dateOptions = [];
+    const today = new Date();
+    
+    for (let i = 0; i < 365; i++) {
+      const date = new Date();
+      date.setDate(today.getDate() + i);
+      const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
+      dateOptions.push(formattedDate);
+    }
+    
+    return dateOptions;
+  };
+
+  // Options for days dropdown
+  const daysOptions = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "14", "21", "30"];
+  const dateOptions = generateDateOptions();
+
+  // Calculate days between start and end dates
+  useEffect(() => {
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      const differenceInTime = end - start;
+      const differenceInDays = Math.ceil(differenceInTime / (1000 * 3600 * 24)) + 1;
+      setDays(differenceInDays.toString());
+    }
+  }, [startDate, endDate]);
 
   const handleSaveItinerary = async () => {
     if (!destination) {
@@ -55,36 +96,101 @@ export default function CreateItinerary() {
       return;
     }
 
-    if (!days) {
-      ToastAndroid.show('Please select number of days', ToastAndroid.SHORT);
+    if (!startDate) {
+      ToastAndroid.show('Please select start date', ToastAndroid.SHORT);
+      return;
+    }
+
+    if (!endDate) {
+      ToastAndroid.show('Please select end date', ToastAndroid.SHORT);
       return;
     }
 
     try {
+      const token = localStorage.getItem('token');
       setLoading(true);
-      
-      // Create itinerary data object
-      const itineraryData = {
-        destination,
-        days,
-        travelerCategory,
-        tripType,
-        vehicle,
-        budget,
-        createdAt: new Date()
-      };
+      const response = await fetch('http://localhost:5000/api/trips', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          destination: destination,
+          startDate: startDate,
+          from: currentLocation,
+          endDate: endDate,
+          travelerCategory: travelerCategory,
+          tripType: tripType,
+          vehicle: vehicle,
+          budget: budget,
+          description: description
+        })
+      });
 
-      console.log("Creating itinerary:", itineraryData);
-      // Here you would typically save to database
-      // For now we just log the data
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log("Creating itinerary:", data);
       
-      setLoading(false);
-      ToastAndroid.show('Itinerary created successfully!', ToastAndroid.SHORT);
+      // If plan was generated, navigate to plan view
+      if (showPlan) {
+        router.push('/trip-itinerary');
+      } else {
+        router.push('/budget-planner');
+      }
       
     } catch (error) {
       console.error("Error creating itinerary: ", error);
       ToastAndroid.show('Failed to create itinerary', ToastAndroid.SHORT);
+    } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGeneratePlan = async () => {
+    // Validate required fields
+    if (!destination || !currentLocation || !days || !travelerCategory || !tripType || !vehicle || !budget) {
+      ToastAndroid.show('Please fill all the required fields', ToastAndroid.SHORT);
+      return;
+    }
+
+    try {
+      setGeneratingPlan(true);
+      
+      // Call the Gemini API through our backend
+      const response = await fetch('http://localhost:5000/api/gemini/generate-plan', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          travelerCategory,
+          tripType,
+          destination,
+          from: currentLocation,
+          days,
+          budget,
+          vehicle
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      setPlan(data.data.plan);
+      setShowPlan(true);
+      setPlanModalVisible(true);
+      
+    } catch (error) {
+      console.error("Error generating plan: ", error);
+      ToastAndroid.show('Failed to generate plan', ToastAndroid.SHORT);
+    } finally {
+      setGeneratingPlan(false);
     }
   };
 
@@ -101,42 +207,32 @@ export default function CreateItinerary() {
   );
 
   // Generic dropdown modal
-  const renderDropdownModal = (visible, setVisible, title, data, selectedValue, setSelectedValue) => {
-    return (
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={visible}
-        onRequestClose={() => setVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{title}</Text>
-              <TouchableOpacity onPress={() => setVisible(false)}>
-                <Ionicons name="close" size={24} color="#333" />
-              </TouchableOpacity>
-            </View>
-
-            <FlatList
-              data={data}
-              renderItem={({ item }) => renderDropdownItem(item, setSelectedValue, () => setVisible(false))}
-              keyExtractor={(item) => item}
-              style={styles.dropdownList}
-            />
+  const renderDropdownModal = (visible, setVisible, title, data, selectedValue, setSelectedValue) => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={() => setVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <TouchableOpacity onPress={() => setVisible(false)}>
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
           </View>
+
+          <FlatList
+            data={data}
+            renderItem={({ item }) => renderDropdownItem(item, setSelectedValue, () => setVisible(false))}
+            keyExtractor={(item) => item}
+            style={styles.dropdownList}
+          />
         </View>
-      </Modal>
-    );
-  };
-
-  const handleGeneratePlan = () => {
-    // First save the itinerary
-    handleSaveItinerary();
-
-    // Navigate to AI Plan Generator page instead of budget planner
-    router.push('/ai-plan-generator');
-  };
+      </View>
+    </Modal>
+  );
 
   const handleSaveForLater = () => {
     if (!destination) {
@@ -150,15 +246,14 @@ export default function CreateItinerary() {
 
   return (
     <SafeAreaView style={styles.container}>
-
       {/* Back Button to Homepage */}
       <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
-        <Ionicons name="arrow-back" size={24} color="#333" />
+        <Ionicons name="arrow-back" size={20} color="#333" />
       </TouchableOpacity>
 
       {/* Header with profile photo */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}></Text>
+        <Text style={styles.headerTitle}>Create a New Trip</Text>
         <TouchableOpacity onPress={() => router.push('/profile')}>
           <Image
             source={require('../../assets/images/profile.png')}
@@ -182,9 +277,9 @@ export default function CreateItinerary() {
             <View style={styles.searchInputContainer}>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search destination"
-                value={searchText}
-                onChangeText={setSearchText}
+                placeholder="Enter your current location"
+                value={currentLocation}
+                onChangeText={setCurrentLocation}
               />
               <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
             </View>
@@ -204,21 +299,46 @@ export default function CreateItinerary() {
             </View>
           </View>
 
-          {/* Days */}
+          {/* Start Date - New field */}
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Days</Text>
+            <Text style={styles.inputLabel}>Start Date</Text>
             <TouchableOpacity 
               style={styles.dropdownField}
-              onPress={() => setDaysModalVisible(true)}
+              onPress={() => setStartDateModalVisible(true)}
             >
-              <Text style={[styles.dropdownText, !days && styles.placeholderText]}>
-                {days || "Select number of days"}
+              <Text style={[styles.dropdownText, !startDate && styles.placeholderText]}>
+                {startDate || "Select start date"}
               </Text>
-              <Ionicons name="chevron-down" size={20} color="#999" style={styles.dropdownIcon} />
+              <Ionicons name="calendar" size={20} color="#999" style={styles.dropdownIcon} />
             </TouchableOpacity>
           </View>
 
-          {/* Budget - New field */}
+          {/* End Date - New field */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>End Date</Text>
+            <TouchableOpacity 
+              style={styles.dropdownField}
+              onPress={() => setEndDateModalVisible(true)}
+            >
+              <Text style={[styles.dropdownText, !endDate && styles.placeholderText]}>
+                {endDate || "Select end date"}
+              </Text>
+              <Ionicons name="calendar" size={20} color="#999" style={styles.dropdownIcon} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Days */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Duration (Days)</Text>
+            <View style={styles.dropdownField}>
+              <Text style={[styles.dropdownText, !days && styles.placeholderText]}>
+                {days || "Calculated from dates"}
+              </Text>
+              <Ionicons name="time-outline" size={20} color="#999" style={styles.dropdownIcon} />
+            </View>
+          </View>
+
+          {/* Budget */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Budget (LKR)</Text>
             <View style={styles.dropdownField}>
@@ -275,6 +395,38 @@ export default function CreateItinerary() {
             </TouchableOpacity>
           </View>
 
+          {/* Description - New field */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Description</Text>
+            <View style={styles.textAreaContainer}>
+              <TextInput
+                style={styles.textArea}
+                placeholder="Enter trip description"
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+            </View>
+          </View>
+
+          {/* Generate Plan Button */}
+          <TouchableOpacity 
+            style={styles.generatePlanButton}
+            onPress={handleGeneratePlan}
+            disabled={generatingPlan}
+          >
+            {generatingPlan ? (
+              <ActivityIndicator size="small" color="white" />
+            ) : (
+              <>
+                <Text style={styles.generatePlanText}>Generate Trip Plan</Text>
+                <Ionicons name="document-text" size={18} color="white" style={{ marginLeft: 8 }} />
+              </>
+            )}
+          </TouchableOpacity>
+
           {/* Action Buttons */}
           <View style={styles.actionButtonsContainer}>
             <TouchableOpacity 
@@ -285,12 +437,16 @@ export default function CreateItinerary() {
               <Text style={styles.saveForLaterText}>Save for Later</Text>
             </TouchableOpacity>
 
-            
             <TouchableOpacity 
-              style={styles.generatePlanButton}
-              onPress={handleGeneratePlan}
+              style={styles.createTripButton}
+              onPress={handleSaveItinerary}
+              disabled={loading}
             >
-              <Text style={styles.generatePlanText}>Create Trip</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text style={styles.createTripText}>Create Trip</Text>
+              )}
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -298,12 +454,21 @@ export default function CreateItinerary() {
 
       {/* Dropdown Modals */}
       {renderDropdownModal(
-        daysModalVisible, 
-        setDaysModalVisible, 
-        "Select Number of Days", 
-        daysOptions, 
-        days, 
-        setDays
+        startDateModalVisible, 
+        setStartDateModalVisible, 
+        "Select Start Date", 
+        dateOptions, 
+        startDate, 
+        setStartDate
+      )}
+
+      {renderDropdownModal(
+        endDateModalVisible, 
+        setEndDateModalVisible, 
+        "Select End Date", 
+        dateOptions, 
+        endDate, 
+        setEndDate
       )}
 
       {renderDropdownModal(
@@ -332,6 +497,41 @@ export default function CreateItinerary() {
         vehicle, 
         setVehicle
       )}
+
+      {/* Generated Plan Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={planModalVisible}
+        onRequestClose={() => setPlanModalVisible(false)}
+      >
+        <View style={styles.planModalOverlay}>
+          <View style={styles.planModalContent}>
+            <View style={styles.planModalHeader}>
+              <Text style={styles.planModalTitle}>Your Trip Plan</Text>
+              <TouchableOpacity onPress={() => setPlanModalVisible(false)}>
+                <Ionicons name="close" size={24} color="#333" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.planContent}>
+              <Text style={styles.planText}>{plan}</Text>
+            </ScrollView>
+
+            <View style={styles.planModalButtonContainer}>
+              <TouchableOpacity 
+                style={styles.planModalButton}
+                onPress={() => {
+                  setPlanModalVisible(false);
+                  handleSaveItinerary();
+                }}
+              >
+                <Text style={styles.planModalButtonText}>Save Plan & Create Trip</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -368,7 +568,6 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 100,
-    paddingTop: 70, // Add padding to account for the back button
   },
   inputContainer: {
     marginBottom: 20,
@@ -421,6 +620,20 @@ const styles = StyleSheet.create({
   dropdownIcon: {
     marginLeft: 10,
   },
+  // For the description text area
+  textAreaContainer: {
+    backgroundColor: '#f2f2f2',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  textArea: {
+    fontFamily: 'outfit',
+    fontSize: 16,
+    minHeight: 100,
+    color: '#333',
+  },
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
@@ -460,6 +673,20 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
   },
+  generatePlanButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
+    flexDirection: 'row',
+  },
+  generatePlanText: {
+    fontFamily: 'outfit-medium',
+    fontSize: 16,
+    color: 'white',
+  },
   actionButtonsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -483,7 +710,7 @@ const styles = StyleSheet.create({
     color: '#333',
     marginLeft: 8,
   },
-  generatePlanButton: {
+  createTripButton: {
     backgroundColor: '#3478F6',
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -492,9 +719,61 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flex: 1,
   },
-  generatePlanText: {
+  createTripText: {
     fontFamily: 'outfit-medium',
     fontSize: 14,
+    color: 'white',
+  },
+  // Plan Modal Styles
+  planModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 20,
+  },
+  planModalContent: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    paddingBottom: 20,
+    maxHeight: '80%',
+  },
+  planModalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f2f2f2',
+  },
+  planModalTitle: {
+    fontFamily: 'outfit-bold',
+    fontSize: 18,
+    color: '#333',
+  },
+  planContent: {
+    padding: 20,
+    maxHeight: 400,
+  },
+  planText: {
+    fontFamily: 'outfit',
+    fontSize: 16,
+    color: '#333',
+    lineHeight: 24,
+  },
+  planModalButtonContainer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: '#f2f2f2',
+  },
+  planModalButton: {
+    backgroundColor: '#3478F6',
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  planModalButtonText: {
+    fontFamily: 'outfit-medium',
+    fontSize: 16,
     color: 'white',
   },
 });
