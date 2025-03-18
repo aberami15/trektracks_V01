@@ -189,6 +189,21 @@ export default function Home() {
           </ScrollView>
         </View>
 
+        <View style={styles.aiPlannerContainer}>
+          <TouchableOpacity 
+            style={styles.aiPlannerButton}
+            onPress={() => router.push('/ai-planning')}
+          >
+            <Ionicons name="bulb-outline" size={28} color="white" />
+            <View style={styles.aiPlannerTextContainer}>
+              <Text style={styles.aiPlannerTitle}>AI Trip Planner</Text>
+              <Text style={styles.aiPlannerSubtitle}>Let AI create your perfect itinerary</Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="white" />
+          </TouchableOpacity>
+        </View>
+
+
         {/* recommendations */}
         <View style={[styles.sectionContainer, { marginBottom: 80 }]}>
           <View style={styles.sectionHeader}>
@@ -486,5 +501,35 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#777',
     marginTop: 4,
+  },
+  aiPlannerContainer: {
+    marginBottom: 20,
+    paddingHorizontal: 20,
+  },
+  aiPlannerButton: {
+    backgroundColor: '#3478F6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 15,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  aiPlannerTextContainer: {
+    flex: 1,
+    marginLeft: 15,
+  },
+  aiPlannerTitle: {
+    color: 'white',
+    fontFamily: 'outfit-bold',
+    fontSize: 18,
+  },
+  aiPlannerSubtitle: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontFamily: 'outfit',
+    fontSize: 14,
   },
 });
