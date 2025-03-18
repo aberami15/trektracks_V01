@@ -1,26 +1,55 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
-import React, { useEffect } from 'react'
+import React, { Component, useEffect , useState} from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function TripItinerary() {
   const navigation = useNavigation();
   const router = useRouter();
+  const [trips, setTrips] = useState(null);
 
   useEffect(() => {
     navigation.setOptions({
       headerShown: false  // Changed from true to false to avoid conflicts
-    })
+    }),
+    fetchTrips();
   }, []);
 
   const navigateToHome = () => {
     router.push('/home');
   }
 
+
+
   const navigateToExpenseTracker = () => {
     // Navigate to the budget planner page
     router.push('/budget-planner');
   }
+
+  const fetchTrips = async () =>{
+    try{
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/trips/mytrip`,{
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+      });
+      console.log(response)
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      setTrips(response)
+      
+      const data = await response.json();
+    }
+    catch (error) {
+      console.error('Error fetching place details:', error);
+      // setError('An error occurred while fetching place details');
+    };;
+  }
+
 
   const navigateToFav = () => {
     // Navigate to favorites page
@@ -39,7 +68,7 @@ export default function TripItinerary() {
 
   const handleCreateItinerary = () => {
     // Navigate to create itinerary form
-    router.push('/create-itinerary');
+    router.push('/create-trip');
   }
 
   return (

@@ -42,14 +42,13 @@ const onSignIn = async() => {
     });
     console.log(response)
     if (!response.ok) {
-      const errorData =await response.json();
+      //const errorData =await response.message;
       throw new Error(errorData.message || 'Authentication failed');
     }
     console.log(response)
     const data = await response.json();
-    console.log(response)
     const token = data.token;
-    
+    console.log(token)
     // Store the token - for web
     localStorage.setItem('token', token);
     router.replace('/home');

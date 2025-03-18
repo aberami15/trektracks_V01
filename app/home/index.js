@@ -117,47 +117,36 @@ export default function Home() {
   }
 
   const handleProfilePress = () => {
-    // Navigate to profile page
     router.push('/profile');
   }
 
   const navigateToHome = () => {
-    // Stay on home page or navigate to it if coming from elsewhere
     router.push('/home');
   }
 
   const navigateToItinerary = () => {
-    // Navigate to trip itinerary page
     router.push('/trip-itinerary');
   }
 
   const navigateToFav = () => {
-    // Navigate to trip Favoutites page
     router.push('/save-favourite');
   }
 
   const navigateToRecentTrips = () => {
-    // Navigate to recent trips page
     router.push('/recent-trips');
   }
 
-  // Function to format category name for display
+
   const formatCategoryName = (category) => {
     if (category === 'ancient-places') return 'Ancient Place';
     return category.charAt(0).toUpperCase() + category.slice(1);
   };
 
-  // Function to handle image paths
   const getCategoryImage = (category) => {
-    // This is a mapping to handle any special cases with image names
-    const imageMapping = {
-      'ancient-places': 'dalada' // If the image name differs from the route name
-    };
-    
+
+    const imageMapping = { 'ancient-places': 'dalada' };
     const imageName = imageMapping[category] || category;
-    
     try {
-      // Dynamic requires aren't supported in React Native, so we need to map each case
       switch (imageName) {
         case 'beach': return require('../../assets/images/beach.jpg');
         case 'mountain': return require('../../assets/images/mountain.webp');
@@ -168,11 +157,11 @@ export default function Home() {
         case 'dalada': return require('../../assets/images/dalada.jpg');
         case 'waterfall': return require('../../assets/images/waterfall.jpg');
         case 'island': return require('../../assets/images/island.jpg');
-        default: return require('../../assets/images/beach.jpg'); // Fallback
+        default: return require('../../assets/images/beach.jpg');
       }
     } catch (error) {
       console.error(`Error loading image for ${category}:`, error);
-      return require('../../assets/images/beach.jpg'); // Fallback image
+      return require('../../assets/images/beach.jpg');
     }
   };
 
@@ -220,19 +209,17 @@ export default function Home() {
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Popular Destinations</Text>
             <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text>
+              <Text style={styles.seeAllText}>See all</Text> {/*have to check*/}
             </TouchableOpacity>
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.destinationsScroll}>
             {loading ? (
-              // Show loading spinner while fetching categories
               <View style={styles.loadingContainer}>
                 <ActivityIndicator size="large" color="#3478F6" />
                 <Text style={styles.loadingText}>Loading categories...</Text>
               </View>
             ) : categories.length > 0 ? (
-              // Dynamically render category cards
               categories.map((category, index) => (
                 <TouchableOpacity 
                   key={index}
@@ -247,7 +234,6 @@ export default function Home() {
                 </TouchableOpacity>
               ))
             ) : (
-              // Show message if no categories found
               <View style={styles.loadingContainer}>
                 <Text style={styles.errorText}>No categories available</Text>
               </View>

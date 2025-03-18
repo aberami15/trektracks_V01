@@ -17,6 +17,7 @@ export default function PlaceDetails() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [text, setText] = useState('');
+  const [review, setReview] = useState('');
   
 
   useEffect(() => {
@@ -172,6 +173,29 @@ export default function PlaceDetails() {
     );
   }
 
+  const addReview = async() => {
+    if(review == '') {
+      return ToastAndroid.show('Please enter review', ToastAndroid.LONG);
+    }
+    
+    try {
+      const response = await fetch(`http://localhost:5000/api/places/review/${place._id}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          reviews: review,
+        })
+      });
+      console.log("Creating review:", response);
+      setReview('');
+    } catch (error) {
+      console.error('review save error:', error);
+      ToastAndroid.show(error.message || "review save failed", ToastAndroid.LONG);
+    }
+  };
+
   // Get image source - use first image from API or fallback to local image
   const imageSource = place.images && place.images.length > 0 
     ? { uri: place.images[0] }
@@ -316,16 +340,20 @@ export default function PlaceDetails() {
           <TextInput
             style={styles.textInput}
             placeholder="Write your review here..."
-            value={text}
-            onChangeText={(newText) => setText(newText)}
+            value={review}
+            onChangeText={setReview}
             multiline
           />
         </View>
 
           
         {/* Add Review Button */}
-        <TouchableOpacity style={styles.addReview}>
-          <Text style={styles.addReviewText}>Add your review</Text>
+        <TouchableOpacity style={styles.addReview} 
+        onPress={addReview}
+        >
+          <Text style={styles.addReviewText}
+
+          >Add your review</Text>
           <Ionicons name="add-circle-outline" size={20} color="black" style={styles.addIcon} />
         </TouchableOpacity>
         
