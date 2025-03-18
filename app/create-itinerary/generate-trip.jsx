@@ -13,7 +13,7 @@ export default function GenerateTrip({ route }) {
     setLoading(true);
     setError(null); // Clear previous errors
     try {
-      const response = await axios.post('http://your-backend-url.com/api/generate-trip', {
+      const response = await axios.post('http://localhost:5000/api/generate-trip', {
         destination,
         days,
         travelerCategory,
