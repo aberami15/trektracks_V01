@@ -384,7 +384,7 @@ export default function AiTripPlanner() {
         
         <TouchableOpacity 
           style={styles.footerItem}
-          onPress={() => router.push('/trip-itinerary')}
+          onPress={() => router.push('/create-trip')}
         >
           <Ionicons name="calendar" size={24} color="#777" />
           <Text style={styles.footerText}>Itinerary</Text>
