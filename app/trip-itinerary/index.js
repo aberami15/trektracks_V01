@@ -1,17 +1,19 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList, Image, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function TripItinerary() {
   const navigation = useNavigation();
   const router = useRouter();
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     navigation.setOptions({
-      headerShown: false  // Changed from true to false to avoid conflicts
+      headerShown: false
     });
     fetchTrips();
   }, []);
@@ -27,32 +29,41 @@ export default function TripItinerary() {
 
   const fetchTrips = async () => {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/trips/mytrip`, {
+      setLoading(true);
+      setError(null);
+      
+      // Get the token from AsyncStorage
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+      
+      const response = await fetch('http://10.31.25.1:5000/api/trips/mytrip', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
       });
-        
+      
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
       }
-        
+      
       const data = await response.json();
-      console.log("Fetched trips:", data);
-        
-      // Make sure to set the correct data structure
+      
       if (data && data.data) {
         setTrips(data.data);
       } else {
-        console.warn("Unexpected data structure:", data);
+        // No trips or empty data
         setTrips([]);
       }
     } catch (error) {
       console.error('Error fetching trips:', error);
-      setTrips([]);
+      setError(error.message);
+      // Don't show alert, just set the error state
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -73,76 +84,14 @@ export default function TripItinerary() {
 
   const handleCreateItinerary = () => {
     // Navigate to create itinerary form
-    router.push('/ai-planning');
+    router.push('/create-trip');
   }
-
-  const handleViewTrip = (tripId) => {
-    // Navigate to trip plan view
-    router.push(`/trip-plan?id=${tripId}`);
-  }
-
-  const renderTripItem = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.tripCard}
-      onPress={() => handleViewTrip(item._id)}
-    >
-      <View style={styles.tripCardHeader}>
-        <Text style={styles.tripDestination}>{item.from} → {item.destination}</Text>
-        <View style={styles.dateContainer}>
-          <Ionicons name="calendar-outline" size={16} color="#666" />
-          <Text style={styles.tripDate}>
-            {new Date(item.startDate).toLocaleDateString()} - {new Date(item.endDate).toLocaleDateString()}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.tripDetails}>
-        {item.travelerCategory && (
-          <View style={styles.tripDetailItem}>
-            <Ionicons name="people-outline" size={16} color="#666" />
-            <Text style={styles.detailText}>{item.travelerCategory}</Text>
-          </View>
-        )}
-        
-        {item.tripType && (
-          <View style={styles.tripDetailItem}>
-            <Ionicons name="compass-outline" size={16} color="#666" />
-            <Text style={styles.detailText}>{item.tripType}</Text>
-          </View>
-        )}
-        
-        {item.vehicle && (
-          <View style={styles.tripDetailItem}>
-            <Ionicons name="car-outline" size={16} color="#666" />
-            <Text style={styles.detailText}>{item.vehicle}</Text>
-          </View>
-        )}
-        
-        {item.budget && (
-          <View style={styles.tripDetailItem}>
-            <Ionicons name="wallet-outline" size={16} color="#666" />
-            <Text style={styles.detailText}>LKR {Number(item.budget).toLocaleString()}</Text>
-          </View>
-        )}
-      </View>
-
-      <View style={styles.tripCardFooter}>
-        <TouchableOpacity 
-          style={styles.viewButton}
-          onPress={() => handleViewTrip(item._id)}
-        >
-          <Text style={styles.viewButtonText}>View Details</Text>
-          <Ionicons name="chevron-forward" size={16} color="#3478F6" />
-        </TouchableOpacity>
-      </View>
-    </TouchableOpacity>
-  );
 
   return (
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Trips</Text>
+        <Text style={styles.headerTitle}>My Trip</Text>
         <TouchableOpacity 
           onPress={navigateToProfile} 
           style={styles.profileButton}
@@ -152,21 +101,56 @@ export default function TripItinerary() {
       </View>
 
       {/* Content */}
-      <View style={styles.content}>
+      <ScrollView style={styles.content}>
         {loading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#3478F6" />
             <Text style={styles.loadingText}>Loading trips...</Text>
           </View>
+        ) : error ? (
+          <View style={styles.errorContainer}>
+            <Ionicons name="alert-circle-outline" size={60} color="#FF3B30" />
+            <Text style={styles.errorTitle}>Oops!</Text>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity 
+              style={styles.retryButton}
+              onPress={fetchTrips}
+            >
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
         ) : trips.length > 0 ? (
-          <FlatList
-            data={trips}
-            renderItem={renderTripItem}
-            keyExtractor={item => item._id}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={styles.tripsList}
-          />
+          // Render trips here
+          <View>
+            <Text style={styles.sectionTitle}>Your Upcoming Trips</Text>
+            {trips.map((trip, index) => (
+              <View key={index} style={styles.tripCard}>
+                <Text style={styles.tripDestination}>{trip.destination}</Text>
+                <Text style={styles.tripDate}>
+                  {new Date(trip.startDate).toLocaleDateString()} - {new Date(trip.endDate).toLocaleDateString()}
+                </Text>
+                <Text style={styles.tripType}>{trip.tripType || 'Trip'}</Text>
+                
+                <View style={styles.tripButtonsContainer}>
+                  <TouchableOpacity 
+                    style={styles.tripButton}
+                    onPress={() => router.push('/plan-display')}
+                  >
+                    <Text style={styles.tripButtonText}>View Plan</Text>
+                  </TouchableOpacity>
+                  
+                  <TouchableOpacity 
+                    style={[styles.tripButton, styles.budgetButton]}
+                    onPress={() => router.push('/budget-planner')}
+                  >
+                    <Text style={styles.tripButtonText}>Budget</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            ))}
+          </View>
         ) : (
+          // Empty state
           <View style={styles.emptyState}>
             <Ionicons name="calendar-outline" size={80} color="#ccc" />
             <Text style={styles.emptyTitle}>No Upcoming Trips</Text>
@@ -181,17 +165,7 @@ export default function TripItinerary() {
             </TouchableOpacity>
           </View>
         )}
-      </View>
-
-      {/* Create Trip FAB */}
-      {trips.length > 0 && (
-        <TouchableOpacity 
-          style={styles.fabButton}
-          onPress={handleCreateItinerary}
-        >
-          <Ionicons name="add" size={30} color="white" />
-        </TouchableOpacity>
-      )}
+      </ScrollView>
 
       {/* Footer Navigation */}
       <View style={styles.footer}>
@@ -256,19 +230,103 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    marginBottom: 60, // Space for the footer
+    marginBottom: 60,
   },
   loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
+    padding: 50,
     alignItems: 'center',
-    marginTop: 50,
   },
   loadingText: {
+    marginTop: 10,
     fontFamily: 'outfit',
     fontSize: 16,
     color: '#666',
-    marginTop: 10,
+  },
+  errorContainer: {
+    padding: 50,
+    alignItems: 'center',
+  },
+  errorTitle: {
+    fontFamily: 'outfit-bold',
+    fontSize: 20,
+    color: '#333',
+    marginTop: 15,
+    marginBottom: 5,
+  },
+  errorText: {
+    fontFamily: 'outfit',
+    fontSize: 16,
+    color: '#666',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#3478F6',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+  },
+  retryButtonText: {
+    fontFamily: 'outfit-medium',
+    fontSize: 16,
+    color: 'white',
+  },
+  sectionTitle: {
+    fontFamily: 'outfit-medium',
+    fontSize: 20,
+    color: '#333',
+    marginBottom: 15,
+  },
+  tripCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  tripDestination: {
+    fontFamily: 'outfit-bold',
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 5,
+  },
+  tripDate: {
+    fontFamily: 'outfit',
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 5,
+  },
+  tripType: {
+    fontFamily: 'outfit',
+    fontSize: 14,
+    color: '#3478F6',
+    marginBottom: 15,
+  },
+  tripButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  tripButton: {
+    backgroundColor: '#3478F6',
+    paddingVertical: 8,
+    paddingHorizontal: 15,
+    borderRadius: 8,
+    flex: 1,
+    marginRight: 10,
+    alignItems: 'center',
+  },
+  budgetButton: {
+    backgroundColor: '#4CAF50',
+    marginRight: 0,
+  },
+  tripButtonText: {
+    fontFamily: 'outfit-medium',
+    fontSize: 14,
+    color: 'white',
   },
   emptyState: {
     alignItems: 'center',
@@ -291,7 +349,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   createButton: {
-    backgroundColor: '#3478F6',
+    backgroundColor: 'black',
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 12,
@@ -300,91 +358,6 @@ const styles = StyleSheet.create({
     fontFamily: 'outfit-medium',
     color: 'white',
     fontSize: 16,
-  },
-  tripsList: {
-    paddingBottom: 80,
-  },
-  tripCard: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    marginBottom: 15,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  tripCardHeader: {
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f2',
-  },
-  tripDestination: {
-    fontFamily: 'outfit-bold',
-    fontSize: 18,
-    color: '#333',
-    marginBottom: 5,
-  },
-  dateContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  tripDate: {
-    fontFamily: 'outfit',
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 5,
-  },
-  tripDetails: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 15,
-    backgroundColor: '#f9f9f9',
-  },
-  tripDetailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    width: '50%',
-    marginBottom: 8,
-  },
-  detailText: {
-    fontFamily: 'outfit',
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 5,
-  },
-  tripCardFooter: {
-    padding: 15,
-    borderTopWidth: 1,
-    borderTopColor: '#f2f2f2',
-    alignItems: 'flex-end',
-  },
-  viewButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  viewButtonText: {
-    fontFamily: 'outfit-medium',
-    fontSize: 14,
-    color: '#3478F6',
-    marginRight: 5,
-  },
-  fabButton: {
-    position: 'absolute',
-    right: 20,
-    bottom: 80,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: '#3478F6',
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 5,
   },
   footer: {
     position: 'absolute',
