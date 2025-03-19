@@ -65,6 +65,32 @@ export default function Home() {
 
       {/* Main Scrollable Content */}
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+
+        {/* AI Trip Planner Card */}
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>AI Travel Assistant</Text>
+        </View>
+  
+        <TouchableOpacity 
+          style={styles.aiPlannerCard}
+          onPress={() => router.push('/ai-trip-planner')}
+        >
+          <View style={styles.aiPlannerContent}>
+            <View style={styles.aiPlannerIcon}>
+              <Ionicons name="bulb" size={28} color="white" />
+            </View>
+            <View style={styles.aiPlannerTextContainer}>
+              <Text style={styles.aiPlannerTitle}>AI Trip Planner</Text>
+              <Text style={styles.aiPlannerDescription}>
+                Generate a personalized travel itinerary with our AI assistant
+              </Text>
+            </View>
+            <Ionicons name="chevron-forward" size={24} color="#3478F6" />
+          </View>
+        </TouchableOpacity>
+      </View>
+
         {/* Popular Destinations Section */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
@@ -522,14 +548,48 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 15,
   },
-  aiPlannerTitle: {
-    color: 'white',
-    fontFamily: 'outfit-bold',
-    fontSize: 18,
-  },
   aiPlannerSubtitle: {
     color: 'rgba(255, 255, 255, 0.8)',
     fontFamily: 'outfit',
     fontSize: 14,
+  },
+  aiPlannerCard: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 15,
+    marginBottom: 15,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  aiPlannerContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  aiPlannerIcon: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: '#3478F6',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+  },
+  aiPlannerTextContainer: {
+    flex: 1,
+  },
+  aiPlannerTitle: {
+    fontFamily: 'outfit-medium',
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 4,
+  },
+  aiPlannerDescription: {
+    fontFamily: 'outfit',
+    fontSize: 14,
+    color: '#666',
+    lineHeight: 18,
   },
 });
