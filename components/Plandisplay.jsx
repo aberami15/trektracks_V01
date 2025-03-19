@@ -14,9 +14,10 @@ export default function PlanDisplay({ plan }) {
   // Format the plan text by splitting it into sections
   const formatPlan = (planText) => {
     // Split the plan into sections by day
-    const sections = planText.split(/Day \d+:/g);
+    const dayRegex = /Day \d+:/g;
+    const sections = planText.split(dayRegex);
     
-    // If there are no sections (unlikely), just return the text
+    // If there are no day sections, just return the text as is
     if (sections.length <= 1) {
       return [{ title: 'Your Trip Plan', content: planText }];
     }
@@ -26,11 +27,11 @@ export default function PlanDisplay({ plan }) {
     const days = [];
     
     // Get day headings using regex
-    const dayHeadings = planText.match(/Day \d+:/g) || [];
+    const dayHeadings = planText.match(dayRegex) || [];
     
     // Combine the day headings with their content
     for (let i = 1; i < sections.length; i++) {
-      const dayNumber = dayHeadings[i-1];
+      const dayNumber = dayHeadings[i-1] || `Day ${i}:`;
       days.push({
         title: dayNumber,
         content: sections[i]
