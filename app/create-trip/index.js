@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, SafeAreaView, TextInput, ScrollView,
-  ToastAndroid, KeyboardAvoidingView, Platform, Modal, FlatList, Image, Alert
+  ToastAndroid, KeyboardAvoidingView, Platform, Modal, FlatList, Image, Alert, ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
@@ -61,179 +61,95 @@ export default function CreateTrip() {
 
   const dateOptions = generateDateOptions();
 
-  // Helper function to calculate days between dates
-  const calculateDays = (start, end) => {
-    if (!start || !end) return "1";
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const diffTime = Math.abs(endDate - startDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
-    return diffDays.toString();
-  };
-
   const handleSaveItinerary = async () => {
     if (!destination) {
       ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
       return;
     }
-
-    if (!startDate) {
-      ToastAndroid.show('Please select start date', ToastAndroid.SHORT);
+  
+    if (!startDate || !endDate) {
+      ToastAndroid.show('Please select dates', ToastAndroid.SHORT);
       return;
     }
-
-    if (!endDate) {
-      ToastAndroid.show('Please select end date', ToastAndroid.SHORT);
-      return;
-    }
-
+  
     if (!currentLocation) {
       ToastAndroid.show('Please enter your current location', ToastAndroid.SHORT);
       return;
     }
-
+  
     try {
       setLoading(true);
-      // Get token (using await with AsyncStorage)
-      let token;
-      try {
-        token = await AsyncStorage.getItem('token');
-      } catch (error) {
-        console.error("Error getting token:", error);
-        token = null;
-      }
-
-      console.log("Generating AI plan with:", {
-        travelerCategory: travelerCategory || 'Solo',
-        tripType: tripType || 'General',
-        destination: destination,
-        from: currentLocation,
-        days: calculateDays(startDate, endDate),
-        budget: budget || '50000',
-        vehicle: vehicle || 'Public Transport'
-      });
-
-      // DIRECT HTTP call instead of using a helper
-      const apiUrl = Platform.select({
-        // Use 10.0.2.2 for Android emulator
-        android: `http://10.0.2.2:5000`,
-        // Use localhost for iOS
-        ios: `http://localhost:5000`,
-        // For testing on physical devices, use your computer's IP
-        default: `http://${SERVER_IP}:5000`
-      });
-
-      console.log(`Using API URL: ${apiUrl}`);
-
-      // First attempt to ping server to test connectivity
-      try {
-        const pingResponse = await fetch(`${apiUrl}/test`, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        
-        if (pingResponse.ok) {
-          console.log("Server connectivity test successful");
-        } else {
-          console.error("Server ping failed:", await pingResponse.text());
-        }
-      } catch (pingError) {
-        console.error("Server ping error:", pingError);
-        Alert.alert(
-          "Server Connection Error",
-          `Cannot connect to server. Make sure your backend is running and check the IP address: ${apiUrl}`
-        );
-        setLoading(false);
-        return;
-      }
-
-      // Now call the Gemini API endpoint
-      const response = await fetch(`${apiUrl}/api/gemini/generate-plan`, {
+      const token = localStorage.getItem('token');
+      
+      // Call the Gemini API endpoint to generate a plan
+      const response = await fetch('http://localhost:5000/api/gemini/generate-plan', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': token ? `Bearer ${token}` : ''
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          travelerCategory: travelerCategory || 'Solo',
-          tripType: tripType || 'General',
           destination: destination,
           from: currentLocation,
           days: calculateDays(startDate, endDate),
-          budget: budget || '50000',
-          vehicle: vehicle || 'Public Transport'
+          travelerCategory: travelerCategory || 'Solo',
+          tripType: tripType || 'General',
+          vehicle: vehicle || 'Public Transport',
+          budget: budget || 'Moderate'
         })
       });
-
+  
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`API Error: ${response.status} - ${errorText}`);
-        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
+        throw new Error(`API request failed with status ${response.status}`);
       }
-
+  
       const data = await response.json();
       console.log("Generated plan:", data);
       
-      // Save the trip information
-      const tripData = {
-        destination: destination,
-        startDate: startDate,
-        from: currentLocation,
-        endDate: endDate,
-        travelCategory: travelerCategory || 'Solo',
-        tripType: tripType || 'General',
-        vehicle: vehicle || 'Public Transport',
-        budget: budget || '50000',
-        description: description || ''
-      };
-
-      try {
-        const tripResponse = await fetch(`${apiUrl}/api/trips`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': token ? `Bearer ${token}` : ''
-          },
-          body: JSON.stringify(tripData)
+      // Store the trip information
+      const tripResponse = await fetch('http://localhost:5000/api/trips', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          destination: destination,
+          startDate: startDate,
+          from: currentLocation,
+          endDate: endDate,
+          travelCategory: travelerCategory,
+          tripType: tripType,
+          vehicle: vehicle,
+          budget: budget,
+          description: description
+        })
+      });
+  
+      if (tripResponse.ok) {
+        // Navigate to the trip display page with the generated plan
+        router.push({
+          pathname: '/recent-trips',
+          params: { plan: encodeURIComponent(JSON.stringify(data.data.plan)) }
         });
-
-        const tripResult = await tripResponse.json();
-        console.log("Trip saved:", tripResult);
-      } catch (tripError) {
-        console.error("Error saving trip:", tripError);
-        // Continue anyway to show the generated plan
-      }
-
-      // Navigate with the plan data - using a simplified approach
-      if (data && data.data && data.data.plan) {
-        try {
-          // Store plan in AsyncStorage for retrieval
-          await AsyncStorage.setItem('generatedPlan', data.data.plan);
-          
-          // Navigate to plan display page
-          router.push('/plan-display');
-        } catch (navError) {
-          console.error("Navigation error:", navError);
-          Alert.alert(
-            "Success, but navigation failed",
-            "Your plan was generated successfully, but we couldn't navigate to the display page."
-          );
-        }
       } else {
-        Alert.alert(
-          "Generation Error",
-          "Plan was generated but the response format was unexpected."
-        );
+        throw new Error("Failed to save trip");
       }
     } catch (error) {
       console.error("Error creating itinerary:", error);
-      Alert.alert(
-        "Error",
-        `Failed to create itinerary: ${error.message}`
-      );
+      ToastAndroid.show('Failed to create itinerary', ToastAndroid.LONG);
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Helper function to calculate number of days between dates
+  const calculateDays = (start, end) => {
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays.toString();
   };
 
   const renderDropdownItem = (item, setSelected, closeModal) => (
