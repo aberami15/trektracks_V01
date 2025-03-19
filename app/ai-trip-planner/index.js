@@ -76,9 +76,10 @@ export default function AiTripPlanner() {
       
       // Configure API URL based on environment
       const API_URL = Platform.select({
-        android: 'http://10.31.25.1:5000', // Your local IP address
-        ios: 'http://10.31.25.1:5000',     // Your local IP address
-        default: 'http://localhost:5000'    // For web testing
+        android: 'http://10.0.2.2:5000', // This is standard for Android emulator to reach host
+        ios: 'http://localhost:5000',    // For iOS simulator
+        web: 'http://localhost:5000',    // For web
+        default: 'http://localhost:5000' // Fallback
       });
       
       // Make API call to Gemini endpoint
