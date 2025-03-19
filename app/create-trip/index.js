@@ -8,16 +8,17 @@ import {
   TextInput, 
   ScrollView, 
   ToastAndroid,
-  KeyboardAvoidingView,
+  KeyboardAvoidingView, 
   Platform, 
   Modal, 
-  FlatList,
+  FlatList, 
   Image,
   Alert,
   ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function CreateTrip() {
   const navigation = useNavigation();
@@ -70,38 +71,32 @@ export default function CreateTrip() {
 
   const dateOptions = generateDateOptions();
 
-  // Helper function to calculate days between dates
-  const calculateDays = (start, end) => {
-    if (!start || !end) return 1;
-    
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const diffTime = Math.abs(endDate - startDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    return diffDays || 1; // Default to 1 day if calculation fails
-  };
-
   const handleSaveItinerary = async () => {
     if (!destination) {
-      ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
+      Alert.alert('Missing Information', 'Please enter a destination');
       return;
     }
 
     if (!startDate) {
-      ToastAndroid.show('Please select start date', ToastAndroid.SHORT);
+      Alert.alert('Missing Information', 'Please select start date');
       return;
     }
 
     if (!endDate) {
-      ToastAndroid.show('Please select end date', ToastAndroid.SHORT);
+      Alert.alert('Missing Information', 'Please select end date');
       return;
     }
 
     try {
+      // Get token from AsyncStorage
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+      
       setLoading(true);
-      const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/gemini/generate-plan', {
+      
+      const response = await fetch('http://10.31.25.1:5000/api/trips', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -119,18 +114,20 @@ export default function CreateTrip() {
           description: description
         })
       });
-      
+
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || `API request failed with status ${response.status}`);
+        throw new Error(errorData.message || `Request failed with status ${response.status}`);
       }
 
-      console.log("Trip saved successfully");
-      return true;
+      const data = await response.json();
+      console.log("Trip created successfully:", data);
+      return data;
+      
     } catch (error) {
-      console.error("Error creating trip:", error);
-      ToastAndroid.show('Failed to create trip', ToastAndroid.LONG);
-      return false;
+      console.error("Error creating itinerary: ", error);
+      Alert.alert('Error', 'Failed to create itinerary: ' + error.message);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -176,31 +173,42 @@ export default function CreateTrip() {
     </Modal>
   );
 
+  // Calculate days between two dates
+  const calculateDays = (start, end) => {
+    if (!start || !end) return "7"; // Default to 7 days
+    
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays.toString() || "7";
+  };
+
   const handleGeneratePlan = async () => {
     try {
-      // First save the trip data
-      const saveSuccess = await handleSaveItinerary();
-      if (!saveSuccess) {
-        throw new Error('Failed to save trip data');
-      }
+      // First save the itinerary data
+      const tripData = await handleSaveItinerary();
       
-      // Show loading state
       setLoading(true);
       
       // Prepare data for the Gemini API
-      const token = localStorage.getItem('token');
       const tripDetails = {
         travelerCategory: travelerCategory || "Solo",
         tripType: tripType || "Adventure",
         destination: destination,
         from: currentLocation || "Colombo",
-        days: calculateDays(startDate, endDate).toString(),
+        days: calculateDays(startDate, endDate),
         budget: budget || "50000",
         vehicle: vehicle || "Car"
       };
       
+      console.log("Generating AI plan with:", JSON.stringify(tripDetails));
+      
+      // Get token from AsyncStorage
+      const token = await AsyncStorage.getItem('token');
+      
       // Call the Gemini API
-      const response = await fetch('http://localhost:5000/api/gemini/generate-plan', {
+      const response = await fetch('http://10.31.25.1:5000/api/gemini/generate-plan', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -215,24 +223,25 @@ export default function CreateTrip() {
       }
       
       const data = await response.json();
+      console.log("AI Plan generated:", data);
       
-      // Store the generated plan in localStorage (temporary solution)
+      // Save the generated plan to AsyncStorage
       if (data && data.data && data.data.plan) {
-        localStorage.setItem('generatedPlan', data.data.plan);
+        await AsyncStorage.setItem('generatedPlan', data.data.plan);
         
-        // Navigate to a plan display page
+        // Navigate to plan display page
         router.push('/plan-display');
       } else {
-        throw new Error('Received invalid plan data from API');
+        throw new Error('Invalid plan data received from API');
       }
     } catch (error) {
       console.error("Error generating plan:", error);
       Alert.alert(
-        "Generation Error",
-        "Failed to generate travel plan. Please try again.",
+        "Error",
+        "Failed to generate trip plan: " + error.message,
         [{ text: "OK" }]
       );
-      // Navigate anyway to avoid user being stuck
+      // Navigate to budget planner anyway
       router.push('/budget-planner');
     } finally {
       setLoading(false);
@@ -241,16 +250,26 @@ export default function CreateTrip() {
 
   const handleSaveForLater = () => {
     if (!destination) {
-      ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
+      Alert.alert('Missing Information', 'Please enter a destination');
       return;
     }
 
-    ToastAndroid.show('Saved for later!', ToastAndroid.SHORT);
+    Alert.alert('Success', 'Saved for later!');
     // Implement save for later functionality
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Loading Overlay */}
+      {loading && (
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color="#3478F6" />
+          <Text style={styles.loadingText}>
+            {destination ? `Planning your trip to ${destination}...` : 'Processing...'}
+          </Text>
+        </View>
+      )}
+      
       {/* Back Button to Homepage */}
       <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
         <Ionicons name="arrow-back" size={20} color="#333" />
@@ -420,11 +439,7 @@ export default function CreateTrip() {
               onPress={handleGeneratePlan}
               disabled={loading}
             >
-              {loading ? (
-                <ActivityIndicator size="small" color="white" />
-              ) : (
-                <Text style={styles.generatePlanText}>Create Trip</Text>
-              )}
+              <Text style={styles.generatePlanText}>Create Trip</Text>
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -483,6 +498,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 1000,
+  },
+  loadingText: {
+    color: 'white',
+    marginTop: 15,
+    fontSize: 16,
+    fontFamily: 'outfit-medium',
+    textAlign: 'center',
+    paddingHorizontal: 30,
   },
   backButton: {
     position: 'absolute',
