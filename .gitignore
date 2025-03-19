@@ -37,3 +37,6 @@ yarn-error.*
 
 app-example
 /SDGP_TrekTracks
+android/.gradle/8.12/checksums/checksums.lock
+android/.gradle/8.12/checksums/md5-checksums.bin
+android/.gradle/8.12/checksums/sha1-checksums.bin
