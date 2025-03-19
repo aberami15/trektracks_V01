@@ -36,7 +36,7 @@ export default function Home() {
 
   const navigateToItinerary = () => {
     // Navigate to trip itinerary page
-    router.push('/trip-itinerary');
+    router.push('/create-trip');
   }
 
   const navigateToRecentTrips = () => {
