@@ -1,13 +1,13 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native'
 import React, { useEffect, useState } from 'react'
-import { useNavigation, useRouter } from 'expo-router'
+import { useNavigation, useRouter, useLocalSearchParams } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PlanDisplay() {
   const navigation = useNavigation();
   const router = useRouter();
-  const [plan, setPlan] = useState('');
+  const params = useLocalSearchParams();
+  const [plan, setPlan] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,22 +15,40 @@ export default function PlanDisplay() {
       headerShown: false
     });
     
-    // Load the plan from AsyncStorage
-    const loadPlan = async () => {
+    // Get plan from params or fetch from API
+    if (params.plan) {
       try {
-        const savedPlan = await AsyncStorage.getItem('generatedPlan');
-        if (savedPlan) {
-          setPlan(savedPlan);
-        }
+        const decodedPlan = JSON.parse(decodeURIComponent(params.plan));
+        setPlan(decodedPlan);
       } catch (error) {
-        console.error("Error loading plan:", error);
-      } finally {
-        setLoading(false);
+        console.error("Error parsing plan:", error);
       }
-    };
+    } else if (params.planId) {
+      fetchPlanById(params.planId);
+    }
     
-    loadPlan();
-  }, []);
+    setLoading(false);
+  }, [params]);
+
+  const fetchPlanById = async (planId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:5000/api/ai-plan/${planId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) throw new Error('Failed to fetch plan');
+      
+      const data = await response.json();
+      setPlan(data.data.generatedPlan.content);
+    } catch (error) {
+      console.error("Error fetching plan:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
