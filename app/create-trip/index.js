@@ -1,24 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, 
-  Text, 
-  StyleSheet, 
-  TouchableOpacity, 
-  SafeAreaView,
-  TextInput, 
-  ScrollView, 
-  ToastAndroid,
-  KeyboardAvoidingView, 
-  Platform, 
-  Modal, 
-  FlatList, 
-  Image,
-  Alert,
-  ActivityIndicator
+  View, Text, StyleSheet, TouchableOpacity, SafeAreaView, TextInput, ScrollView,
+  ToastAndroid, KeyboardAvoidingView, Platform, Modal, FlatList, Image, Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// IMPORTANT: Replace with your actual server IP address
+const SERVER_IP = '192.168.x.x'; // ← CHANGE THIS to your computer's local IP
 
 export default function CreateTrip() {
   const navigation = useNavigation();
@@ -71,63 +61,176 @@ export default function CreateTrip() {
 
   const dateOptions = generateDateOptions();
 
+  // Helper function to calculate days between dates
+  const calculateDays = (start, end) => {
+    if (!start || !end) return "1";
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    const diffTime = Math.abs(endDate - startDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) || 1;
+    return diffDays.toString();
+  };
+
   const handleSaveItinerary = async () => {
     if (!destination) {
-      Alert.alert('Missing Information', 'Please enter a destination');
+      ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
       return;
     }
 
     if (!startDate) {
-      Alert.alert('Missing Information', 'Please select start date');
+      ToastAndroid.show('Please select start date', ToastAndroid.SHORT);
       return;
     }
 
     if (!endDate) {
-      Alert.alert('Missing Information', 'Please select end date');
+      ToastAndroid.show('Please select end date', ToastAndroid.SHORT);
+      return;
+    }
+
+    if (!currentLocation) {
+      ToastAndroid.show('Please enter your current location', ToastAndroid.SHORT);
       return;
     }
 
     try {
-      // Get token from AsyncStorage
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
-      
       setLoading(true);
-      
-      const response = await fetch('http://10.31.25.1:5000/api/trips', {
+      // Get token (using await with AsyncStorage)
+      let token;
+      try {
+        token = await AsyncStorage.getItem('token');
+      } catch (error) {
+        console.error("Error getting token:", error);
+        token = null;
+      }
+
+      console.log("Generating AI plan with:", {
+        travelerCategory: travelerCategory || 'Solo',
+        tripType: tripType || 'General',
+        destination: destination,
+        from: currentLocation,
+        days: calculateDays(startDate, endDate),
+        budget: budget || '50000',
+        vehicle: vehicle || 'Public Transport'
+      });
+
+      // DIRECT HTTP call instead of using a helper
+      const apiUrl = Platform.select({
+        // Use 10.0.2.2 for Android emulator
+        android: `http://10.0.2.2:5000`,
+        // Use localhost for iOS
+        ios: `http://localhost:5000`,
+        // For testing on physical devices, use your computer's IP
+        default: `http://${SERVER_IP}:5000`
+      });
+
+      console.log(`Using API URL: ${apiUrl}`);
+
+      // First attempt to ping server to test connectivity
+      try {
+        const pingResponse = await fetch(`${apiUrl}/test`, {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (pingResponse.ok) {
+          console.log("Server connectivity test successful");
+        } else {
+          console.error("Server ping failed:", await pingResponse.text());
+        }
+      } catch (pingError) {
+        console.error("Server ping error:", pingError);
+        Alert.alert(
+          "Server Connection Error",
+          `Cannot connect to server. Make sure your backend is running and check the IP address: ${apiUrl}`
+        );
+        setLoading(false);
+        return;
+      }
+
+      // Now call the Gemini API endpoint
+      const response = await fetch(`${apiUrl}/api/gemini/generate-plan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          'Authorization': token ? `Bearer ${token}` : ''
         },
         body: JSON.stringify({
+          travelerCategory: travelerCategory || 'Solo',
+          tripType: tripType || 'General',
           destination: destination,
-          startDate: startDate,
-          from: currentLocation || 'Colombo',
-          endDate: endDate,
-          travelerCategory: travelerCategory,
-          tripType: tripType,
-          vehicle: vehicle,
-          budget: budget,
-          description: description
+          from: currentLocation,
+          days: calculateDays(startDate, endDate),
+          budget: budget || '50000',
+          vehicle: vehicle || 'Public Transport'
         })
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `Request failed with status ${response.status}`);
+        const errorText = await response.text();
+        console.error(`API Error: ${response.status} - ${errorText}`);
+        throw new Error(`API request failed with status ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log("Trip created successfully:", data);
-      return data;
+      console.log("Generated plan:", data);
       
+      // Save the trip information
+      const tripData = {
+        destination: destination,
+        startDate: startDate,
+        from: currentLocation,
+        endDate: endDate,
+        travelCategory: travelerCategory || 'Solo',
+        tripType: tripType || 'General',
+        vehicle: vehicle || 'Public Transport',
+        budget: budget || '50000',
+        description: description || ''
+      };
+
+      try {
+        const tripResponse = await fetch(`${apiUrl}/api/trips`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token ? `Bearer ${token}` : ''
+          },
+          body: JSON.stringify(tripData)
+        });
+
+        const tripResult = await tripResponse.json();
+        console.log("Trip saved:", tripResult);
+      } catch (tripError) {
+        console.error("Error saving trip:", tripError);
+        // Continue anyway to show the generated plan
+      }
+
+      // Navigate with the plan data - using a simplified approach
+      if (data && data.data && data.data.plan) {
+        try {
+          // Store plan in AsyncStorage for retrieval
+          await AsyncStorage.setItem('generatedPlan', data.data.plan);
+          
+          // Navigate to plan display page
+          router.push('/plan-display');
+        } catch (navError) {
+          console.error("Navigation error:", navError);
+          Alert.alert(
+            "Success, but navigation failed",
+            "Your plan was generated successfully, but we couldn't navigate to the display page."
+          );
+        }
+      } else {
+        Alert.alert(
+          "Generation Error",
+          "Plan was generated but the response format was unexpected."
+        );
+      }
     } catch (error) {
-      console.error("Error creating itinerary: ", error);
-      Alert.alert('Error', 'Failed to create itinerary: ' + error.message);
-      throw error;
+      console.error("Error creating itinerary:", error);
+      Alert.alert(
+        "Error",
+        `Failed to create itinerary: ${error.message}`
+      );
     } finally {
       setLoading(false);
     }
@@ -173,103 +276,23 @@ export default function CreateTrip() {
     </Modal>
   );
 
-  // Calculate days between two dates
-  const calculateDays = (start, end) => {
-    if (!start || !end) return "7"; // Default to 7 days
-    
-    const startDate = new Date(start);
-    const endDate = new Date(end);
-    const diffTime = Math.abs(endDate - startDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    return diffDays.toString() || "7";
-  };
-
-  const handleGeneratePlan = async () => {
-    try {
-      // First save the itinerary data
-      const tripData = await handleSaveItinerary();
-      
-      setLoading(true);
-      
-      // Prepare data for the Gemini API
-      const tripDetails = {
-        travelerCategory: travelerCategory || "Solo",
-        tripType: tripType || "Adventure",
-        destination: destination,
-        from: currentLocation || "Colombo",
-        days: calculateDays(startDate, endDate),
-        budget: budget || "50000",
-        vehicle: vehicle || "Car"
-      };
-      
-      console.log("Generating AI plan with:", JSON.stringify(tripDetails));
-      
-      // Get token from AsyncStorage
-      const token = await AsyncStorage.getItem('token');
-      
-      // Call the Gemini API
-      const response = await fetch('http://10.31.25.1:5000/api/gemini/generate-plan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(tripDetails)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `API request failed with status ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log("AI Plan generated:", data);
-      
-      // Save the generated plan to AsyncStorage
-      if (data && data.data && data.data.plan) {
-        await AsyncStorage.setItem('generatedPlan', data.data.plan);
-        
-        // Navigate to plan display page
-        router.push('/plan-display');
-      } else {
-        throw new Error('Invalid plan data received from API');
-      }
-    } catch (error) {
-      console.error("Error generating plan:", error);
-      Alert.alert(
-        "Error",
-        "Failed to generate trip plan: " + error.message,
-        [{ text: "OK" }]
-      );
-      // Navigate to budget planner anyway
-      router.push('/budget-planner');
-    } finally {
-      setLoading(false);
-    }
+  const handleGeneratePlan = () => {
+    // First save the itinerary
+    handleSaveItinerary();
   };
 
   const handleSaveForLater = () => {
     if (!destination) {
-      Alert.alert('Missing Information', 'Please enter a destination');
+      ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
       return;
     }
 
-    Alert.alert('Success', 'Saved for later!');
+    ToastAndroid.show('Saved for later!', ToastAndroid.SHORT);
     // Implement save for later functionality
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Loading Overlay */}
-      {loading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#3478F6" />
-          <Text style={styles.loadingText}>
-            {destination ? `Planning your trip to ${destination}...` : 'Processing...'}
-          </Text>
-        </View>
-      )}
-      
       {/* Back Button to Homepage */}
       <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
         <Ionicons name="arrow-back" size={20} color="#333" />
@@ -301,7 +324,7 @@ export default function CreateTrip() {
             <View style={styles.searchInputContainer}>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search destination"
+                placeholder="Enter your current location"
                 value={currentLocation}
                 onChangeText={setCurrentLocation}
               />
@@ -410,7 +433,7 @@ export default function CreateTrip() {
 
           {/* Description - New field */}
           <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Description</Text>
+            <Text style={styles.inputLabel}>Description (Optional)</Text>
             <View style={styles.textAreaContainer}>
               <TextInput
                 style={styles.textArea}
@@ -435,11 +458,14 @@ export default function CreateTrip() {
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={styles.generatePlanButton}
+              style={[styles.generatePlanButton, loading && styles.disabledButton]}
               onPress={handleGeneratePlan}
               disabled={loading}
             >
-              <Text style={styles.generatePlanText}>Create Trip</Text>
+              <Text style={styles.generatePlanText}>
+                {loading ? 'Creating...' : 'Create Trip'}
+              </Text>
+              {loading && <ActivityIndicator size="small" color="white" style={{marginLeft: 8}} />}
             </TouchableOpacity>
           </View>
         </ScrollView>
@@ -498,21 +524,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'white',
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  loadingText: {
-    color: 'white',
-    marginTop: 15,
-    fontSize: 16,
-    fontFamily: 'outfit-medium',
-    textAlign: 'center',
-    paddingHorizontal: 30,
   },
   backButton: {
     position: 'absolute',
@@ -677,6 +688,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
+    flexDirection: 'row',
+  },
+  disabledButton: {
+    backgroundColor: '#a0c0f0',
   },
   generatePlanText: {
     fontFamily: 'outfit-medium',
