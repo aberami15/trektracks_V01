@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text } from 'react-native';
 import { useNavigation, useRouter } from 'expo-router';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import PlanDisplay from '../../components/PlanDisplay';
+import PlanDisplay from '../../components/Plandisplay';
 
 export default function PlanDisplayScreen() {
   const navigation = useNavigation();
