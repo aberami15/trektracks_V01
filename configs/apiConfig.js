@@ -1,4 +1,3 @@
-// Create a new file: configs/apiConfig.js
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const getApiBaseUrl = () => {
