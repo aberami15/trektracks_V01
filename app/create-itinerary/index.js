@@ -109,9 +109,16 @@ export default function CreateTrip() {
     try {
       setLoading(true); // Set loading to true
       
+      // Configure API URL based on environment
+      const API_URL = Platform.select({
+        android: 'http://10.31.25.1:5000', // Your local IP address
+        ios: 'http://10.31.25.1:5000',     // Your local IP address
+        default: 'http://localhost:5000'    // For web testing
+      });
+      
       // First save the trip to the database
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/trips', {
+      const response = await fetch(`${API_URL}/api/trips`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -137,54 +144,27 @@ export default function CreateTrip() {
       const savedTrip = await response.json();
       console.log("Trip saved:", savedTrip);
       
-      // Calculate the number of days for the trip
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
-      
-      // Now call Gemini API to generate a travel plan
-      const geminiResponse = await fetch('http://localhost:5000/api/gemini/generate-plan', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          travelerCategory: travelerCategory || "Solo",  // Default to Solo if not specified
-          tripType: tripType || "Adventure",  // Default to Adventure if not specified
-          destination: destination,
-          from: currentLocation,
-          days: days.toString(),
-          budget: budget,
-          vehicle: vehicle || "Car"  // Default to Car if not specified
-        })
-      });
-      
-      if (!geminiResponse.ok) {
-        console.error("Failed to generate plan, but trip was saved");
-        // Continue anyway since the trip was saved
-      } else {
-        const planData = await geminiResponse.json();
-        console.log("Generated plan:", planData);
-        
+      // If we have a generated plan, save it with the trip
+      if (plan) {
         // Optionally update the trip with the generated plan
         if (savedTrip.data && savedTrip.data._id) {
-          const updateResponse = await fetch(`http://localhost:5000/api/trips/${savedTrip.data._id}`, {
+          const updateResponse = await fetch(`${API_URL}/api/trips/${savedTrip.data._id}`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify({
-              generatedPlan: planData.data.plan
+              generatedPlan: plan
             })
           });
           console.log("Updated trip with plan:", await updateResponse.json());
         }
       }
       
+      ToastAndroid.show('Trip created successfully!', ToastAndroid.SHORT);
       setLoading(false);
-      router.push('/trip-itinerary');
+      router.push('/ai-trip-planner');
       
     } catch (error) {
       console.error("Error creating itinerary: ", error);
@@ -195,29 +175,46 @@ export default function CreateTrip() {
 
   const handleGeneratePlan = async () => {
     // Validate required fields
-    if (!destination || !currentLocation || !days || !travelerCategory || !tripType || !vehicle || !budget) {
-      ToastAndroid.show('Please fill all the required fields', ToastAndroid.SHORT);
+    if (!destination || !currentLocation) {
+      ToastAndroid.show('Please enter both destination and current location', ToastAndroid.SHORT);
+      return;
+    }
+
+    if (!days && (!startDate || !endDate)) {
+      ToastAndroid.show('Please select dates or specify number of days', ToastAndroid.SHORT);
       return;
     }
 
     try {
       setGeneratingPlan(true);
       
+      // Configure API URL based on environment
+      const API_URL = Platform.select({
+        android: 'http://10.31.25.1:5000', // Your local IP address
+        ios: 'http://10.31.25.1:5000',     // Your local IP address
+        default: 'http://localhost:5000'    // For web testing
+      });
+      
+      // Create payload with reasonable defaults for missing values
+      const payload = {
+        travelerCategory: travelerCategory || "Solo",
+        tripType: tripType || "Adventure",
+        destination: destination,
+        from: currentLocation,
+        days: days || "3", // Default to 3 days if not specified
+        budget: budget || "10000", // Default budget if not specified
+        vehicle: vehicle || "Car" // Default to car if not specified
+      };
+      
+      console.log("Generating AI plan with:", payload);
+      
       // Call the Gemini API through our backend
-      const response = await fetch('http://localhost:5000/api/gemini/generate-plan', {
+      const response = await fetch(`${API_URL}/api/gemini/generate-plan`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          travelerCategory,
-          tripType,
-          destination,
-          from: currentLocation,
-          days,
-          budget,
-          vehicle
-        })
+        body: JSON.stringify(payload)
       });
 
       if (!response.ok) {
@@ -225,13 +222,17 @@ export default function CreateTrip() {
       }
 
       const data = await response.json();
-      setPlan(data.data.plan);
-      setShowPlan(true);
-      setPlanModalVisible(true);
+      
+      if (data && data.data && data.data.plan) {
+        setPlan(data.data.plan);
+        setPlanModalVisible(true);
+      } else {
+        throw new Error('No plan received from API');
+      }
       
     } catch (error) {
       console.error("Error generating plan: ", error);
-      ToastAndroid.show('Failed to generate plan', ToastAndroid.SHORT);
+      ToastAndroid.show('Failed to generate plan: ' + error.message, ToastAndroid.SHORT);
     } finally {
       setGeneratingPlan(false);
     }
@@ -324,7 +325,7 @@ export default function CreateTrip() {
                 value={currentLocation}
                 onChangeText={setCurrentLocation}
               />
-              <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+              <Ionicons name="location-outline" size={20} color="#999" style={styles.searchIcon} />
             </View>
           </View>
 
@@ -338,11 +339,11 @@ export default function CreateTrip() {
                 value={destination}
                 onChangeText={setDestination}
               />
-              <Ionicons name="search" size={20} color="#999" style={styles.dropdownIcon} />
+              <Ionicons name="location" size={20} color="#999" style={styles.dropdownIcon} />
             </View>
           </View>
 
-          {/* Start Date - New field */}
+          {/* Start Date */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Start Date</Text>
             <TouchableOpacity 
@@ -356,7 +357,7 @@ export default function CreateTrip() {
             </TouchableOpacity>
           </View>
 
-          {/* End Date - New field */}
+          {/* End Date */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>End Date</Text>
             <TouchableOpacity 
@@ -438,7 +439,7 @@ export default function CreateTrip() {
             </TouchableOpacity>
           </View>
 
-          {/* Description - New field */}
+          {/* Description */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Description</Text>
             <View style={styles.textAreaContainer}>
@@ -456,57 +457,25 @@ export default function CreateTrip() {
 
           {/* Generate Plan Button */}
           <TouchableOpacity 
-            style={styles.generatePlanButton}
+            style={[
+              styles.generatePlanButton,
+              generatingPlan && styles.disabledButton
+            ]}
             onPress={handleGeneratePlan}
             disabled={generatingPlan}
           >
             {generatingPlan ? (
-              <ActivityIndicator size="small" color="white" />
+              <>
+                <ActivityIndicator size="small" color="white" style={{marginRight: 10}} />
+                <Text style={styles.generatePlanText}>Generating Plan...</Text>
+              </>
             ) : (
               <>
-                <Text style={styles.generatePlanText}>Generate Trip Plan</Text>
-                <Ionicons name="document-text" size={18} color="white" style={{ marginLeft: 8 }} />
+                <Ionicons name="bulb-outline" size={20} color="white" style={{marginRight: 10}} />
+                <Text style={styles.generatePlanText}>Generate AI Trip Plan</Text>
               </>
             )}
           </TouchableOpacity>
-
-          <TouchableOpacity 
-            style={styles.aiSuggestButton}
-            onPress={() => {
-              // Call the AI API for suggestions
-              if (destination) {
-                // Logic to fetch AI suggestions for the selected destination
-                fetch(`http://localhost:5000/api/gemini/generate-plan`, {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                  destination: destination,
-                  days: startDate && endDate ? 
-                    Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24)) : 3,
-                  tripType: tripType || 'General',
-                  vehicle: vehicle || 'Mixed'
-                })
-              })
-              .then(response => response.json())
-              .then(data => {
-                // Show suggestions to the user
-                alert("AI Suggestions: " + data.data.plan.substring(0, 200) + "...");
-                // You could show this in a modal or dedicated section
-              })
-              .catch(error => {
-                console.error("Error getting AI suggestions:", error);
-              });
-            } else {
-              alert("Please enter a destination first");
-            }
-          }}
-        >
-          <Ionicons name="bulb-outline" size={18} color="#3478F6" />
-          <Text style={styles.aiSuggestText}>Get AI Suggestions</Text>
-        </TouchableOpacity>
-
 
           {/* Action Buttons */}
           <View style={styles.actionButtonsContainer}>
@@ -519,7 +488,10 @@ export default function CreateTrip() {
             </TouchableOpacity>
 
             <TouchableOpacity 
-              style={styles.createTripButton}
+              style={[
+                styles.createTripButton,
+                loading && styles.disabledButton
+              ]}
               onPress={handleSaveItinerary}
               disabled={loading}
             >
@@ -586,32 +558,51 @@ export default function CreateTrip() {
         visible={planModalVisible}
         onRequestClose={() => setPlanModalVisible(false)}
       >
-        <View style={styles.planModalOverlay}>
+        <SafeAreaView style={styles.planModalOverlay}>
           <View style={styles.planModalContent}>
             <View style={styles.planModalHeader}>
-              <Text style={styles.planModalTitle}>Your Trip Plan</Text>
               <TouchableOpacity onPress={() => setPlanModalVisible(false)}>
                 <Ionicons name="close" size={24} color="#333" />
               </TouchableOpacity>
+              <Text style={styles.planModalTitle}>Your AI Trip Plan</Text>
+              <TouchableOpacity onPress={() => {
+                // Option to save the plan to clipboard or do other actions
+              }}>
+                <Ionicons name="share-outline" size={24} color="#3478F6" />
+              </TouchableOpacity>
+            </View>
+            
+            <View style={styles.planSubheader}>
+              <Text style={styles.planDestination}>{destination}</Text>
+              <Text style={styles.planDetails}>
+                {days} days • {travelerCategory || 'Solo'} • {tripType || 'Adventure'}
+              </Text>
             </View>
 
-            <ScrollView style={styles.planContent}>
+            <ScrollView style={styles.planScrollContent}>
               <Text style={styles.planText}>{plan}</Text>
             </ScrollView>
 
             <View style={styles.planModalButtonContainer}>
               <TouchableOpacity 
-                style={styles.planModalButton}
+                style={styles.planModalSecondaryButton}
+                onPress={() => setPlanModalVisible(false)}
+              >
+                <Text style={styles.planModalSecondaryButtonText}>Close</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.planModalPrimaryButton}
                 onPress={() => {
                   setPlanModalVisible(false);
                   handleSaveItinerary();
                 }}
               >
-                <Text style={styles.planModalButtonText}>Save Plan & Create Trip</Text>
+                <Text style={styles.planModalPrimaryButtonText}>Use This Plan</Text>
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </SafeAreaView>
       </Modal>
     </SafeAreaView>
   );
@@ -701,7 +692,6 @@ const styles = StyleSheet.create({
   dropdownIcon: {
     marginLeft: 10,
   },
-  // For the description text area
   textAreaContainer: {
     backgroundColor: '#f2f2f2',
     borderRadius: 10,
@@ -763,6 +753,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     flexDirection: 'row',
   },
+  disabledButton: {
+    opacity: 0.7,
+  },
   generatePlanText: {
     fontFamily: 'outfit-medium',
     fontSize: 16,
@@ -805,24 +798,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'white',
   },
-  // Plan Modal Styles
+  
+  // Plan Modal Styles - Enhanced
   planModalOverlay: {
     flex: 1,
-    justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    padding: 20,
+    backgroundColor: 'white',
   },
   planModalContent: {
+    flex: 1,
     backgroundColor: 'white',
-    borderRadius: 20,
-    paddingBottom: 20,
-    maxHeight: '80%',
   },
   planModalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
+    paddingTop: Platform.OS === 'ios' ? 50 : 20,
     borderBottomWidth: 1,
     borderBottomColor: '#f2f2f2',
   },
@@ -831,9 +822,25 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#333',
   },
-  planContent: {
+  planSubheader: {
     padding: 20,
-    maxHeight: 400,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f2f2f2',
+  },
+  planDestination: {
+    fontFamily: 'outfit-bold',
+    fontSize: 24,
+    color: '#333',
+    marginBottom: 4,
+  },
+  planDetails: {
+    fontFamily: 'outfit',
+    fontSize: 14,
+    color: '#666',
+  },
+  planScrollContent: {
+    flex: 1,
+    padding: 20,
   },
   planText: {
     fontFamily: 'outfit',
@@ -842,36 +849,37 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   planModalButtonContainer: {
+    flexDirection: 'row',
     padding: 20,
     borderTopWidth: 1,
     borderTopColor: '#f2f2f2',
   },
-  planModalButton: {
+  planModalSecondaryButton: {
+    flex: 1,
+    paddingVertical: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    marginRight: 10,
+  },
+  planModalSecondaryButtonText: {
+    fontFamily: 'outfit-medium',
+    fontSize: 16,
+    color: '#333',
+  },
+  planModalPrimaryButton: {
+    flex: 2,
     backgroundColor: '#3478F6',
     paddingVertical: 15,
     borderRadius: 10,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  planModalButtonText: {
+  planModalPrimaryButtonText: {
     fontFamily: 'outfit-medium',
     fontSize: 16,
     color: 'white',
-  },
-  aiSuggestButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#f0f7ff',
-    borderWidth: 1,
-    borderColor: '#3478F6',
-    borderRadius: 10,
-    paddingVertical: 12,
-    marginTop: 15,
-  },
-  aiSuggestText: {
-    color: '#3478F6',
-    fontFamily: 'outfit-medium',
-    fontSize: 15,
-    marginLeft: 8,
   },
 });
