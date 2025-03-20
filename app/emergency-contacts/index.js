@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons, MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
+import Footer from '../footer';
 
 export default function EmergencyContacts() {
   const navigation = useNavigation();
@@ -168,6 +169,7 @@ export default function EmergencyContacts() {
           </Text>
         </View>
       </ScrollView>
+      <Footer/>
     </SafeAreaView>
   );
 }

@@ -4,7 +4,9 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, FlatLi
 import React, { useEffect, useState } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
+import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons'
+import Footer from '../../footer';
+
 
 export default function Island() {
   const navigation = useNavigation();
@@ -112,17 +114,6 @@ export default function Island() {
     setFilteredIslands(filtered);
   }, [searchQuery, selectedCategory]);
 
-  const navigateToHome = () => {
-    router.push('/home');
-  }
-
-  const navigateToItinerary = () => {
-    router.push('/trip-itinerary');
-  }
-
-  const navigateToRecentTrips = () => {
-    router.push('/recent-trips');
-  }
 
   // Function to count access types (accessible by land)
   const countAccessibleByLand = () => {
@@ -247,29 +238,7 @@ export default function Island() {
 
       {/* Footer Navigation */}
       <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.footerItem} 
-          onPress={navigateToHome}
-        >
-          <Ionicons name="home" size={24} color="#777" />
-          <Text style={styles.footerText}>Home</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToItinerary}
-        >
-          <Ionicons name="calendar" size={24} color="#777" />
-          <Text style={styles.footerText}>Itinerary</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToRecentTrips}
-        >
-          <Ionicons name="time" size={24} color="#777" />
-          <Text style={styles.footerText}>Recent</Text>
-        </TouchableOpacity>
+       <Footer/>
       </View>
     </View>
   )

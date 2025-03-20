@@ -42,7 +42,7 @@ export default function SignUp() {
           const errorData =await response.json();
           throw new Error(errorData.message || 'Registration failed');
         }
-        router.replace('/home');
+        router.replace('auth/sign-in');
       } catch (error) {
         console.error('Register error:', error);
         ToastAndroid.show(error.message || "Sign up failed", ToastAndroid.LONG);
@@ -145,7 +145,7 @@ export default function SignUp() {
       </TouchableOpacity>
       
       {/* Sign in Button */}
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={()=>router.replace('auth/sign-in')}
         style={{
           padding:20,
@@ -158,8 +158,8 @@ export default function SignUp() {
           color:'black',
           textAlign:'center',
           fontFamily:'outfit'
-        }}>Sign in</Text>
-      </TouchableOpacity>
+        }}>Create Account</Text>
+      </TouchableOpacity> */}
     </View>
   )
 }

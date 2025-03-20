@@ -1,27 +1,26 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Platform, Modal } from 'react-native';
 import Footer from '../footer';
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
+import Config from '../../config';
+import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for the back icon
 
-const ExpenseEntry = () => {
+export default function ExpenseEntry() {
+  const router = useRouter();
   const [expense, setExpense] = useState({
     date: new Date(),
     category: '',
     description: '',
     amount: ''
   });
+  const params = useLocalSearchParams();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [transaction, setTransaction] = useState({});
+  const id = params.q;
 
-  // Categories for expenses
   const categories = ['Food', 'Accommodation', 'Fuel', 'Ticket'];
-
-  // Configure API URL based on where the app is running
-  const API_URL = Platform.select({
-    android: 'http://10.31.25.1:5000', // Your local IP address
-    ios: 'http://10.31.25.1:5000',     // Your local IP address
-    default: 'http://192.168.74.138:5000'    // For web testing
-  });
 
   const handleInputChange = (name, value) => {
     setExpense({ ...expense, [name]: value });
@@ -62,7 +61,6 @@ const ExpenseEntry = () => {
     setIsLoading(true);
     try {
       const expenseData = {
-        userId: '64f1a2b3c4d5e6f7a8b9c0d1',
         date: expense.date.toISOString(),
         category: expense.category.toLowerCase(),
         description: expense.description,
@@ -71,7 +69,7 @@ const ExpenseEntry = () => {
 
       console.log('Submitting expense:', expenseData); // Debug log
 
-      const response = await fetch(`${API_URL}/api/expenses`, {
+      const response = await fetch(`${Config.BASE_URL}/trips/expense/${id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -79,8 +77,9 @@ const ExpenseEntry = () => {
         },
         body: JSON.stringify(expenseData),
       });
-
+      console.log(response)
       const responseData = await response.json();
+      console.log(responseData.data)
       if (!response.ok) {
         throw new Error(responseData.message || 'Failed to save expense');
       }
@@ -92,8 +91,8 @@ const ExpenseEntry = () => {
         description: '',
         amount: ''
       });
-      
       Alert.alert('Success', 'Expense added successfully!');
+      router.push(`/budget-planner?q=${encodeURIComponent(id)}`)
     } catch (error) {
       console.error('Network Error Details:', error);
       Alert.alert(
@@ -105,16 +104,26 @@ const ExpenseEntry = () => {
     }
   };
 
+  const handleBack = () => {
+    router.push(`/budget-planner?q=${encodeURIComponent(id)}`);
+  };
+
   return (
-    
-      <ScrollView style={styles.container}>
+    <View style={styles.container}>
+      {/* Back Button */}
+      <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+        <Ionicons name="arrow-back" size={24} color="#5edfff" />
+        <Text style={styles.backButtonText}>Back</Text>
+      </TouchableOpacity>
+
+      <ScrollView style={styles.scrollContainer}>
         <Text style={styles.title}>Expense Entry</Text>
         <View style={styles.formContainer}>
           {/* Date Field */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Date</Text>
-            <TouchableOpacity 
-              style={styles.input} 
+            <TouchableOpacity
+              style={styles.input}
               onPress={() => setShowDatePicker(true)}
             >
               <Text style={styles.inputText}>{formatDate(expense.date)}</Text>
@@ -124,8 +133,8 @@ const ExpenseEntry = () => {
           {/* Category Field */}
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Category</Text>
-            <TouchableOpacity 
-              style={styles.input} 
+            <TouchableOpacity
+              style={styles.input}
               onPress={() => setShowCategoryModal(true)}
             >
               <Text style={[styles.inputText, !expense.category && styles.placeholderText]}>
@@ -165,13 +174,11 @@ const ExpenseEntry = () => {
             onPress={handleSubmit}
             disabled={isLoading}
           >
-            <Text 
-            style={styles.buttonText}
-            onPress={'/budget-planner'}>
-              {isLoading ? 'Adding...' : 'Add Entry'}
+            <Text style={styles.buttonText}>
+              Add Entry
             </Text>
           </TouchableOpacity>
-        
+
         </View>
 
         {/* Category Selection Modal */}
@@ -184,7 +191,7 @@ const ExpenseEntry = () => {
           <View style={styles.modalOverlay}>
             <View style={styles.modalContent}>
               <Text style={styles.modalTitle}>Select Category</Text>
-              
+
               {categories.map((category) => (
                 <TouchableOpacity
                   key={category}
@@ -194,7 +201,7 @@ const ExpenseEntry = () => {
                   <Text style={styles.categoryText}>{category}</Text>
                 </TouchableOpacity>
               ))}
-              
+
               <TouchableOpacity
                 style={styles.cancelButton}
                 onPress={() => setShowCategoryModal(false)}
@@ -204,10 +211,9 @@ const ExpenseEntry = () => {
             </View>
           </View>
         </Modal>
-        
+
       </ScrollView>
-      
-      
+    </View>
   );
 };
 
@@ -215,7 +221,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#031f2a',
+  },
+  scrollContainer: {
+    flex: 1,
     padding: 20,
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 40,
+    paddingBottom: 10,
+  },
+  backButtonText: {
+    color: '#5edfff',
+    fontSize: 16,
+    marginLeft: 5,
   },
   title: {
     color: '#5edfff',
@@ -306,5 +327,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-
-export default ExpenseEntry;

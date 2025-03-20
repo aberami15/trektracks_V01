@@ -1,26 +1,68 @@
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
-import { Stack, useRouter } from 'expo-router';
+import React, { useEffect, useState } from 'react'
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons, Feather } from '@expo/vector-icons';
 import Footer from '../footer';
+import Config from '../../config';
 
-const BudgetPlanner = () => {
+
+export default function BudgetPlanner() {
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const id = params.q;
+  const [tripDetail, setTripDetail] = useState({
+    budget: 0,
+    totalExpense: 0,
+    transactions: []
+  });
+
+  useEffect(() => {
+    fetchBudgetDetails();
+  }, []);
+
   const handleBudgetOverview = () => {
-    // Navigate to budget details page
-    console.log("Navigating to budget planner");
     router.push('/budget-overview'); // Direct to the budget planner page
-  };
-  
-  const handleAddTransation = () => {
-    // Navigate to budget details page
-    console.log("Navigating to budget planner");
-    router.push('/add-transactions'); // Direct to the budget planner page
   };
 
   const handleBack = () => {
     router.back(); // Navigate back to the previous screen
   };
+
+  const fetchBudgetDetails = async () => {
+    try {
+      const response = await fetch(`${Config.BASE_URL}/trips/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const responseData = await response.json();
+      console.log(responseData.data)
+      setTripDetail(responseData.data || {
+        budget: 0,
+        totalExpense: 0,
+        transactions: []
+      });
+    }
+    catch (error) {
+      console.error('Error fetching trips:', error);
+      setTripDetail({
+        budget: 0,
+        totalExpense: 0,
+        transactions: []
+      });
+    }
+  }
+
+  // Calculate remaining budget
+  const remainingBudget = tripDetail.budget - tripDetail.totalExpense;
   
+  // Calculate progress percentage (bounded to ensure it doesn't exceed 100%)
+  const progressPercentage = Math.min(((tripDetail.totalExpense / tripDetail.budget) * 100), 100);
   
   return (
     <View style={styles.mainContainer}>
@@ -34,7 +76,7 @@ const BudgetPlanner = () => {
         
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Expence Planner</Text>
+          <Text style={styles.title}>Expense Planner</Text>
           <Feather name="settings" size={24} color="#2cc3e5" />
         </View>
 
@@ -50,9 +92,9 @@ const BudgetPlanner = () => {
             {/* Progress Bars */}
             <View style={styles.progressContainer}>
               <View style={styles.progressBar}>
-                <View style={[styles.progressFill, { width: '65%' }]} />
+                <View style={[styles.progressFill, { width: `${progressPercentage}%` }]} />
               </View>
-              <Text style={styles.progressText}>LKR 45,000 / LKR 70,000</Text>
+              <Text style={styles.progressText}>LKR {tripDetail.totalExpense} / LKR {tripDetail.budget}</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -62,16 +104,16 @@ const BudgetPlanner = () => {
           <Text style={styles.sectionTitle}>Budget Summary</Text>
           <View style={styles.summaryContainer}>
             <View style={styles.summaryItem}>
-              <Text style={styles.summaryLabel}>Total Budget</Text>
-              <Text style={styles.summaryValue}>LKR 150,000</Text>
+              <Text style={styles.summaryLabel}>Budget</Text>
+              <Text style={styles.summaryValue}>LKR {tripDetail.budget}</Text>
             </View>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Spent</Text>
-              <Text style={styles.summaryValue}>LKR 45,000</Text>
+              <Text style={styles.summaryValue}>LKR {tripDetail.totalExpense}</Text>
             </View>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Remaining</Text>
-              <Text style={styles.summaryValue}>LKR 105,000</Text>
+              <Text style={styles.summaryValue}>LKR {remainingBudget}</Text>
             </View>
           </View>
         </View>
@@ -88,18 +130,22 @@ const BudgetPlanner = () => {
           
           {/* Transaction List */}
           <View style={styles.transactionList}>
-            {[1, 2, 3].map((item) => (
-              <View key={item} style={styles.transactionItem}>
-                <View style={styles.transactionIcon}>
-                  <Feather name="dollar-sign" size={20} color="#fff" />
+            {tripDetail.transactions && tripDetail.transactions.length > 0 ? (
+              tripDetail.transactions.map((item, index) => (
+                <View key={index} style={styles.transactionItem}>
+                  <View style={styles.transactionIcon}>
+                    <Feather name="dollar-sign" size={20} color="#fff" />
+                  </View>
+                  <View style={styles.transactionDetails}>
+                    <Text style={styles.transactionTitle}>{item.category} : {item.description}</Text>
+                    <Text style={styles.transactionDate}>{item.date}</Text>
+                  </View>
+                  <Text style={styles.transactionAmount}>- LKR {item.amount}</Text>
                 </View>
-                <View style={styles.transactionDetails}>
-                  <Text style={styles.transactionTitle}>Food Delivery</Text>
-                  <Text style={styles.transactionDate}>2023-07-17</Text>
-                </View>
-                <Text style={styles.transactionAmount}>- LKR 1,500</Text>
-              </View>
-            ))}
+              ))
+            ) : (
+              <Text style={styles.noTransactionsText}>No transactions yet</Text>
+            )}
           </View>
         </View>
 
@@ -107,7 +153,9 @@ const BudgetPlanner = () => {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Money Moves</Text>
           <View style={styles.buttonRow}>
-            <TouchableOpacity style={styles.actionButton} onPress={handleAddTransation}>
+            <TouchableOpacity 
+              style={styles.actionButton} 
+              onPress={() => router.push(`/add-transactions?q=${encodeURIComponent(id)}`)}>
               <Feather name="plus" size={20} color="#fff" />
               <Text style={styles.buttonText}>Add Transactions</Text>
             </TouchableOpacity>
@@ -291,6 +339,9 @@ const styles = StyleSheet.create({
     color: '#2cc3e5',
     fontWeight: '600',
   },
+  noTransactionsText: {
+    color: '#658998',
+    textAlign: 'center',
+    padding: 15,
+  },
 });
-
-export default BudgetPlanner;

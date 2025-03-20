@@ -1,6 +1,6 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
-import React, { Component, useEffect , useState} from 'react'
-import {jwtDecode} from 'jwt-decode';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Alert } from 'react-native'
+import React, { Component, useEffect, useState } from 'react'
+import { jwtDecode } from 'jwt-decode';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -12,22 +12,16 @@ export default function TripItinerary() {
   const navigation = useNavigation();
   const router = useRouter();
   const [trips, setTrips] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchTrips();
   }, []);
 
-  const navigateToHome = () => {
-    router.push('/home');
-  }
-
-  const navigateToExpenseTracker = () => {
-    // Navigate to the budget planner page
-    router.push('/budget-planner');
-  }
-
+ 
   const fetchTrips = async () => {
     try {
+      setLoading(true);
       const token = await AsyncStorage.getItem('token');
       if (!token) {
         throw new Error("No authentication token found");
@@ -52,17 +46,9 @@ export default function TripItinerary() {
       console.error('Error fetching trips:', error);
       setTrips([]);
     } finally {
+      setLoading(false);
     }
   };
-
-  const navigateToFav = () => {
-    // Navigate to favorites page
-    router.push('/save-favourite');
-  }
-
-  const navigateToRecentTrips = () => {
-    router.push('/recent-trips');
-  }
 
   const navigateToProfile = () => {
     // Explicit function for profile navigation
@@ -70,14 +56,52 @@ export default function TripItinerary() {
     router.push('/profile');
   }
 
+  const deleteTrip = async (id) => {
+    try {
+      Alert.alert(
+        "Delete Trip",
+        "Are you sure you want to delete this trip?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel"
+          },
+          {
+            text: "Delete",
+            onPress: async () => {
+              try {
+                const response = await fetch(`${Config.BASE_URL}/trips/${id}`, {
+                  method: 'DELETE',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                });
+
+                if (!response.ok) {
+                  throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // After successful deletion, refresh the trips list
+                fetchTrips();
+                Alert.alert("Success", "Trip deleted successfully");
+              } catch (error) {
+                console.error('Error deleting trip:', error);
+                Alert.alert("Error", "Failed to delete the trip");
+              }
+            },
+            style: "destructive"
+          }
+        ]
+      );
+    } catch (error) {
+      console.error('Error in delete function:', error);
+      Alert.alert("Error", "Something went wrong");
+    }
+  }
+
   const handleCreateTrip = () => {
     // Navigate to create itinerary form
     router.push('/create-trip');
-  }
-
-  const DirectToExpTrack = () => {
-    // Navigate to budget overview page 
-    router.push('/budget-planner');
   }
 
   const formatDate = (dateString) => {
@@ -90,7 +114,7 @@ export default function TripItinerary() {
       <TouchableOpacity 
         key={trip._id}
         style={styles.tripCard}
-        onPress={() => console.log(`Navigate to trip detail for ${trip._id}`)}
+        onPress={() => router.push(`/budget-planner?q=${encodeURIComponent(trip._id)}`)}
       >
         <View style={styles.tripHeader}>
           <Text style={styles.tripName}>{trip.name}</Text>
@@ -141,25 +165,15 @@ export default function TripItinerary() {
             </View>
           </View>
 
-          {/* <View style={styles.descriptionContainer}>
-            <Text style={styles.descriptionLabel}>Description:</Text>
-            <Text style={styles.descriptionText}>{trip.description}</Text>
-          </View> */}
-
           <View style={styles.actionButtons}>
-          <TouchableOpacity 
-          style={styles.actionButton}
-          onPress={DirectToExpTrack}>
-              <MaterialIcons name="edit" size={18} color="#3478F6" />
-              <Text style={styles.actionButtonText}>View Expence</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
-              <MaterialIcons name="edit" size={18} color="#3478F6" />
-              <Text style={styles.actionButtonText}>Edit</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.actionButton}>
+            <TouchableOpacity 
+              style={styles.actionButton} 
+              onPress={() => deleteTrip(trip._id)}
+            >
               <MaterialIcons name="delete" size={18} color="#FF3B30" />
-              <Text style={[styles.actionButtonText, {color: '#FF3B30'}]}>Delete</Text>
+              <Text style={[styles.actionButtonText, {color: '#FF3B30'}]}>
+                Delete
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -171,10 +185,10 @@ export default function TripItinerary() {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>My Trip</Text>
+        <Text style={styles.headerTitle}>My Trips</Text>
         <TouchableOpacity 
           onPress={navigateToProfile} 
-          style={styles.profileButton} // Added specific style for better touch area
+          style={styles.profileButton}
         >
           <Ionicons name="person-circle" size={40} color="black" />
         </TouchableOpacity>
@@ -182,7 +196,11 @@ export default function TripItinerary() {
 
       {/* Content */}
       <ScrollView style={styles.content}>
-        {trips && trips.length  > 0 ? (
+        {loading ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyTitle}>Loading trips...</Text>
+          </View>
+        ) : trips && trips.length > 0 ? (
           <View style={styles.tripCardsContainer}>
             {trips.map(trip => renderTripCard(trip))}
           </View>
@@ -207,40 +225,7 @@ export default function TripItinerary() {
         </View>
       </ScrollView>
 
-      {/* Footer Navigation */}
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.footerItem} 
-          onPress={navigateToHome}
-        >
-          <Ionicons name="home" size={24} color="#777" />
-          <Text style={styles.footerText}>Home</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToExpenseTracker}
-        >
-          <Ionicons name="wallet" size={24} color="#3478F6" />
-          <Text style={[styles.footerText, { color: '#3478F6' }]}>Expense</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToFav}
-        >
-          <Ionicons name="heart" size={24} color="#777" />
-          <Text style={styles.footerText}>Favourites</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToRecentTrips}
-        >
-          <Ionicons name="time" size={24} color="#777" />
-          <Text style={styles.footerText}>Recent</Text>
-        </TouchableOpacity>
-      </View>
+      {/* Footer */}
       <Footer/>
     </View>
   )
@@ -389,6 +374,10 @@ const styles = StyleSheet.create({
     marginBottom: 30,
     paddingHorizontal: 20,
   },
+  createButtonContainer: {
+    alignItems: 'center',
+    marginBottom: 30,
+  },
   createButton: {
     backgroundColor: 'black',
     paddingHorizontal: 24,
@@ -399,30 +388,5 @@ const styles = StyleSheet.create({
     fontFamily: 'outfit-medium',
     color: 'white',
     fontSize: 16,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    backgroundColor: 'white',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#e8e8e8',
-    paddingBottom: 5,
-  },
-  footerItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 8,
-  },
-  footerText: {
-    fontFamily: 'outfit',
-    fontSize: 12,
-    color: '#777',
-    marginTop: 4,
-  },
+  }
 });

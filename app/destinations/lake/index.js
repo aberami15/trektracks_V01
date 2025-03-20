@@ -3,7 +3,9 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
-import Ionicons from '@expo/vector-icons/Ionicons';
+import Ionicons from '@expo/vector-icons/Ionicons'
+import Footer from '../../footer'
+
 
 export default function Lake() {
   const navigation = useNavigation();
@@ -103,17 +105,6 @@ export default function Lake() {
     }
   }, [searchQuery]);
 
-  const navigateToHome = () => {
-    router.push('/home');
-  }
-
-  const navigateToItinerary = () => {
-    router.push('/trip-itinerary');
-  }
-
-  const navigateToRecentTrips = () => {
-    router.push('/recent-trips');
-  }
 
   // Function to count unique categories
   const countCategories = () => {
@@ -205,29 +196,7 @@ export default function Lake() {
 
       {/* Footer Navigation */}
       <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.footerItem} 
-          onPress={navigateToHome}
-        >
-          <Ionicons name="home" size={24} color="#777" />
-          <Text style={styles.footerText}>Home</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToItinerary}
-        >
-          <Ionicons name="calendar" size={24} color="#777" />
-          <Text style={styles.footerText}>Itinerary</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToRecentTrips}
-        >
-          <Ionicons name="time" size={24} color="#777" />
-          <Text style={styles.footerText}>Recent</Text>
-        </TouchableOpacity>
+        <Footer/>
       </View>
     </View>
   )
