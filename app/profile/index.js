@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {jwtDecode} from 'jwt-decode';
+import Config from '../../config';
 
 import { 
   View, 
@@ -35,22 +37,20 @@ export default function Profile() {
     // Fetch user data directly from auth
     const fetchUserData = async () => {
       try {
-        const token = localStorage.getItem('token');
-        
+        const tokenPromise = AsyncStorage.getItem('token');
+        const token = await tokenPromise;
+        console.log("dd" +token);
         if (!token) {
           console.error("No authentication token found");
           setLoading(false);
           return;
         }
-
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const decodedToken = JSON.parse(window.atob(base64));
-        
-        const userId = decodedToken.id;
+        const decodedToken = jwtDecode(token);
+        const x = decodedToken.id;
+        const userId = x;
         
         // Make API call to fetch user data
-        const response = await fetch(`http://localhost:5000/api/auth/user/${userId}`);
+        const response = await fetch(`${Config.BASE_URL}/auth/user/${userId}`);
         console.log(response)
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);

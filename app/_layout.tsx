@@ -1,30 +1,23 @@
 import { Stack } from "expo-router";
 import { useFonts } from "expo-font";
 import { useEffect, useState } from "react";
-import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "../configs/FirebaseConfig";
 import { useRouter } from "expo-router";
 
 export default function RootLayout() {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState(null);
   const router = useRouter();
-
-  // Load fonts
   const [fontsLoaded] = useFonts({
     'outfit': require('./../assets/fonts/Outfit-Regular.ttf'),
     'outfit-medium': require('./../assets/fonts/Outfit-Medium.ttf'),
     'outfit-bold': require('./../assets/fonts/Outfit-Bold.ttf'),
   });
 
-  useEffect(() => {
-    // Set up auth state listener
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
+  // useEffect(() => {
+  //   });
 
-    // Clean up subscription
-    return unsubscribe;
-  }, []);
+  //   // Clean up subscription
+  //   return unsubscribe;
+  // }, []);
 
   if (!fontsLoaded) {
     return null; // Or a loading spinner
@@ -58,8 +51,7 @@ export default function RootLayout() {
       <Stack.Screen name="mirissa-beach/index" />
       <Stack.Screen name="create-trip/index" />
       <Stack.Screen name="add-transactions/index" />
-
-
+      <Stack.Screen name="footer/index" />
     </Stack>
   );
 }

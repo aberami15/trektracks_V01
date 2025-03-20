@@ -4,6 +4,8 @@ import { useNavigation, useRouter } from 'expo-router'
 import { signOut } from 'firebase/auth';
 import { auth, db } from '../../configs/FirebaseConfig';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Footer from '../footer';
+import Config from '../../config';
 
 export default function Home() {
   const navigation = useNavigation();
@@ -51,7 +53,7 @@ export default function Home() {
     setSearchError(null);
     
     try {
-      const response = await fetch(`http://localhost:5000/api/places/search?q=${encodeURIComponent(searchText)}`);
+      const response = await fetch(`${Config.BASE_URL}/places/search?q=${encodeURIComponent(searchText)}`);
       
       if (!response.ok) {
         throw new Error(`API request failed with status ${response.status}`);
@@ -120,23 +122,6 @@ export default function Home() {
     router.push('/profile');
   }
 
-  const navigateToHome = () => {
-    router.push('/home');
-  }
-
-  const navigateToItinerary = () => {
-    router.push('/trip-itinerary');
-  }
-
-  const navigateToFav = () => {
-    router.push('/save-favourite');
-  }
-
-  const navigateToRecentTrips = () => {
-    router.push('/recent-trips');
-  }
-
-
   const formatCategoryName = (category) => {
     if (category === 'ancient-places') return 'Ancient Place';
     return category.charAt(0).toUpperCase() + category.slice(1);
@@ -167,7 +152,6 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
-      {/* Header: Trektracks! title and profile icon */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Trektracks!</Text>
         <TouchableOpacity onPress={handleProfilePress}>
@@ -175,7 +159,6 @@ export default function Home() {
         </TouchableOpacity>
       </View>
 
-      {/* Search Bar */}
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={20} color="#777" style={styles.searchIcon} />
         <TextInput
@@ -202,15 +185,11 @@ export default function Home() {
         </TouchableOpacity>
       </View>
 
-      {/* Main Scrollable Content */}
       <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-        {/* Popular Destinations Section */}
+     
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Popular Destinations</Text>
-            <TouchableOpacity>
-              <Text style={styles.seeAllText}>See all</Text> {/*have to check*/}
-            </TouchableOpacity>
           </View>
 
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.destinationsScroll}>
@@ -241,7 +220,6 @@ export default function Home() {
           </ScrollView>
         </View>
 
-        {/* recommendations or search results */}
         <View style={[styles.sectionContainer, { marginBottom: 80 }]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
@@ -253,7 +231,6 @@ export default function Home() {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity>
-                <Text style={styles.viewAllText}>View all</Text>
               </TouchableOpacity>
             )}
           </View>
@@ -274,7 +251,6 @@ export default function Home() {
                 </TouchableOpacity>
               </View>
             ) : searchResults.length > 0 ? (
-              // Show search results
               searchResults.map((place) => (
                 <TouchableOpacity 
                   key={place._id} 
@@ -306,9 +282,7 @@ export default function Home() {
                 </TouchableOpacity>
               ))
             ) : (
-              // Show default recommended places when not searching
               <>
-                {/* Sigiriya Rock Fortress Card */}
                 <TouchableOpacity 
                   style={styles.locationCard}
                   onPress={() => router.push('/sigiriya')}
@@ -330,7 +304,6 @@ export default function Home() {
                   </View>
                 </TouchableOpacity>
 
-                {/* Mirissa Beach Card */}
                 <TouchableOpacity 
                   style={styles.locationCard}
                   onPress={() => router.push('/mirissa-beach')}
@@ -352,7 +325,6 @@ export default function Home() {
                   </View>
                 </TouchableOpacity>
 
-                {/* Temple of the Sacred Tooth Relic Card */}
                 <TouchableOpacity 
                   style={styles.locationCard}
                   onPress={() => router.push('/tooth-temple')}
@@ -374,7 +346,6 @@ export default function Home() {
                   </View>
                 </TouchableOpacity>
 
-                {/* Galle Fort Card */}
                 <TouchableOpacity 
                   style={styles.locationCard}
                   onPress={() => router.push('/galle-fort')}
@@ -401,42 +372,7 @@ export default function Home() {
         </View>
       </ScrollView>
 
-      {/* Footer Navigation */}
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.footerItem} 
-          onPress={navigateToHome}
-        >
-          <Ionicons name="home" size={24} color="#3478F6" />
-          <Text style={[styles.footerText, { color: '#3478F6' }]}>Home</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToItinerary}
-        >
-          <Ionicons name="calendar" size={24} color="#777" />
-          <Text style={styles.footerText}>Expence Tracker</Text>
-        </TouchableOpacity>
-
-        
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToFav}
-        >
-          <Ionicons name="heart" size={24} color="#777" />
-          <Text style={styles.footerText}>Favourites</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToRecentTrips}
-        >
-          <Ionicons name="time" size={24} color="#777" />
-          <Text style={styles.footerText}>Recent</Text>
-        </TouchableOpacity>
-      </View>
+      <Footer/>
     </View>
   )
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView, Alert, Platform, Modal } from 'react-native';
-import DateTimePicker from '@react-native-community/datetimepicker';
+import Footer from '../footer';
 
 const ExpenseEntry = () => {
   const [expense, setExpense] = useState({
@@ -20,7 +20,7 @@ const ExpenseEntry = () => {
   const API_URL = Platform.select({
     android: 'http://10.31.25.1:5000', // Your local IP address
     ios: 'http://10.31.25.1:5000',     // Your local IP address
-    default: 'http://localhost:5000'    // For web testing
+    default: 'http://192.168.74.138:5000'    // For web testing
   });
 
   const handleInputChange = (name, value) => {
@@ -106,110 +106,108 @@ const ExpenseEntry = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.title}>Expense Entry</Text>
-      <View style={styles.formContainer}>
-        {/* Date Field */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Date</Text>
-          <TouchableOpacity 
-            style={styles.input} 
-            onPress={() => setShowDatePicker(true)}
-          >
-            <Text style={styles.inputText}>{formatDate(expense.date)}</Text>
-          </TouchableOpacity>
-
-          {showDatePicker && (
-            <DateTimePicker
-              value={expense.date}
-              mode="date"
-              display="default"
-              onChange={handleDateChange}
-            />
-          )}
-        </View>
-
-        {/* Category Field */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Category</Text>
-          <TouchableOpacity 
-            style={styles.input} 
-            onPress={() => setShowCategoryModal(true)}
-          >
-            <Text style={[styles.inputText, !expense.category && styles.placeholderText]}>
-              {expense.category || 'Select a category'}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Description Field */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Description (Optional)</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Enter a short description"
-            placeholderTextColor="#aaa"
-            value={expense.description}
-            onChangeText={(value) => handleInputChange('description', value)}
-          />
-        </View>
-
-        {/* Amount Field */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Amount</Text>
-          <TextInput
-            style={styles.input}
-            keyboardType="numeric"
-            placeholder="Enter amount"
-            placeholderTextColor="#aaa"
-            value={expense.amount}
-            onChangeText={(value) => handleInputChange('amount', value)}
-          />
-        </View>
-
-        {/* Submit Button */}
-        <TouchableOpacity
-          style={[styles.button, isLoading && styles.disabledButton]}
-          onPress={handleSubmit}
-          disabled={isLoading}
-        >
-          <Text style={styles.buttonText}>
-            {isLoading ? 'Adding...' : 'Add Entry'}
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Category Selection Modal */}
-      <Modal
-        visible={showCategoryModal}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => setShowCategoryModal(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Select Category</Text>
-            
-            {categories.map((category) => (
-              <TouchableOpacity
-                key={category}
-                style={styles.categoryItem}
-                onPress={() => handleCategorySelect(category)}
-              >
-                <Text style={styles.categoryText}>{category}</Text>
-              </TouchableOpacity>
-            ))}
-            
-            <TouchableOpacity
-              style={styles.cancelButton}
-              onPress={() => setShowCategoryModal(false)}
+    
+      <ScrollView style={styles.container}>
+        <Text style={styles.title}>Expense Entry</Text>
+        <View style={styles.formContainer}>
+          {/* Date Field */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Date</Text>
+            <TouchableOpacity 
+              style={styles.input} 
+              onPress={() => setShowDatePicker(true)}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.inputText}>{formatDate(expense.date)}</Text>
             </TouchableOpacity>
           </View>
+
+          {/* Category Field */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Category</Text>
+            <TouchableOpacity 
+              style={styles.input} 
+              onPress={() => setShowCategoryModal(true)}
+            >
+              <Text style={[styles.inputText, !expense.category && styles.placeholderText]}>
+                {expense.category || 'Select a category'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Description Field */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Description (Optional)</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter a short description"
+              placeholderTextColor="#aaa"
+              value={expense.description}
+              onChangeText={(value) => handleInputChange('description', value)}
+            />
+          </View>
+
+          {/* Amount Field */}
+          <View style={styles.inputGroup}>
+            <Text style={styles.label}>Amount</Text>
+            <TextInput
+              style={styles.input}
+              keyboardType="numeric"
+              placeholder="Enter amount"
+              placeholderTextColor="#aaa"
+              value={expense.amount}
+              onChangeText={(value) => handleInputChange('amount', value)}
+            />
+          </View>
+
+          {/* Submit Button */}
+          <TouchableOpacity
+            style={[styles.button, isLoading && styles.disabledButton]}
+            onPress={handleSubmit}
+            disabled={isLoading}
+          >
+            <Text 
+            style={styles.buttonText}
+            onPress={'/budget-planner'}>
+              {isLoading ? 'Adding...' : 'Add Entry'}
+            </Text>
+          </TouchableOpacity>
+        
         </View>
-      </Modal>
-    </ScrollView>
+
+        {/* Category Selection Modal */}
+        <Modal
+          visible={showCategoryModal}
+          transparent={true}
+          animationType="slide"
+          onRequestClose={() => setShowCategoryModal(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Select Category</Text>
+              
+              {categories.map((category) => (
+                <TouchableOpacity
+                  key={category}
+                  style={styles.categoryItem}
+                  onPress={() => handleCategorySelect(category)}
+                >
+                  <Text style={styles.categoryText}>{category}</Text>
+                </TouchableOpacity>
+              ))}
+              
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowCategoryModal(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+        
+      </ScrollView>
+      
+      
   );
 };
 

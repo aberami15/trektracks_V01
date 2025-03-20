@@ -1,10 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, StatusBar, ActivityIndicator,TextInput } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, StatusBar, ActivityIndicator, TextInput, ToastAndroid } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useNavigation, useRouter, useLocalSearchParams } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { MaterialIcons } from '@expo/vector-icons';
-
-
+import Config from '../../config';
 
 export default function PlaceDetails() {
   const navigation = useNavigation();
@@ -12,13 +11,11 @@ export default function PlaceDetails() {
   const params = useLocalSearchParams();
   const id = params.q;
   
-  
   const [place, setPlace] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [text, setText] = useState('');
   const [review, setReview] = useState('');
-  
 
   useEffect(() => {
     navigation.setOptions({
@@ -67,6 +64,11 @@ export default function PlaceDetails() {
                 'Dambulla Cave Temple (15 km)',
                 'Polonnaruwa Ancient City (67 km)',
                 'Minneriya National Park (26 km)'
+              ],
+              reviews: [
+                "Beautiful place!",
+                "Must visit when in Sri Lanka",
+                "Incredible historical site"
               ]
             };
             
@@ -75,8 +77,9 @@ export default function PlaceDetails() {
           }, 1000);
           return;
         }
+        
         // Fetch from API for real MongoDB IDs
-        const response = await fetch(`http://localhost:5000/api/places/${id}`);
+        const response = await fetch(`${Config.BASE_URL}/places/${id}`);
         console.log(response)
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
@@ -174,12 +177,12 @@ export default function PlaceDetails() {
   }
 
   const addReview = async() => {
-    if(review == '') {
+    if(review === '') {
       return ToastAndroid.show('Please enter review', ToastAndroid.LONG);
     }
     
     try {
-      const response = await fetch(`http://localhost:5000/api/places/review/${place._id}`, {
+      const response = await fetch(`${Config.BASE_URL}/places/review/${place._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -188,11 +191,32 @@ export default function PlaceDetails() {
           reviews: review,
         })
       });
-      console.log("Creating review:", response);
-      setReview('');
+      
+      if (!response.ok) {
+        throw new Error(`API request failed with status ${response.status}`);
+      }
+      
+      // Update the place object with the new review
+      if (place.reviews) {
+        // Add the new review to the existing reviews array
+        setPlace({
+          ...place,
+          reviews: [review, ...place.reviews]
+        });
+      } else {
+        // Create a new reviews array if none exists
+        setPlace({
+          ...place,
+          reviews: [review]
+        });
+      }
+      
+      console.log("Review added successfully");
+      ToastAndroid.show('Review added successfully', ToastAndroid.SHORT);
+      setReview(''); // Clear the input field
     } catch (error) {
-      console.error('review save error:', error);
-      ToastAndroid.show(error.message || "review save failed", ToastAndroid.LONG);
+      console.error('Review save error:', error);
+      ToastAndroid.show(error.message || "Review save failed", ToastAndroid.LONG);
     }
   };
 
@@ -229,7 +253,11 @@ export default function PlaceDetails() {
           <Text style={styles.title}>{place.name}</Text>
           <View style={styles.locationContainer}>
             <Ionicons name="location" size={16} color="#3478F6" />
-            <Text style={styles.locationText}>{place.location.coordinates.lat}</Text>
+            <Text style={styles.locationText}>
+              {place.location.coordinates 
+                ? `${place.location.coordinates.lat}, ${place.location.coordinates.lng}` 
+                : place.location}
+            </Text>
           </View>
         </View>
         
@@ -335,7 +363,28 @@ export default function PlaceDetails() {
             </View>
           ))}
         </View>
-           {/* Text Box for Review */}
+        
+        {/* Reviews Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Reviews</Text>
+          
+          {place.reviews && place.reviews.length > 0 ? (
+            <View style={styles.reviewsContainer}>
+              {place.reviews.map((reviewText, index) => (
+                <View key={index} style={styles.reviewCard}>
+                  <View style={styles.reviewHeader}>
+                    <Text style={styles.reviewUser}>Visitor {index + 1}</Text>
+                  </View>
+                  <Text style={styles.reviewText}>{reviewText}</Text>
+                </View>
+              ))}
+            </View>
+          ) : (
+            <Text style={styles.noReviewsText}>No reviews yet. Be the first to leave a review!</Text>
+          )}
+        </View>
+           
+        {/* Text Box for Review */}
         <View style={styles.textBoxContainer}>
           <TextInput
             style={styles.textInput}
@@ -345,15 +394,13 @@ export default function PlaceDetails() {
             multiline
           />
         </View>
-
           
         {/* Add Review Button */}
-        <TouchableOpacity style={styles.addReview} 
-        onPress={addReview}
+        <TouchableOpacity 
+          style={styles.addReview} 
+          onPress={addReview}
         >
-          <Text style={styles.addReviewText}
-
-          >Add your review</Text>
+          <Text style={styles.addReviewText}>Add your review</Text>
           <Ionicons name="add-circle-outline" size={20} color="black" style={styles.addIcon} />
         </TouchableOpacity>
         
@@ -362,8 +409,6 @@ export default function PlaceDetails() {
           <Text style={styles.addButtonText}>Add to Itinerary</Text>
           <Ionicons name="add-circle-outline" size={20} color="white" style={styles.addIcon} />
         </TouchableOpacity>
-
-
         
         <View style={styles.footer} />
       </ScrollView>
@@ -567,6 +612,43 @@ const styles = StyleSheet.create({
     color: '#444',
     flex: 1,
     marginLeft: 8,
+  },
+  // Reviews styles
+  reviewsContainer: {
+    marginTop: 5,
+  },
+  reviewCard: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 8,
+  },
+  reviewUser: {
+    fontFamily: 'outfit-medium',
+    fontSize: 16,
+    color: '#333',
+  },
+  reviewText: {
+    fontFamily: 'outfit',
+    fontSize: 14,
+    color: '#444',
+    lineHeight: 20,
+  },
+  noReviewsText: {
+    fontFamily: 'outfit',
+    fontSize: 14,
+    color: '#777',
+    fontStyle: 'italic',
+    textAlign: 'center',
+    marginVertical: 10,
   },
   addButton: {
     backgroundColor: '#3478F6',

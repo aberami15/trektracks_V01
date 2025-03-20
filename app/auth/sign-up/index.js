@@ -3,23 +3,16 @@ import React, { useEffect } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import { TextInput } from 'react-native';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
-import { auth, db } from './../../../configs/FirebaseConfig';
-import { doc, setDoc } from 'firebase/firestore';
 import { useState } from 'react';
-
+import Config from '../../../config';
 
 export default function SignUp() {
   const navigation= useNavigation();
   const router=useRouter();
-
-  
   const [email, setEmail]=useState('');
   const [password, setPassword]=useState('');
   const [fullName, setFullName]=useState('');
-  const [phoneNumber, setPhoneNumber]=useState(''); // Added phone number state
-
-
+  const [phoneNumber, setPhoneNumber]=useState('');
 
   useEffect(()=>{
     navigation.setOptions({
@@ -28,15 +21,12 @@ export default function SignUp() {
   },[]);
 
   const OnCreateAccount = async() => {
-    // Updated validation to include phone number
     if(!email || !password || !fullName || !phoneNumber) {
       Alert.alert('Missing Information', 'Please Enter All Details');
       return;
     }
-
-    console.log(email, password, fullName, phoneNumber);
       try {
-        const response = await fetch('http://localhost:5000/api/auth/register', {
+        const response = await fetch(`${Config.BASE_URL}/auth/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -48,7 +38,6 @@ export default function SignUp() {
             phoneNumber: phoneNumber
           })
         });
-        console.log(response)
         if (!response.ok) {
           const errorData =await response.json();
           throw new Error(errorData.message || 'Registration failed');
@@ -58,7 +47,6 @@ export default function SignUp() {
         console.error('Register error:', error);
         ToastAndroid.show(error.message || "Sign up failed", ToastAndroid.LONG);
       }
-
   }
 
   return (
@@ -172,7 +160,6 @@ export default function SignUp() {
           fontFamily:'outfit'
         }}>Sign in</Text>
       </TouchableOpacity>
-
     </View>
   )
 }

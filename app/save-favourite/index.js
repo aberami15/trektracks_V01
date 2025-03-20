@@ -2,6 +2,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, FlatList } from '
 import React, { useEffect, useState } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Footer from '../footer';
+
 // Make sure this file is saved as save-favourite/index.js for proper Expo Router file-based routing
 
 export default function SaveFavourite() {
@@ -19,23 +21,7 @@ export default function SaveFavourite() {
     setFavorites([]);
   }, []);
 
-  const navigateToHome = () => {
-    router.push('/home');
-  }
-
-  const navigateToItinerary = () => {
-    router.push('/trip-itinerary');
-  }
-
-  const navigateToFav = () => {
-    // Stay on favorites page
-    router.push('/save-favourite');
-  }
-
-  const navigateToRecentTrips = () => {
-    router.push('/recent-trips');
-  }
-
+ 
   const navigateToProfile = () => {
     console.log("Navigating to profile");
     router.push('/profile');
@@ -89,41 +75,9 @@ export default function SaveFavourite() {
         )}
       </ScrollView>
 
-      {/* Footer Navigation */}
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.footerItem} 
-          onPress={navigateToHome}
-        >
-          <Ionicons name="home" size={24} color="#777" />
-          <Text style={styles.footerText}>Home</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToItinerary}
-        >
-          <Ionicons name="calendar" size={24} color="#777" />
-          <Text style={styles.footerText}>Expence Tracker</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToFav}
-        >
-          <Ionicons name="heart" size={24} color="#3478F6" />
-          <Text style={[styles.footerText, { color: '#3478F6' }]}>Favorites</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToRecentTrips}
-        >
-          <Ionicons name="time" size={24} color="#777" />
-          <Text style={styles.footerText}>Recent</Text>
-        </TouchableOpacity>
-      </View>
+      <Footer/>
     </View>
+    
   )
 }
 

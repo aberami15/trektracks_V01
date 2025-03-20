@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'rea
 import React, { useEffect } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
+import Footer from '../footer';
 
 export default function RecentTrips() {
   const navigation = useNavigation();
@@ -13,18 +14,7 @@ export default function RecentTrips() {
     })
   }, []);
 
-  const navigateToHome = () => {
-    router.push('/home');
-  }
-
-  const navigateToItinerary = () => {
-    router.push('/trip-itinerary');
-  }
-
-  const navigateToRecentTrips = () => {
-    // Stay on recent trips page
-    router.push('/recent-trips');
-  }
+  
 
   return (
     <View style={styles.container}>
@@ -88,32 +78,7 @@ export default function RecentTrips() {
         </View>
       </ScrollView>
 
-      {/* Footer Navigation */}
-      <View style={styles.footer}>
-        <TouchableOpacity 
-          style={styles.footerItem} 
-          onPress={navigateToHome}
-        >
-          <Ionicons name="home" size={24} color="#777" />
-          <Text style={styles.footerText}>Home</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToItinerary}
-        >
-          <Ionicons name="calendar" size={24} color="#777" />
-          <Text style={styles.footerText}>Itinerary</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.footerItem}
-          onPress={navigateToRecentTrips}
-        >
-          <Ionicons name="time" size={24} color="#3478F6" />
-          <Text style={[styles.footerText, { color: '#3478F6' }]}>Recent</Text>
-        </TouchableOpacity>
-      </View>
+      <Footer/>
     </View>
   )
 }

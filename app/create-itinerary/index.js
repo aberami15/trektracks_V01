@@ -1,3 +1,5 @@
+// This page is created to sync the Ai part. this may have changes.
+
 import React, { useState, useEffect } from 'react';
 import {
   View,

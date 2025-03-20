@@ -1,6 +1,7 @@
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { Stack, useRouter } from 'expo-router';
+import Footer from '../footer';
 
 const BudgetOverview = () => {
   const router = useRouter();
@@ -10,6 +11,7 @@ const BudgetOverview = () => {
   };
 
   return (
+    <View style={styles.mainContainer}>
     <ScrollView style={styles.container}>
       <Stack.Screen options={{ headerShown: false }} />
       
@@ -77,10 +79,16 @@ const BudgetOverview = () => {
         </View>
       </View>
     </ScrollView>
+    <Footer/>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  mainContainer: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
   container: {
     flex: 1,
     backgroundColor: '#ffffff',

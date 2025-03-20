@@ -1,17 +1,15 @@
 import { View, Text ,StyleSheet, TextInput, TouchableOpacity,ToastAndroid} from 'react-native'
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect,useState } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './../../../configs/FirebaseConfig';
+import Config from '../../../config';
 
 
 
 export default function SignIn() {
     const navigation= useNavigation();
     const router=useRouter();
-
     const [email,setEmail]=useState();
     const [password,setPassword]=useState();
 
@@ -21,8 +19,6 @@ export default function SignIn() {
     })
   },[])
 
-// In your auth/sign-in/index.js file, update the onSignIn function:
-
 const onSignIn = async() => {
   if(!email || !password) {
     ToastAndroid.show('Please Enter Email & Password', ToastAndroid.LONG);
@@ -30,7 +26,7 @@ const onSignIn = async() => {
   }
   
   try {
-    const response = await fetch('http://localhost:5000/api/auth/login', {
+    const response = await fetch(`${Config.BASE_URL}/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -40,17 +36,14 @@ const onSignIn = async() => {
         password: password
       })
     });
-    console.log(response)
     if (!response.ok) {
-      //const errorData =await response.message;
+      const errorData = await response.json();
+      ToastAndroid.show(errorData.message || "Sign in failed", ToastAndroid.LONG);
       throw new Error(errorData.message || 'Authentication failed');
     }
-    console.log(response)
     const data = await response.json();
     const token = data.token;
-    console.log(token)
-    // Store the token - for web
-    localStorage.setItem('token', token);
+    AsyncStorage.setItem('token', token);
     router.replace('/home');
   } catch (error) {
     console.error('Login error:', error);
@@ -71,12 +64,12 @@ const onSignIn = async() => {
     <Ionicons name="arrow-back-circle-outline" size={30} color="black" />
     </TouchableOpacity>
 
-      <Text style={{
-      fontFamily:'outfit-bold',
-      fontSize:30,
-      marginTop:30
-    
-     }}>Let's Sign You In</Text> 
+    <Text style={{
+    fontFamily:'outfit-bold',
+    fontSize:30,
+    marginTop:30
+  
+    }}>Let's Sign You In</Text> 
 
     <Text style={{
       fontFamily:'outfit',
@@ -85,7 +78,7 @@ const onSignIn = async() => {
       marginTop:20
      }}>Welcome Back</Text> 
 
-<Text style={{
+    <Text style={{
       fontFamily:'outfit',
       fontSize:30,
       color:'gray',
@@ -96,13 +89,13 @@ const onSignIn = async() => {
      <View style={{
         marginTop:50
       }}>
-        <Text style={{
-          fontFamily:'outfit'
-        }}>Email</Text>
-        <TextInput 
-        style={styles.input}
-        onChangeText={(value)=>setEmail(value)}
-        placeholder='Enter Email'/>
+
+      <Text style={{ fontFamily:'outfit'}}>Email</Text>
+
+      <TextInput 
+      style={styles.input}
+      onChangeText={(value)=>setEmail(value)}
+      placeholder='Enter Email'/>
 
      </View>
 
@@ -122,7 +115,7 @@ const onSignIn = async() => {
         
       </View>
 
-        {/* {Sign in Button} */}
+      
       <TouchableOpacity onPress={onSignIn} style={{
         padding:20,
         backgroundColor:'black',
@@ -136,7 +129,7 @@ const onSignIn = async() => {
       </TouchableOpacity>
 
 
-       {/* {Create Account Button} */}
+       
        <TouchableOpacity
           onPress={()=>router.replace('auth/sign-up')}
         style={{

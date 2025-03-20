@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import {jwtDecode} from 'jwt-decode';
 import {
   View,
   Text,
@@ -12,10 +13,14 @@ import {
   Platform,
   Modal,
   FlatList,
-  Image
+  Image,
+  ActivityIndicator
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Footer from '../footer';
+import Config from '../../config';
 
 export default function CreateTrip() {
   const navigation = useNavigation();
@@ -31,6 +36,7 @@ export default function CreateTrip() {
   const [budget, setBudget] = useState('');
   const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [currentLocation, setCurrentLocation] = useState('');
 
   // Modal visibility states
@@ -69,6 +75,7 @@ export default function CreateTrip() {
   const dateOptions = generateDateOptions();
 
   const handleSaveItinerary = async () => {
+    // Validate required fields
     if (!destination) {
       ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
       return;
@@ -84,46 +91,87 @@ export default function CreateTrip() {
       return;
     }
 
+    if (!currentLocation) {
+      ToastAndroid.show('Please enter your current location', ToastAndroid.SHORT);
+      return;
+    }
+
+    if (!budget) {
+      ToastAndroid.show('Please enter your budget', ToastAndroid.SHORT);
+      return;
+    }
+
+    // Validate that end date is after start date
+    if (new Date(endDate) <= new Date(startDate)) {
+      ToastAndroid.show('End date must be after start date', ToastAndroid.SHORT);
+      return;
+    }
+
     try {
-      const token = localStorage.getItem('token');
-      // setLoading(true);
-      const response = await fetch('http://localhost:5000/api/trips', {
+      setLoading(true);
+      setError(null);
+      
+      // Get token from AsyncStorage
+      const token = await AsyncStorage.getItem('token');
+      
+      if (!token) {
+        ToastAndroid.show('Authentication required. Please login again.', ToastAndroid.LONG);
+        router.replace('/auth/sign-in');
+        return;
+      }
+      
+      const tokenPromise = AsyncStorage.getItem('token');
+      const token2 = await tokenPromise;
+      if (!token2) {
+        console.error("No authentication token found");
+        setLoading(false);
+        return;
+      }
+      const decodedToken = jwtDecode(token2);
+      const x = decodedToken.id;
+      const userId = x;
+
+      // Create request payload
+      const tripData = {
+        destination: destination,
+        startDate: startDate,
+        from: currentLocation,
+        endDate: endDate,
+        travelerCategory: travelerCategory,
+        tripType: tripType,
+        vehicle: vehicle,
+        budget: parseInt(budget), // Convert to number
+        currency: "LKR", // Hardcoded as mentioned in your data model
+        description: description,
+        userId: userId
+      };
+      
+      console.log("Creating trip with data:", tripData);
+      
+      // Make API request
+      const response = await fetch(`${Config.BASE_URL}/trips`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({
-          destination : destination,
-          startDate: startDate,
-          from:currentLocation,
-          endDate: endDate,
-          travelerCategory:travelerCategory,
-          tripType:tripType,
-          vehicle:vehicle,
-          budget:budget,
-          description:description
-        })
+        body: JSON.stringify(tripData)
       });
-      // Create itinerary data object
-      // const itineraryData = {
-      //   destination,
-      //   startDate,
-      //   endDate,
-      //   travelerCategory,
-      //   tripType,
-      //   vehicle,
-      //   budget,
-      //   description,
-      //   createdAt: new Date()
-      // };
-
-      console.log("Creating itinerary:", response);
-      router.push('/trip-itinerary')
       
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Server responded with status ${response.status}`);
+      }
+      
+      const responseData = await response.json();
+      console.log("Trip created successfully:", responseData);
+      
+      ToastAndroid.show('Trip created successfully!', ToastAndroid.LONG);
+      router.push('/trip-itinerary');
     } catch (error) {
-      console.error("Error creating itinerary: ", error);
-      ToastAndroid.show('Failed to create itinerary', ToastAndroid.SHORT);
+      console.error("Error creating trip:", error);
+      setError(error.message || 'Failed to create trip. Please try again.');
+      ToastAndroid.show(error.message || 'Failed to create trip', ToastAndroid.LONG);
+    } finally {
       setLoading(false);
     }
   };
@@ -171,9 +219,10 @@ export default function CreateTrip() {
   const handleGeneratePlan = () => {
     // First save the itinerary
     handleSaveItinerary();
+  };
 
-    // Navigate to budget overview page
-    router.push('/budget-planner');
+  const handleBack = () => {
+    router.back(); // Navigate back to the previous screen
   };
 
   const handleSaveForLater = () => {
@@ -188,13 +237,16 @@ export default function CreateTrip() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Back Button to Homepage */}
+      {/* Back Button to Homepage
       <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
         <Ionicons name="arrow-back" size={20} color="#333" />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* Header with profile photo */}
       <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={20} color="#333" />
+        </TouchableOpacity>
         <Text style={styles.headerTitle}>Fill This Out!</Text>
         <TouchableOpacity onPress={() => router.push('/profile')}>
           <Image
@@ -219,7 +271,7 @@ export default function CreateTrip() {
             <View style={styles.searchInputContainer}>
               <TextInput
                 style={styles.searchInput}
-                placeholder="Search destination"
+                placeholder="Enter your current location"
                 value={currentLocation}
                 onChangeText={setCurrentLocation}
               />
@@ -342,11 +394,19 @@ export default function CreateTrip() {
             </View>
           </View>
 
+          {/* Error message if there's an error */}
+          {error && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          )}
+
           {/* Action Buttons */}
           <View style={styles.actionButtonsContainer}>
             <TouchableOpacity 
               style={styles.saveForLaterButton}
               onPress={handleSaveForLater}
+              disabled={loading}
             >
               <Ionicons name="bookmark-outline" size={18} color="#333" />
               <Text style={styles.saveForLaterText}>Save for Later</Text>
@@ -355,12 +415,18 @@ export default function CreateTrip() {
             <TouchableOpacity 
               style={styles.generatePlanButton}
               onPress={handleGeneratePlan}
+              disabled={loading}
             >
-              <Text style={styles.generatePlanText}>Create Trip</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text style={styles.generatePlanText}>Create Trip</Text>
+              )}
             </TouchableOpacity>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <Footer/>
 
       {/* Dropdown Modals */}
       {renderDropdownModal(
@@ -417,7 +483,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   backButton: {
-    position: 'absolute',
     top: 50, 
     left: 20, 
     zIndex: 10,
@@ -433,7 +498,9 @@ const styles = StyleSheet.create({
     color: '#333',
     fontSize: 20,
     fontWeight: '600',
-    fontFamily: 'outfit-bold'
+    fontFamily: 'outfit-bold',
+    flex: 1,
+    textAlign: 'center'
   },
   profileImage: {
     width: 40,
@@ -508,6 +575,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     minHeight: 100,
     color: '#333',
+  },
+  errorContainer: {
+    backgroundColor: '#ffebee',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  errorText: {
+    color: '#d32f2f',
+    fontFamily: 'outfit',
+    fontSize: 14,
   },
   modalOverlay: {
     flex: 1,
