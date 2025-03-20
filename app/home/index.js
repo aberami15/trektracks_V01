@@ -189,6 +189,31 @@ export default function Home() {
      
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Plan Your Adventure</Text>
+          </View>
+          
+          <View style={styles.planAdventureCard}>
+            <View style={styles.planAdventureContent}>
+              <Text style={styles.planAdventureTitle}>AI-Powered Trip Planning</Text>
+              <Text style={styles.planAdventureDescription}>
+                Create a personalized Sri Lanka itinerary with our AI assistant. Get custom recommendations based on your preferences.
+              </Text>
+              <TouchableOpacity 
+                style={styles.planAdventureButton}
+                onPress={() => router.push('/create-trip')}
+              >
+                <Text style={styles.planAdventureButtonText}>Create New Trip</Text>
+                <Ionicons name="arrow-forward" size={20} color="white" />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.planAdventureImageContainer}>
+              <Ionicons name="map" size={80} color="#3478F6" />
+            </View>
+          </View>
+        </View>
+     
+        <View style={styles.sectionContainer}>
+          <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Popular Destinations</Text>
           </View>
 
@@ -619,4 +644,53 @@ const styles = StyleSheet.create({
     color: '#777',
     marginTop: 4,
   },
+  planAdventureCard: {
+    backgroundColor: 'white',
+    borderRadius: 15,
+    padding: 20,
+    flexDirection: 'row',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+    marginHorizontal: 20,
+  },
+  planAdventureContent: {
+    flex: 3,
+  },
+  planAdventureImageContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  planAdventureTitle: {
+    fontFamily: 'outfit-bold',
+    fontSize: 18,
+    color: '#333',
+    marginBottom: 8,
+  },
+  planAdventureDescription: {
+    fontFamily: 'outfit',
+    fontSize: 14,
+    color: '#666',
+    marginBottom: 15,
+    lineHeight: 20,
+  },
+  planAdventureButton: {
+    backgroundColor: '#3478F6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+  },
+  planAdventureButtonText: {
+    fontFamily: 'outfit-medium',
+    fontSize: 14,
+    color: 'white',
+    marginRight: 8,
+  }
 });
