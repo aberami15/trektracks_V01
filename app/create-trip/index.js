@@ -135,7 +135,7 @@ export default function CreateTrip() {
       };
       
       // Make API call
-      const response = await fetch(`${Config.BASE_URL}/api/travel`, {
+      const response = await fetch(`${Config.BASE_URL}/travel`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
