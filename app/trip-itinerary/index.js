@@ -80,7 +80,7 @@ export default function TripItinerary() {
       const fetchTripPlan = async () => {
         setLoadingPlan(true);
         try {
-          const response = await fetch(`${Config.BASE_URL}/api/travel/${params.id}`);
+          const response = await fetch(`${Config.BASE_URL}/travel/${params.id}`);
           
           if (!response.ok) {
             throw new Error(`Failed to fetch trip plan: ${response.status}`);
