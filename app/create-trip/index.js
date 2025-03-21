@@ -17,8 +17,9 @@ import { Picker } from '@react-native-picker/picker';
 import { Ionicons } from '@expo/vector-icons';
 import Config from '../../config';
 import Footer from '../footer';
+import { jwtDecode } from 'jwt-decode';
 
-export default function CreateTrip() {
+function CreateTrip() {
   const navigation = useNavigation();
   const router = useRouter();
   
@@ -55,17 +56,15 @@ export default function CreateTrip() {
       try {
         const token = await AsyncStorage.getItem('token');
         if (token) {
-          // Decode token to get user ID (simplified version)
-          // In reality, you might want to make an API call to get user info
-          const tokenParts = token.split('.');
-          if (tokenParts.length === 3) {
-            const payload = JSON.parse(atob(tokenParts[1]));
-            setUserId(payload.id);
-          }
+          // Decode token to get user ID
+          const decoded = jwtDecode(token);
+          setUserId(decoded.id);
+          return decoded.id;
         }
       } catch (error) {
         console.error('Error getting user ID:', error);
       }
+      return null;
     };
     
     getUserId();
@@ -134,6 +133,8 @@ export default function CreateTrip() {
         userId: userId
       };
       
+      console.log('Submitting data:', dataToSend);
+      
       // Make API call
       const response = await fetch(`${Config.BASE_URL}/travel`, {
         method: 'POST',
@@ -150,6 +151,7 @@ export default function CreateTrip() {
       }
       
       const responseData = await response.json();
+      console.log('Response data:', responseData);
       
       // Success - Navigate to trip details page
       Alert.alert(
@@ -463,3 +465,5 @@ const styles = StyleSheet.create({
     height: 50, // Space at the bottom of the form
   },
 });
+
+export default CreateTrip;
