@@ -166,6 +166,8 @@ export default function TripItinerary() {
           </View>
 
           <View style={styles.actionButtons}>
+            
+
             <TouchableOpacity 
               style={styles.actionButton} 
               onPress={() => deleteTrip(trip._id)}
@@ -176,6 +178,18 @@ export default function TripItinerary() {
               </Text>
             </TouchableOpacity>
           </View>
+
+          {/* <View style={styles.actionButtons}>
+            <TouchableOpacity 
+              style={styles.actionButton} 
+              onPress={() => deleteTrip(trip._id)}
+            >
+              <MaterialIcons name="delete" size={18} color="#FF3B30" />
+              <Text style={[styles.actionButtonText, {color: '#FF3B30'}]}>
+                Delete
+              </Text>
+            </TouchableOpacity>
+          </View> */}
         </View>
       </TouchableOpacity>
     );

@@ -19,6 +19,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Calendar } from 'react-native-calendars'; // Import the Calendar component
 import Footer from '../footer';
 import Config from '../../config';
 
@@ -39,12 +40,19 @@ export default function CreateTrip() {
   const [error, setError] = useState(null);
   const [currentLocation, setCurrentLocation] = useState('');
 
-  // Modal visibility states
-  const [startDateModalVisible, setStartDateModalVisible] = useState(false);
-  const [endDateModalVisible, setEndDateModalVisible] = useState(false);
+  // Calendar modal states
+  const [startCalendarVisible, setStartCalendarVisible] = useState(false);
+  const [endCalendarVisible, setEndCalendarVisible] = useState(false);
+  
+  // Modal visibility states for other dropdowns
   const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [tripTypeModalVisible, setTripTypeModalVisible] = useState(false);
   const [vehicleModalVisible, setVehicleModalVisible] = useState(false);
+
+  // Get today's date in YYYY-MM-DD format for calendar min date
+  const today = new Date().toISOString().split('T')[0];
+
+
 
   useEffect(() => {
     navigation.setOptions({
@@ -56,23 +64,6 @@ export default function CreateTrip() {
   const travelerCategories = ["Solo", "Couple", "Family", "Friends", "Group Tour"];
   const tripTypes = ["Adventure", "Relaxation", "Cultural", "Devotional", "Food & Cuisine", "Nature", "Photography"];
   const vehicleOptions = ["Car", "Public Transport", "Bike", "Walking", "Plane", "Train", "Bus"];
-
-  // Generate date options for next 365 days
-  const generateDateOptions = () => {
-    const dateOptions = [];
-    const today = new Date();
-    
-    for (let i = 0; i < 365; i++) {
-      const date = new Date();
-      date.setDate(today.getDate() + i);
-      const formattedDate = date.toISOString().split('T')[0]; // YYYY-MM-DD format
-      dateOptions.push(formattedDate);
-    }
-    
-    return dateOptions;
-  };
-
-  const dateOptions = generateDateOptions();
 
   const handleSaveItinerary = async () => {
     // Validate required fields
@@ -216,6 +207,44 @@ export default function CreateTrip() {
     </Modal>
   );
 
+  // Calendar modal for date selection
+  const renderCalendarModal = (visible, setVisible, title, selectedDate, setSelectedDate, minDate) => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={() => setVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <TouchableOpacity onPress={() => setVisible(false)}>
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
+          </View>
+          
+          <Calendar
+            current={selectedDate || today}
+            minDate={minDate || today}
+            onDayPress={(day) => {
+              setSelectedDate(day.dateString);
+              setVisible(false);
+            }}
+            markedDates={{
+              [selectedDate]: {selected: true, marked: true, selectedColor: '#3478F6'}
+            }}
+            theme={{
+              selectedDayBackgroundColor: '#3478F6',
+              todayTextColor: '#3478F6',
+              arrowColor: '#3478F6',
+            }}
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+
   const handleGeneratePlan = () => {
     // First save the itinerary
     handleSaveItinerary();
@@ -237,11 +266,6 @@ export default function CreateTrip() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Back Button to Homepage
-      <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
-        <Ionicons name="arrow-back" size={20} color="#333" />
-      </TouchableOpacity> */}
-
       {/* Header with profile photo */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
@@ -293,12 +317,12 @@ export default function CreateTrip() {
             </View>
           </View>
 
-          {/* Start Date - New field */}
+          {/* Start Date - Calendar */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Start Date</Text>
             <TouchableOpacity 
               style={styles.dropdownField}
-              onPress={() => setStartDateModalVisible(true)}
+              onPress={() => setStartCalendarVisible(true)}
             >
               <Text style={[styles.dropdownText, !startDate && styles.placeholderText]}>
                 {startDate || "Select start date"}
@@ -307,12 +331,12 @@ export default function CreateTrip() {
             </TouchableOpacity>
           </View>
 
-          {/* End Date - New field */}
+          {/* End Date - Calendar */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>End Date</Text>
             <TouchableOpacity 
               style={styles.dropdownField}
-              onPress={() => setEndDateModalVisible(true)}
+              onPress={() => setEndCalendarVisible(true)}
             >
               <Text style={[styles.dropdownText, !endDate && styles.placeholderText]}>
                 {endDate || "Select end date"}
@@ -378,7 +402,7 @@ export default function CreateTrip() {
             </TouchableOpacity>
           </View>
 
-          {/* Description - New field */}
+          {/* Description */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Description</Text>
             <View style={styles.textAreaContainer}>
@@ -428,25 +452,26 @@ export default function CreateTrip() {
       </KeyboardAvoidingView>
       <Footer/>
 
-      {/* Dropdown Modals */}
-      {renderDropdownModal(
-        startDateModalVisible, 
-        setStartDateModalVisible, 
-        "Select Start Date", 
-        dateOptions, 
-        startDate, 
-        setStartDate
+      {/* Calendar Modals */}
+      {renderCalendarModal(
+        startCalendarVisible,
+        setStartCalendarVisible,
+        "Select Start Date",
+        startDate,
+        setStartDate,
+        today
       )}
 
-      {renderDropdownModal(
-        endDateModalVisible, 
-        setEndDateModalVisible, 
-        "Select End Date", 
-        dateOptions, 
-        endDate, 
-        setEndDate
+      {renderCalendarModal(
+        endCalendarVisible,
+        setEndCalendarVisible,
+        "Select End Date",
+        endDate,
+        setEndDate,
+        startDate || today
       )}
 
+      {/* Dropdown Modals for other fields */}
       {renderDropdownModal(
         categoryModalVisible, 
         setCategoryModalVisible, 
@@ -562,7 +587,6 @@ const styles = StyleSheet.create({
   dropdownIcon: {
     marginLeft: 10,
   },
-  // For the description text area
   textAreaContainer: {
     backgroundColor: '#f2f2f2',
     borderRadius: 10,
