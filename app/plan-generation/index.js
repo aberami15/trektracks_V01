@@ -76,56 +76,60 @@ export default function PlanGeneration() {
   const handleSubmit = async () => {
     setError(null);
     
-    if (!formData.from || !formData.destination) {
-      setError('Please enter both start and end locations');
-      return;
+    if(formData.plan) {
+      router.push(`/show-plan?q=${id}`);
     }
-    
-    setLoading(true);
-    
-    try {
-      const token = await AsyncStorage.getItem('token');
-      if (!token) {
-        setError("No authentication token found");
+    else{
+      if (!formData.from || !formData.destination) {
+        setError('Please enter both start and end locations');
         return;
       }
       
-      const dataToSend = {
-        tripId: id,
-        endDate: formData.endDate,
-        startDate: formData.startDate,
-        startLocation: formData.from,
-        endLocation: formData.destination,
-        numPersons: formData.numPersons,
-        tripPreference: formData.tripType,
-        travelerType: formData.tripType,
-        transportMode: formData.vehicle
-      };
+      setLoading(true);
       
-      const response = await fetch(`${Config.BASE_URL}/travel/${id}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: JSON.stringify(dataToSend),
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to generate itinerary');
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (!token) {
+          setError("No authentication token found");
+          return;
+        }
+        
+        const dataToSend = {
+          tripId: id,
+          endDate: formData.endDate,
+          startDate: formData.startDate,
+          startLocation: formData.from,
+          endLocation: formData.destination,
+          numPersons: formData.numPersons,
+          tripPreference: formData.tripType,
+          travelerType: formData.tripType,
+          transportMode: formData.vehicle
+        };
+        
+        const response = await fetch(`${Config.BASE_URL}/travel/${id}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+          body: JSON.stringify(dataToSend),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to generate itinerary');
+        }
+        
+        const responseData = await response.json();
+        console.log(responseData);
+        
+        router.push(`/show-plan?q=${id}`);
+      } catch (error) {
+        console.error('Error generating itinerary:', error);
+        setError(error.message || 'Failed to generate itinerary');
+      } finally {
+        setLoading(false);
       }
-      
-      const responseData = await response.json();
-      console.log(responseData);
-      
-      router.push(`/show-plan?q=${id}`);
-      
-    } catch (error) {
-      console.error('Error generating itinerary:', error);
-      setError(error.message || 'Failed to generate itinerary');
-    } finally {
-      setLoading(false);
     }
   };
   
@@ -199,19 +203,24 @@ export default function PlanGeneration() {
         </View>
 
         <TouchableOpacity 
-          style={[styles.button, loading && styles.disabledButton]}
-          onPress={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" size="small" />
-          ) : (
-            <>
-              <Text style={styles.buttonText}>Generate Itinerary</Text>
-              <Ionicons name="paper-plane" size={20} color="white" style={styles.buttonIcon} />
-            </>
-          )}
-        </TouchableOpacity>
+            style={[styles.button, loading && styles.disabledButton]}
+            onPress={handleSubmit}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator color="#fff" size="small" />
+            ) : formData.plan ? (
+              <>
+                <Text style={styles.buttonText}>View Itinerary</Text>
+                <Ionicons name="eye" size={20} color="white" style={styles.buttonIcon} />
+              </>
+            ) : (
+              <>
+                <Text style={styles.buttonText}>Generate Itinerary</Text>
+                <Ionicons name="paper-plane" size={20} color="white" style={styles.buttonIcon} />
+              </>
+            )}
+          </TouchableOpacity>
         
         <View style={styles.spacer}></View>
       </ScrollView>
