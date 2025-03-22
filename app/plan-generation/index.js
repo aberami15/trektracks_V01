@@ -24,15 +24,7 @@ export default function PlanGeneration() {
   const id = params.q;
   
   // Initialize form data with proper structure
-  const [formData, setFormData] = useState({
-    from: '',
-    destination: '',
-    startDate: new Date(),
-    endDate: new Date(new Date().setDate(new Date().getDate() + 7)), // Default to 1 week
-    numPersons: '',
-    tripType: '',
-    vehicle: ''
-  });
+  const [formData, setFormData] = useState({});
   
   const [loading, setLoading] = useState(false);
   const [showStartDatePicker, setShowStartDatePicker] = useState(false);
@@ -54,7 +46,7 @@ export default function PlanGeneration() {
         throw new Error("No authentication token found");
       }
       
-      const response = await fetch(`${Config.BASE_URL}/trips?q=${encodeURIComponent(id)}`, {
+      const response = await fetch(`${Config.BASE_URL}/trips/${id}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -199,7 +191,7 @@ export default function PlanGeneration() {
         [
           {
             text: 'View Itinerary',
-            onPress: () => router.push(`/show-plan`)
+            onPress: () => router.push(`/show-plan?q=${encodeURIComponent(id)}`)
           }
         ]
       );

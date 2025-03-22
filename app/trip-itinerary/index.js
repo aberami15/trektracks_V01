@@ -128,12 +128,12 @@ export default function TripItinerary() {
         <View style={styles.tripDetails}>
           <View style={styles.tripDetailRow}>
             <View style={styles.detailItem}>
-              <MaterialIcons name="flight-takeoff" size={18} color="#3478F6" />
+              <MaterialIcons name="flight-takeoff" size={18} color="#37A794" />
               <Text style={styles.detailLabel}>From:</Text>
               <Text style={styles.detailText}>{trip.from}</Text>
             </View>
             <View style={styles.detailItem}>
-              <MaterialIcons name="flight-land" size={18} color="#3478F6" />
+              <MaterialIcons name="flight-land" size={18} color="#37A794" />
               <Text style={styles.detailLabel}>To:</Text>
               <Text style={styles.detailText}>{trip.destination}</Text>
             </View>
@@ -141,12 +141,12 @@ export default function TripItinerary() {
 
           <View style={styles.tripDetailRow}>
             <View style={styles.detailItem}>
-              <MaterialIcons name="account-balance-wallet" size={18} color="#3478F6" />
+              <MaterialIcons name="account-balance-wallet" size={18} color="#37A794" />
               <Text style={styles.detailLabel}>Budget:</Text>
               <Text style={styles.detailText}>{trip.budget}</Text>
             </View>
             <View style={styles.detailItem}>
-              <MaterialIcons name="directions-car" size={18} color="#3478F6" />
+              <MaterialIcons name="directions-car" size={18} color="#37A794" />
               <Text style={styles.detailLabel}>Vehicle:</Text>
               <Text style={styles.detailText}>{trip.vehicle}</Text>
             </View>
@@ -154,12 +154,12 @@ export default function TripItinerary() {
 
           <View style={styles.tripDetailRow}>
             <View style={styles.detailItem}>
-              <MaterialIcons name="group" size={18} color="#3478F6" />
+              <MaterialIcons name="group" size={18} color="#37A794"/>
               <Text style={styles.detailLabel}>Category:</Text>
               <Text style={styles.detailText}>{trip.tripType}</Text>
             </View>
             <View style={styles.detailItem}>
-              <MaterialIcons name="category" size={18} color="#3478F6" />
+              <MaterialIcons name="category" size={18} color="#37A794" />
               <Text style={styles.detailLabel}>Type:</Text>
               <Text style={styles.detailText}>{trip.tripType}</Text>
             </View>
@@ -178,18 +178,6 @@ export default function TripItinerary() {
               </Text>
             </TouchableOpacity>
           </View>
-
-          {/* <View style={styles.actionButtons}>
-            <TouchableOpacity 
-              style={styles.actionButton} 
-              onPress={() => deleteTrip(trip._id)}
-            >
-              <MaterialIcons name="delete" size={18} color="#FF3B30" />
-              <Text style={[styles.actionButtonText, {color: '#FF3B30'}]}>
-                Delete
-              </Text>
-            </TouchableOpacity>
-          </View> */}
         </View>
       </TouchableOpacity>
     );
@@ -248,7 +236,7 @@ export default function TripItinerary() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#F5F7FA', // Light blue-gray background
     paddingTop: 50,
   },
   header: {
@@ -261,16 +249,16 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontFamily: 'outfit-bold',
     fontSize: 28,
-    color: '#333',
+    color: '#2C3E50', // Dark blue-gray
   },
   profileButton: {
-    padding: 10,  // Added padding to increase touch area
-    zIndex: 10,   // Ensure it's above other elements
+    padding: 10,
+    zIndex: 10,
   },
   content: {
     flex: 1,
     paddingHorizontal: 20,
-    marginBottom: 60, // Space for the footer
+    marginBottom: 60,
   },
   tripCardsContainer: {
     marginBottom: 20,
@@ -288,7 +276,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   tripHeader: {
-    backgroundColor: '#3478F6',
+    backgroundColor: '#37A794', // Teal (ocean color)
     padding: 15,
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
@@ -324,14 +312,14 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontFamily: 'outfit-medium',
     fontSize: 14,
-    color: '#555',
+    color: '#5D7A96', // Blue-gray
     marginLeft: 5,
     marginRight: 5,
   },
   detailText: {
     fontFamily: 'outfit',
     fontSize: 14,
-    color: '#333',
+    color: '#2C3E50', // Dark blue-gray
   },
   descriptionContainer: {
     marginTop: 5,
@@ -340,13 +328,13 @@ const styles = StyleSheet.create({
   descriptionLabel: {
     fontFamily: 'outfit-medium',
     fontSize: 14,
-    color: '#555',
+    color: '#5D7A96', // Blue-gray
     marginBottom: 3,
   },
   descriptionText: {
     fontFamily: 'outfit',
     fontSize: 14,
-    color: '#333',
+    color: '#2C3E50', // Dark blue-gray
     lineHeight: 20,
   },
   actionButtons: {
@@ -354,7 +342,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     marginTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: '#EFF4F7', // Light blue-gray
     paddingTop: 15,
   },
   actionButton: {
@@ -365,7 +353,7 @@ const styles = StyleSheet.create({
   actionButtonText: {
     fontFamily: 'outfit-medium',
     fontSize: 14,
-    color: '#3478F6',
+    color: '#37A794', // Teal (ocean color)
     marginLeft: 5,
   },
   emptyState: {
@@ -376,14 +364,14 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontFamily: 'outfit-medium',
     fontSize: 22,
-    color: '#333',
+    color: '#2C3E50', // Dark blue-gray
     marginTop: 20,
     marginBottom: 10,
   },
   emptyText: {
     fontFamily: 'outfit',
     fontSize: 16,
-    color: '#777',
+    color: '#5D7A96', // Blue-gray
     textAlign: 'center',
     marginBottom: 30,
     paddingHorizontal: 20,
@@ -393,7 +381,7 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   createButton: {
-    backgroundColor: 'black',
+    backgroundColor: '#1C6E85', // Deep ocean blue
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 12,

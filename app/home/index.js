@@ -388,19 +388,19 @@ const styles = StyleSheet.create({
   loadingText: {
     fontFamily: 'outfit',
     fontSize: 14,
-    color: '#666',
+    color: '#5D7A96', // Soft blue-gray
     marginTop: 10,
   },
   errorText: {
     fontFamily: 'outfit-medium',
     fontSize: 14,
-    color: '#FF3B30',
+    color: '#E74C3C', // Softer red
   },
   searchLoadingContainer: {
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 40,
-    backgroundColor: '#f8f8f8',
+    backgroundColor: '#EFF4F7', // Light blue-gray
     borderRadius: 12,
     marginBottom: 15,
   },
@@ -408,12 +408,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingVertical: 30,
-    backgroundColor: '#fff0f0',
+    backgroundColor: '#FDEAEA', // Softer red background
     borderRadius: 12,
     marginBottom: 15,
   },
   retryButton: {
-    backgroundColor: '#3478F6',
+    backgroundColor: '#37A794', // Teal (ocean color)
     paddingHorizontal: 20,
     paddingVertical: 8,
     borderRadius: 20,
@@ -428,7 +428,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 10,
     top: 10,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(55, 167, 148, 0.75)', // Semi-transparent teal
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -440,7 +440,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: '#f2f2f2',
+    backgroundColor: '#F5F7FA', // Very light blue-gray
     paddingTop: 50,
   },
   header: {
@@ -453,12 +453,12 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontFamily: 'outfit-bold',
     fontSize: 28,
-    color: '#333',
+    color: '#2C3E50', // Dark blue-gray
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e8e8e8',
+    backgroundColor: '#E8ECF0', // Light grayish blue
     marginHorizontal: 20,
     borderRadius: 25,
     paddingHorizontal: 15,
@@ -472,13 +472,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: 'outfit',
     fontSize: 16,
-    color: '#666',
+    color: '#5D7A96', // Blue-gray
   },
   clearButton: {
     marginRight: 8,
   },
   searchButton: {
-    backgroundColor: '#3478F6',
+    backgroundColor: '#37A794', // Teal (ocean color)
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -502,17 +502,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontFamily: 'outfit-medium',
     fontSize: 20,
-    color: '#333',
+    color: '#2C3E50', // Dark blue-gray
   },
   seeAllText: {
     fontFamily: 'outfit',
     fontSize: 16,
-    color: '#3478F6',
+    color: '#37A794', // Teal (ocean color)
   },
   viewAllText: {
     fontFamily: 'outfit',
     fontSize: 16,
-    color: '#3478F6',
+    color: '#37A794', // Teal (ocean color)
   },
   destinationsScroll: {
     paddingLeft: 20,
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
   destinationName: {
     fontFamily: 'outfit-medium',
     fontSize: 16,
-    color: '#333',
+    color: '#2C3E50', // Dark blue-gray
     textAlign: 'center',
   },
   recentlyVisitedScroll: {
@@ -556,7 +556,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 10,
     top: 10,
-    backgroundColor: 'rgba(0,0,0,0.6)',
+    backgroundColor: 'rgba(44, 62, 80, 0.75)', // Semi-transparent dark blue
     borderRadius: 12,
     flexDirection: 'row',
     alignItems: 'center',
@@ -575,7 +575,7 @@ const styles = StyleSheet.create({
   locationName: {
     fontFamily: 'outfit-medium',
     fontSize: 18,
-    color: '#333',
+    color: '#2C3E50', // Dark blue-gray
     marginBottom: 5,
   },
   locationDetail: {
@@ -586,13 +586,13 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#4CAF50',
+    backgroundColor: '#37A794', // Teal (ocean color)
     marginRight: 8,
   },
   locationPlace: {
     fontFamily: 'outfit',
     fontSize: 14,
-    color: '#666',
+    color: '#5D7A96', // Blue-gray
   },
   footer: {
     position: 'absolute',
@@ -605,7 +605,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     borderTopWidth: 1,
-    borderTopColor: '#e8e8e8',
+    borderTopColor: '#E8ECF0', // Light grayish blue
     paddingBottom: 5,
   },
   footerItem: {
@@ -616,7 +616,7 @@ const styles = StyleSheet.create({
   footerText: {
     fontFamily: 'outfit',
     fontSize: 12,
-    color: '#777',
+    color: '#5D7A96', // Blue-gray
     marginTop: 4,
   },
 });

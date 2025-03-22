@@ -6,7 +6,7 @@ import {
   ScrollView, 
   TouchableOpacity
 } from 'react-native';
-import { useNavigation, useRouter } from 'expo-router';
+import { useNavigation, useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Footer from '../footer';
 import Markdown from 'react-native-markdown-display';
@@ -14,18 +14,57 @@ import Markdown from 'react-native-markdown-display';
 export default function ShowPlan() {
   const navigation = useNavigation();
   const router = useRouter();
-  
-  // Static trip data
-  const tripData = {
-    tripId: "67dd7db3cc91b27728bb01c0",
-    aiGeneratedPlan: "## Sri Lanka Travel Itinerary: Colombo to Sigiriya (March 10th - April 10th, 2025)\n\nThis itinerary focuses on food and prioritizes a relaxed pace, allowing for flexibility.  Note that prices are estimates and can vary depending on season and availability.  Always confirm prices before committing.\n\n**Note:**  Emergency contact details are highly variable and should be obtained locally upon arrival.  The information below provides a general idea of where to find them.\n\n\n### 1. Low Budget Plan (31 Days)\n\n**Transport:** Local buses and occasional three-wheeler taxis.\n\n**Accommodation:** Hostels and guesthouses.\n\n**Food:** Local eateries, street food.\n\n**Daily Budget:**  Approx. $50 per person per day (excluding transport).\n\n\n**(Detailed daily itinerary is omitted due to length.  The focus will be on a sample week and generalized locations.)**\n\n\n**Sample Week (adjust as needed):**\n\n* **Days 1-3: Colombo:** Explore Pettah Market, Galle Face Green, Gangaramaya Temple.  Eat at street food stalls and local restaurants. Stay in a hostel near Colombo Fort.\n* **Days 4-6: Kandy:** Take a bus to Kandy. Visit the Temple of the Tooth Relic, Kandy Lake, and a tea factory.  Enjoy Kottu Roti and other local delicacies. Stay in a budget guesthouse.\n* **Days 7-9: Ella:** Take a bus to Ella. Hike Little Adam's Peak, explore Ella Rock, and visit Nine Arch Bridge. Indulge in local Sri Lankan curries at budget-friendly restaurants. Stay in a budget guesthouse.\n* **Days 10-12:  Yala National Park:** Take a bus to Tissamaharama, near Yala. Consider a shared jeep safari (cheaper option) to spot wildlife. Enjoy simple meals near the park. Stay in a basic guesthouse.\n* **Days 13-14: Travel to Sigiriya:** Take a bus to Sigiriya. \n\n\nThe remaining days can be spent exploring other areas based on your interest, such as Polonnaruwa, Dambulla, or spending more time in a location you particularly enjoyed.\n\n### 2. Normal Budget Plan (31 Days)\n\n**Transport:**  Private van with driver (negotiate prices).\n\n**Accommodation:** 3-star hotels and guesthouses.\n\n**Food:** Mid-range restaurants and occasional fine dining.\n\n**Daily Budget:** Approx. $100-$150 per person per day (excluding transport).\n\n\n**(Detailed daily itinerary is omitted due to length. The focus will be on a sample week and generalized locations.)**\n\n\n**Sample Week (adjust as needed):**\n\n* **Days 1-3: Colombo:** Stay in a 3-star hotel. Explore Colombo's restaurants, visit museums, and enjoy the city life.\n* **Days 4-6: Kandy:** Hire a driver for the journey. Stay in a comfortable 3-star hotel. Explore Kandy's cultural sites and enjoy a cooking class.\n* **Days 7-9: Ella:**  Travel by van to Ella. Stay at a 3-star hotel. Enjoy the views and dine at mid-range restaurants.\n* **Days 10-12: Yala National Park:**  Travel by van to Yala. Stay in a comfortable hotel near the park. Enjoy a private jeep safari.\n* **Days 13-14: Travel to Sigiriya:** Travel by van to Sigiriya.\n\n\nThe remaining days can be tailored to your preferences.\n\n### 3. Expensive Plan (31 Days)\n\n**Transport:** Private luxury van with driver.\n\n**Accommodation:** 5-star luxury hotels and resorts.\n\n**Food:** Fine dining restaurants and private chefs.\n\n**Daily Budget:** Approx. $500-$1000+ per person per day (excluding transport).\n\n\n**(Detailed daily itinerary is omitted due to length.)**  This plan would involve staying in luxury hotels, enjoying private tours, and indulging in top-tier dining experiences across the island.\n\n\n### 4. Shopping Recommendations\n\n* **Pettah Market (Colombo):**  A bustling market with a wide variety of goods, from spices and textiles to clothing and electronics.  Bargaining is expected.\n* **Barefoot Garden Cafe (Colombo):** Upscale shopping with local crafts and design.\n* **Handloom centers in Kandy & Ella:** Find beautiful handcrafted textiles and clothing.\n* **Local markets in smaller towns:** Discover unique souvenirs and local products.\n\n### 5. Emergency Contacts\n\nObtaining reliable, up-to-the-minute emergency contact numbers should be prioritized upon arrival in Sri Lanka.  Look for posted numbers at your hotel or ask your driver/guide.  General numbers may be outdated quickly.\n\n\n### 6. Entry Tickets (Approximate Prices - Confirm before visit)\n\n* **Sigiriya Rock Fortress:**  Approx. $30 USD per person.\n* **Temple of the Tooth Relic (Kandy):**  Approx. $5-10 USD per person.\n* **Yala National Park (Safari):**  Prices vary greatly depending on the type of safari (shared vs. private). Expect to pay from $50-$150+ USD per person.\n* **Other historical sites:**  Prices typically range from $5-20 USD per person.\n\n\nThis itinerary provides a framework. You can customize it to better suit your interests and budget. Remember to book accommodations and transport in advance, especially during peak season. Enjoy your trip!"
-  };
+  const params = useLocalSearchParams();
+  const id = params.q;
+  const [tripData, setTripData] = useState({});
+  const [loading, setLoading] = useState(false);
 
-  React.useEffect(() => {
+  
+  useEffect(() => {
     navigation.setOptions({
       headerShown: false
     });
+    
+    fetchTripDetail();
   }, []);
+
+  const fetchTripDetail = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${Config.BASE_URL}/trips/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const responseData = await response.json();
+      console.log("Trip details:", responseData.data);
+      
+      if (responseData.data) {
+        let tripData = { ...responseData.data };
+        
+        if (typeof tripData.startDate === 'string') {
+          tripData.startDate = new Date(tripData.startDate);
+        }
+        
+        if (typeof tripData.endDate === 'string') {
+          tripData.endDate = new Date(tripData.endDate);
+        }
+        
+        setTripData(tripData);
+      }
+    } catch (error) {
+      console.error('Error fetching trip:', error);
+      Alert.alert('Error', 'Failed to load trip details');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Markdown styles for the itinerary display
   const markdownStyles = {
