@@ -41,7 +41,7 @@ export default function BudgetPlanner() {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const responseData = await response.json();
-      console.log(responseData.data)
+      
       setTripDetail(responseData.data || {
         budget: 0,
         totalExpense: 0,
@@ -66,7 +66,9 @@ export default function BudgetPlanner() {
   
   return (
     <View style={styles.mainContainer}>
-      <ScrollView style={styles.container}>
+      <ScrollView 
+      contentContainerStyle={{ flexGrow: 1, paddingBottom: 100 }} 
+      style={styles.container}>
         <Stack.Screen options={{ headerShown: false }} />
         
         {/* Back Button */}
@@ -151,7 +153,7 @@ export default function BudgetPlanner() {
 
         {/* Money Moves */}
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Money Moves</Text>
+          
           <View style={styles.buttonRow}>
             <TouchableOpacity 
               style={styles.actionButton} 
@@ -159,11 +161,16 @@ export default function BudgetPlanner() {
               <Feather name="plus" size={20} color="#fff" />
               <Text style={styles.buttonText}>Add Transactions</Text>
             </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.actionButton} 
+              onPress={() => router.push(`/plan-generation?q=${id}`)}>
+              <Feather name="calendar" size={20} color="#fff" />
+              <Text style={styles.buttonText}>Generate Plan</Text>
+            </TouchableOpacity>
           </View>
         </View>
       </ScrollView>
-      
-      {/* Footer added here */}
       <Footer />
     </View>
   );
@@ -175,7 +182,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#ffffff',
     padding: 20,
   },

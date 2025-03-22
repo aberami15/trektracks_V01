@@ -1,469 +1,690 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  TouchableOpacity, 
-  ScrollView, 
-  StyleSheet, 
-  ActivityIndicator,
-  Alert,
-  Platform
+import {jwtDecode} from 'jwt-decode';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  TextInput,
+  ScrollView,
+  ToastAndroid,
+  KeyboardAvoidingView,
+  Platform,
+  Modal,
+  FlatList,
+  Image,
+  ActivityIndicator
 } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { Picker } from '@react-native-picker/picker';
-import { Ionicons } from '@expo/vector-icons';
-import Config from '../../config';
+import { Calendar } from 'react-native-calendars'; // Import the Calendar component
 import Footer from '../footer';
-import { jwtDecode } from 'jwt-decode';
+import Config from '../../config';
 
-function CreateTrip() {
+export default function CreateTrip() {
   const navigation = useNavigation();
   const router = useRouter();
   
   // Form state
-  const [formData, setFormData] = useState({
-    startLocation: '',
-    endLocation: '',
-    startDate: new Date(),
-    endDate: new Date(new Date().setDate(new Date().getDate() + 7)), // Default to 1 week
-    numPersons: '1',
-    travelerType: 'Solo',
-    tripPreference: 'General',
-    transportMode: 'Public Transport',
-  });
-  
-  // UI state
+  const [destination, setDestination] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [travelerCategory, setTravelerCategory] = useState('');
+  const [tripType, setTripType] = useState('');
+  const [vehicle, setVehicle] = useState('');
+  const [budget, setBudget] = useState('');
+  const [description, setDescription] = useState('');
   const [loading, setLoading] = useState(false);
-  const [userId, setUserId] = useState(null);
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [error, setError] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState('');
+
+  // Calendar modal states
+  const [startCalendarVisible, setStartCalendarVisible] = useState(false);
+  const [endCalendarVisible, setEndCalendarVisible] = useState(false);
   
-  // Dropdown options
-  const travelerTypes = ['Solo', 'Couple', 'Family', 'Friends', 'Group'];
-  const preferenceTypes = ['General', 'Adventure', 'Cultural', 'Beach', 'Nature', 'Wildlife', 'Luxury'];
-  const transportModes = ['Public Transport', 'Private Car', 'Tuk Tuk', 'Rental Vehicle', 'Tour Bus'];
-  
+  // Modal visibility states for other dropdowns
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [tripTypeModalVisible, setTripTypeModalVisible] = useState(false);
+  const [vehicleModalVisible, setVehicleModalVisible] = useState(false);
+
+  // Get today's date in YYYY-MM-DD format for calendar min date
+  const today = new Date().toISOString().split('T')[0];
+
+
+
   useEffect(() => {
     navigation.setOptions({
       headerShown: false
     });
-    
-    // Get user ID from AsyncStorage
-    const getUserId = async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        if (token) {
-          // Decode token to get user ID
-          const decoded = jwtDecode(token);
-          setUserId(decoded.id);
-          return decoded.id;
-        }
-      } catch (error) {
-        console.error('Error getting user ID:', error);
-      }
-      return null;
-    };
-    
-    getUserId();
   }, []);
-  
-  // Handle input changes
-  const handleInputChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
-  };
-  
-  // Handle date changes
-  const onStartDateChange = (event, selectedDate) => {
-    setShowStartDatePicker(false);
-    if (selectedDate) {
-      setFormData({ ...formData, startDate: selectedDate });
-      
-      // Update end date if it's before start date
-      if (formData.endDate < selectedDate) {
-        const newEndDate = new Date(selectedDate);
-        newEndDate.setDate(selectedDate.getDate() + 1);
-        setFormData(prev => ({
-          ...prev,
-          startDate: selectedDate,
-          endDate: newEndDate
-        }));
-      } else {
-        setFormData(prev => ({
-          ...prev,
-          startDate: selectedDate
-        }));
-      }
-    }
-  };
-  
-  const onEndDateChange = (event, selectedDate) => {
-    setShowEndDatePicker(false);
-    if (selectedDate) {
-      if (selectedDate > formData.startDate) {
-        setFormData({ ...formData, endDate: selectedDate });
-      } else {
-        Alert.alert("Invalid Date", "End date must be after start date");
-      }
-    }
-  };
-  
-  // Format date for display
-  const formatDate = (date) => {
-    const options = { year: 'numeric', month: 'short', day: 'numeric' };
-    return date.toLocaleDateString('en-US', options);
-  };
-  
-  // Submit form
-  const handleSubmit = async () => {
-    // Validate form
-    if (!formData.startLocation || !formData.endLocation) {
-      Alert.alert('Missing Information', 'Please enter both start and end locations');
+
+  // Options for dropdowns
+  const travelerCategories = ["Solo", "Couple", "Family", "Friends", "Group Tour"];
+  const tripTypes = ["Adventure", "Relaxation", "Cultural", "Devotional", "Food & Cuisine", "Nature", "Photography"];
+  const vehicleOptions = ["Car", "Public Transport", "Bike", "Walking", "Plane", "Train", "Bus"];
+
+  const handleSaveItinerary = async () => {
+    // Validate required fields
+    if (!destination) {
+      ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
       return;
     }
-    
-    setLoading(true);
-    
+
+    if (!startDate) {
+      ToastAndroid.show('Please select start date', ToastAndroid.SHORT);
+      return;
+    }
+
+    if (!endDate) {
+      ToastAndroid.show('Please select end date', ToastAndroid.SHORT);
+      return;
+    }
+
+    if (!currentLocation) {
+      ToastAndroid.show('Please enter your current location', ToastAndroid.SHORT);
+      return;
+    }
+
+    if (!budget) {
+      ToastAndroid.show('Please enter your budget', ToastAndroid.SHORT);
+      return;
+    }
+
+    // Validate that end date is after start date
+    if (new Date(endDate) <= new Date(startDate)) {
+      ToastAndroid.show('End date must be after start date', ToastAndroid.SHORT);
+      return;
+    }
+
     try {
-      // Add user ID to form data
-      const dataToSend = {
-        ...formData,
+      setLoading(true);
+      setError(null);
+      
+      // Get token from AsyncStorage
+      const token = await AsyncStorage.getItem('token');
+      
+      if (!token) {
+        ToastAndroid.show('Authentication required. Please login again.', ToastAndroid.LONG);
+        router.replace('/auth/sign-in');
+        return;
+      }
+      
+      const tokenPromise = AsyncStorage.getItem('token');
+      const token2 = await tokenPromise;
+      if (!token2) {
+        console.error("No authentication token found");
+        setLoading(false);
+        return;
+      }
+      const decodedToken = jwtDecode(token2);
+      const x = decodedToken.id;
+      const userId = x;
+
+      // Create request payload
+      const tripData = {
+        destination: destination,
+        startDate: startDate,
+        from: currentLocation,
+        endDate: endDate,
+        travelerCategory: travelerCategory,
+        tripType: tripType,
+        vehicle: vehicle,
+        budget: parseInt(budget), // Convert to number
+        currency: "LKR", // Hardcoded as mentioned in your data model
+        description: description,
         userId: userId
       };
       
-      console.log('Submitting data:', dataToSend);
+      console.log("Creating trip with data:", tripData);
       
-      // Make API call
-      const response = await fetch(`${Config.BASE_URL}/travel`, {
+      // Make API request
+      const response = await fetch(`${Config.BASE_URL}/trips`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
-        body: JSON.stringify(dataToSend),
+        body: JSON.stringify(tripData)
       });
       
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to create trip');
+        throw new Error(errorData.message || `Server responded with status ${response.status}`);
       }
       
       const responseData = await response.json();
-      console.log('Response data:', responseData);
+      console.log("Trip created successfully:", responseData);
       
-      // Success - Navigate to trip details page
-      Alert.alert(
-        'Trip Created',
-        'Your trip was created successfully and an AI-generated itinerary has been created!',
-        [
-          {
-            text: 'View Itinerary',
-            onPress: () => router.push(`/trip-itinerary?id=${responseData.data.tripId}`)
-          }
-        ]
-      );
+      ToastAndroid.show('Trip created successfully!', ToastAndroid.LONG);
+      router.push('/trip-itinerary');
     } catch (error) {
-      console.error('Error creating trip:', error);
-      Alert.alert('Error', error.message || 'Failed to create trip');
+      console.error("Error creating trip:", error);
+      setError(error.message || 'Failed to create trip. Please try again.');
+      ToastAndroid.show(error.message || 'Failed to create trip', ToastAndroid.LONG);
     } finally {
       setLoading(false);
     }
   };
-  
-  return (
-    <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#3478F6" />
-          <Text style={styles.backButtonText}>Back</Text>
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Create Trip</Text>
-      </View>
-      
-      <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.formContainer}>
-        <Text style={styles.formTitle}>Plan Your Sri Lanka Adventure</Text>
-        <Text style={styles.formSubtitle}>Fill in the details and we'll generate a custom itinerary for you</Text>
-        
-        {/* Start Location */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Starting From</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="E.g., Colombo Airport"
-            value={formData.startLocation}
-            onChangeText={(text) => handleInputChange('startLocation', text)}
-          />
-        </View>
-        
-        {/* End Location */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Ending At</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="E.g., Colombo City"
-            value={formData.endLocation}
-            onChangeText={(text) => handleInputChange('endLocation', text)}
-          />
-        </View>
-        
-        {/* Date Row */}
-        <View style={styles.dateRow}>
-          {/* Start Date */}
-          <View style={styles.dateInputGroup}>
-            <Text style={styles.label}>Start Date</Text>
-            <TouchableOpacity 
-              style={styles.dateInput}
-              onPress={() => setShowStartDatePicker(true)}
-            >
-              <Text style={styles.dateText}>{formatDate(formData.startDate)}</Text>
-              <Ionicons name="calendar" size={20} color="#3478F6" />
+
+  const renderDropdownItem = (item, setSelected, closeModal) => (
+    <TouchableOpacity
+      style={styles.dropdownItem}
+      onPress={() => {
+        setSelected(item);
+        closeModal();
+      }}
+    >
+      <Text style={styles.dropdownItemText}>{item}</Text>
+    </TouchableOpacity>
+  );
+
+  // Generic dropdown modal
+  const renderDropdownModal = (visible, setVisible, title, data, selectedValue, setSelectedValue) => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={() => setVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <TouchableOpacity onPress={() => setVisible(false)}>
+              <Ionicons name="close" size={24} color="#333" />
             </TouchableOpacity>
-            {showStartDatePicker && (
-              <DateTimePicker
-                value={formData.startDate}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={onStartDateChange}
-                minimumDate={new Date()}
-              />
-            )}
+          </View>
+
+          <FlatList
+            data={data}
+            renderItem={({ item }) => renderDropdownItem(item, setSelectedValue, () => setVisible(false))}
+            keyExtractor={(item) => item}
+            style={styles.dropdownList}
+          />
+        </View>
+      </View>
+    </Modal>
+  );
+
+  // Calendar modal for date selection
+  const renderCalendarModal = (visible, setVisible, title, selectedDate, setSelectedDate, minDate) => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={() => setVisible(false)}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <TouchableOpacity onPress={() => setVisible(false)}>
+              <Ionicons name="close" size={24} color="#333" />
+            </TouchableOpacity>
           </View>
           
-          {/* End Date */}
-          <View style={styles.dateInputGroup}>
-            <Text style={styles.label}>End Date</Text>
-            <TouchableOpacity 
-              style={styles.dateInput}
-              onPress={() => setShowEndDatePicker(true)}
-            >
-              <Text style={styles.dateText}>{formatDate(formData.endDate)}</Text>
-              <Ionicons name="calendar" size={20} color="#3478F6" />
-            </TouchableOpacity>
-            {showEndDatePicker && (
-              <DateTimePicker
-                value={formData.endDate}
-                mode="date"
-                display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                onChange={onEndDateChange}
-                minimumDate={new Date(formData.startDate.getTime() + 86400000)} // +1 day from start date
-              />
-            )}
-          </View>
-        </View>
-        
-        {/* Number of Persons */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Number of Travelers</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Number of persons"
-            value={formData.numPersons}
-            onChangeText={(text) => handleInputChange('numPersons', text.replace(/[^0-9]/g, ''))}
-            keyboardType="numeric"
+          <Calendar
+            current={selectedDate || today}
+            minDate={minDate || today}
+            onDayPress={(day) => {
+              setSelectedDate(day.dateString);
+              setVisible(false);
+            }}
+            markedDates={{
+              [selectedDate]: {selected: true, marked: true, selectedColor: '#3478F6'}
+            }}
+            theme={{
+              selectedDayBackgroundColor: '#3478F6',
+              todayTextColor: '#3478F6',
+              arrowColor: '#3478F6',
+            }}
           />
         </View>
-        
-        {/* Traveler Type */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Traveler Type</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={formData.travelerType}
-              onValueChange={(value) => handleInputChange('travelerType', value)}
-              style={styles.picker}
-            >
-              {travelerTypes.map((type) => (
-                <Picker.Item key={type} label={type} value={type} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-        
-        {/* Trip Preference */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Trip Preference</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={formData.tripPreference}
-              onValueChange={(value) => handleInputChange('tripPreference', value)}
-              style={styles.picker}
-            >
-              {preferenceTypes.map((type) => (
-                <Picker.Item key={type} label={type} value={type} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-        
-        {/* Transport Mode */}
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Transport Mode</Text>
-          <View style={styles.pickerContainer}>
-            <Picker
-              selectedValue={formData.transportMode}
-              onValueChange={(value) => handleInputChange('transportMode', value)}
-              style={styles.picker}
-            >
-              {transportModes.map((mode) => (
-                <Picker.Item key={mode} label={mode} value={mode} />
-              ))}
-            </Picker>
-          </View>
-        </View>
-        
-        {/* Submit Button */}
-        <TouchableOpacity 
-          style={[styles.button, loading && styles.disabledButton]}
-          onPress={handleSubmit}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="#fff" size="small" />
-          ) : (
-            <>
-              <Text style={styles.buttonText}>Generate Itinerary</Text>
-              <Ionicons name="paper-plane" size={20} color="white" style={styles.buttonIcon} />
-            </>
-          )}
+      </View>
+    </Modal>
+  );
+
+  const handleGeneratePlan = () => {
+    // First save the itinerary
+    handleSaveItinerary();
+  };
+
+  const handleBack = () => {
+    router.back(); // Navigate back to the previous screen
+  };
+
+  const handleSaveForLater = () => {
+    if (!destination) {
+      ToastAndroid.show('Please enter a destination', ToastAndroid.SHORT);
+      return;
+    }
+
+    ToastAndroid.show('Saved for later!', ToastAndroid.SHORT);
+    // Implement save for later functionality
+  };
+
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header with profile photo */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={20} color="#333" />
         </TouchableOpacity>
-        
-        <View style={styles.spacer}></View>
-      </ScrollView>
-      
-      <Footer />
-    </View>
+        <Text style={styles.headerTitle}>Fill This Out!</Text>
+        <TouchableOpacity onPress={() => router.push('/profile')}>
+          <Image
+            source={require('../../assets/images/profile.png')}
+            style={styles.profileImage}
+          />
+        </TouchableOpacity>
+      </View>
+
+      {/* Form Content */}
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <ScrollView 
+          contentContainerStyle={styles.content}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Search Text */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Current Location</Text>
+            <View style={styles.searchInputContainer}>
+              <TextInput
+                style={styles.searchInput}
+                placeholder="Enter your current location"
+                value={currentLocation}
+                onChangeText={setCurrentLocation}
+              />
+              <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
+            </View>
+          </View>
+
+          {/* Destination */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Destination</Text>
+            <View style={styles.dropdownField}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter destination"
+                value={destination}
+                onChangeText={setDestination}
+              />
+              <Ionicons name="search" size={20} color="#999" style={styles.dropdownIcon} />
+            </View>
+          </View>
+
+          {/* Start Date - Calendar */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Start Date</Text>
+            <TouchableOpacity 
+              style={styles.dropdownField}
+              onPress={() => setStartCalendarVisible(true)}
+            >
+              <Text style={[styles.dropdownText, !startDate && styles.placeholderText]}>
+                {startDate || "Select start date"}
+              </Text>
+              <Ionicons name="calendar" size={20} color="#999" style={styles.dropdownIcon} />
+            </TouchableOpacity>
+          </View>
+
+          {/* End Date - Calendar */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>End Date</Text>
+            <TouchableOpacity 
+              style={styles.dropdownField}
+              onPress={() => setEndCalendarVisible(true)}
+            >
+              <Text style={[styles.dropdownText, !endDate && styles.placeholderText]}>
+                {endDate || "Select end date"}
+              </Text>
+              <Ionicons name="calendar" size={20} color="#999" style={styles.dropdownIcon} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Budget */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Budget (LKR)</Text>
+            <View style={styles.dropdownField}>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your budget"
+                value={budget}
+                onChangeText={setBudget}
+                keyboardType="numeric"
+              />
+              <Ionicons name="wallet-outline" size={20} color="#999" style={styles.dropdownIcon} />
+            </View>
+          </View> 
+
+          {/* Traveler Category */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Traveller Category</Text>
+            <TouchableOpacity 
+              style={styles.dropdownField}
+              onPress={() => setCategoryModalVisible(true)}
+            >
+              <Text style={[styles.dropdownText, !travelerCategory && styles.placeholderText]}>
+                {travelerCategory || "Select traveler category"}
+              </Text>
+              <Ionicons name="chevron-down" size={20} color="#999" style={styles.dropdownIcon} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Trip Type */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Trip Type</Text>
+            <TouchableOpacity 
+              style={styles.dropdownField}
+              onPress={() => setTripTypeModalVisible(true)}
+            >
+              <Text style={[styles.dropdownText, !tripType && styles.placeholderText]}>
+                {tripType || "Select trip type"}
+              </Text>
+              <Ionicons name="chevron-down" size={20} color="#999" style={styles.dropdownIcon} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Vehicle */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Vehicle</Text>
+            <TouchableOpacity 
+              style={styles.dropdownField}
+              onPress={() => setVehicleModalVisible(true)}
+            >
+              <Text style={[styles.dropdownText, !vehicle && styles.placeholderText]}>
+                {vehicle || "Select vehicle"}
+              </Text>
+              <Ionicons name="chevron-down" size={20} color="#999" style={styles.dropdownIcon} />
+            </TouchableOpacity>
+          </View>
+
+          {/* Description */}
+          <View style={styles.inputContainer}>
+            <Text style={styles.inputLabel}>Description</Text>
+            <View style={styles.textAreaContainer}>
+              <TextInput
+                style={styles.textArea}
+                placeholder="Enter trip description"
+                value={description}
+                onChangeText={setDescription}
+                multiline
+                numberOfLines={4}
+                textAlignVertical="top"
+              />
+            </View>
+          </View>
+
+          {/* Error message if there's an error */}
+          {error && (
+            <View style={styles.errorContainer}>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          )}
+
+          {/* Action Buttons */}
+          <View style={styles.actionButtonsContainer}>
+            <TouchableOpacity 
+              style={styles.saveForLaterButton}
+              onPress={handleSaveForLater}
+              disabled={loading}
+            >
+              <Ionicons name="bookmark-outline" size={18} color="#333" />
+              <Text style={styles.saveForLaterText}>Save for Later</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={styles.generatePlanButton}
+              onPress={handleGeneratePlan}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color="white" />
+              ) : (
+                <Text style={styles.generatePlanText}>Create Trip</Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+      <Footer/>
+
+      {/* Calendar Modals */}
+      {renderCalendarModal(
+        startCalendarVisible,
+        setStartCalendarVisible,
+        "Select Start Date",
+        startDate,
+        setStartDate,
+        today
+      )}
+
+      {renderCalendarModal(
+        endCalendarVisible,
+        setEndCalendarVisible,
+        "Select End Date",
+        endDate,
+        setEndDate,
+        startDate || today
+      )}
+
+      {/* Dropdown Modals for other fields */}
+      {renderDropdownModal(
+        categoryModalVisible, 
+        setCategoryModalVisible, 
+        "Select Traveler Category", 
+        travelerCategories, 
+        travelerCategory, 
+        setTravelerCategory
+      )}
+
+      {renderDropdownModal(
+        tripTypeModalVisible, 
+        setTripTypeModalVisible, 
+        "Select Trip Type", 
+        tripTypes, 
+        tripType, 
+        setTripType
+      )}
+
+      {renderDropdownModal(
+        vehicleModalVisible, 
+        setVehicleModalVisible, 
+        "Select Vehicle", 
+        vehicleOptions, 
+        vehicle, 
+        setVehicle
+      )}
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'white',
+  },
+  backButton: {
+    top: 50, 
+    left: 20, 
+    zIndex: 10,
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    padding: 20,
     paddingTop: 50,
-    paddingHorizontal: 20,
-    paddingBottom: 15,
-    backgroundColor: 'white',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1',
-  },
-  backButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  backButtonText: {
-    color: '#3478F6',
-    marginLeft: 5,
-    fontSize: 16,
-    fontFamily: 'outfit-medium',
   },
   headerTitle: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 18,
     color: '#333',
+    fontSize: 20,
+    fontWeight: '600',
     fontFamily: 'outfit-bold',
-    marginRight: 40, // Offset for back button to center the title
-  },
-  scrollContainer: {
     flex: 1,
+    textAlign: 'center'
   },
-  formContainer: {
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+  },
+  content: {
     padding: 20,
-    paddingBottom: 100, // Extra padding for footer
+    paddingBottom: 100,
   },
-  formTitle: {
-    fontSize: 22,
-    fontFamily: 'outfit-bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  formSubtitle: {
-    fontSize: 14,
-    fontFamily: 'outfit',
-    color: '#666',
-    marginBottom: 25,
-  },
-  inputGroup: {
+  inputContainer: {
     marginBottom: 20,
   },
-  label: {
-    fontSize: 16,
+  inputLabel: {
     fontFamily: 'outfit-medium',
-    color: '#333',
+    fontSize: 16,
     marginBottom: 8,
+    color: '#333',
   },
-  input: {
-    backgroundColor: 'white',
-    padding: 15,
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f2f2f2',
     borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    paddingHorizontal: 12,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 12,
     fontSize: 16,
     fontFamily: 'outfit',
   },
-  dateRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 20,
-  },
-  dateInputGroup: {
-    width: '48%', // Just under 50% to give a little gap
-  },
-  dateInput: {
-    backgroundColor: 'white',
-    padding: 15,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  dateText: {
-    fontSize: 16,
-    fontFamily: 'outfit',
-  },
-  pickerContainer: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    overflow: 'hidden',
-  },
-  picker: {
-    height: 50,
-    width: '100%',
-  },
-  button: {
-    backgroundColor: '#3478F6',
-    padding: 18,
-    borderRadius: 10,
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  disabledButton: {
-    backgroundColor: '#a0c0f0',
-  },
-  buttonText: {
-    color: 'white',
-    fontSize: 16,
-    fontFamily: 'outfit-medium',
-  },
-  buttonIcon: {
+  searchIcon: {
     marginLeft: 10,
   },
-  spacer: {
-    height: 50, // Space at the bottom of the form
+  input: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 16,
+    fontFamily: 'outfit',
+  },
+  dropdownField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f2f2f2',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    height: 50,
+  },
+  dropdownText: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: 'outfit',
+    color: '#333',
+  },
+  placeholderText: {
+    color: '#999',
+  },
+  dropdownIcon: {
+    marginLeft: 10,
+  },
+  textAreaContainer: {
+    backgroundColor: '#f2f2f2',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  textArea: {
+    fontFamily: 'outfit',
+    fontSize: 16,
+    minHeight: 100,
+    color: '#333',
+  },
+  errorContainer: {
+    backgroundColor: '#ffebee',
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 15,
+  },
+  errorText: {
+    color: '#d32f2f',
+    fontFamily: 'outfit',
+    fontSize: 14,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 20,
+    maxHeight: '80%',
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f2f2f2',
+  },
+  modalTitle: {
+    fontFamily: 'outfit-bold',
+    fontSize: 18,
+    color: '#333',
+  },
+  dropdownList: {
+    maxHeight: 300,
+  },
+  dropdownItem: {
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f2f2f2',
+  },
+  dropdownItemText: {
+    fontFamily: 'outfit',
+    fontSize: 16,
+    color: '#333',
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  saveForLaterButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    flex: 1,
+    marginRight: 10,
+  },
+  saveForLaterText: {
+    fontFamily: 'outfit-medium',
+    fontSize: 14,
+    color: '#333',
+    marginLeft: 8,
+  },
+  generatePlanButton: {
+    backgroundColor: '#3478F6',
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+  },
+  generatePlanText: {
+    fontFamily: 'outfit-medium',
+    fontSize: 14,
+    color: 'white',
   },
 });
-
-export default CreateTrip;

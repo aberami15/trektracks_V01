@@ -25,7 +25,7 @@ export default function Footer() {
   }
 
   const navigateToRecentTrips = () => {
-    router.push('/recent-trips');
+    router.push('/plan-generation-form');
   }
 
   return (
@@ -59,7 +59,7 @@ export default function Footer() {
           onPress={navigateToRecentTrips}
         >
           <Ionicons name="time" size={24} color="#777" />
-          <Text style={styles.footerText}>Recent</Text>
+          <Text style={styles.footerText}>Trip Itinerary</Text>
         </TouchableOpacity>
       </View>
   )

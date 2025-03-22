@@ -220,10 +220,15 @@ export default function PlaceDetails() {
     }
   };
 
+
+
   // Get image source - use first image from API or fallback to local image
   const imageSource = place.images && place.images.length > 0 
     ? { uri: place.images[0] }
     : getCategoryImage(place.category);
+
+
+  
 
   return (
     <View style={styles.container}>
@@ -406,8 +411,8 @@ export default function PlaceDetails() {
         
         {/* Add to Itinerary Button */}
         <TouchableOpacity style={styles.addButton}>
-          <Text style={styles.addButtonText}>Add to Itinerary</Text>
-          <Ionicons name="add-circle-outline" size={20} color="white" style={styles.addIcon} />
+          <Text style={styles.addButtonText}>Add to Favourite</Text>
+          <Ionicons name="heart" size={20} color="white" style={styles.addIcon} />
         </TouchableOpacity>
         
         <View style={styles.footer} />

@@ -52,6 +52,8 @@ export default function RootLayout() {
       <Stack.Screen name="create-trip/index" />
       <Stack.Screen name="add-transactions/index" />
       <Stack.Screen name="footer/index" />
+      <Stack.Screen name="plan-generation/index" />
+      <Stack.Screen name="show-plan/index" />
     </Stack>
   );
 }
