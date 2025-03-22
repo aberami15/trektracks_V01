@@ -1,15 +1,17 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
   StyleSheet, 
   ScrollView, 
-  TouchableOpacity
+  TouchableOpacity,
+  ActivityIndicator
 } from 'react-native';
 import { useNavigation, useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import Footer from '../footer';
 import Markdown from 'react-native-markdown-display';
+import Config from '../../config';
 
 export default function ShowPlan() {
   const navigation = useNavigation();
@@ -18,6 +20,7 @@ export default function ShowPlan() {
   const id = params.q;
   const [tripData, setTripData] = useState({});
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   
   useEffect(() => {
@@ -31,6 +34,7 @@ export default function ShowPlan() {
   const fetchTripDetail = async () => {
     try {
       setLoading(true);
+      setError(null);
       const response = await fetch(`${Config.BASE_URL}/trips/${id}`, {
         method: 'GET',
         headers: {
@@ -39,7 +43,8 @@ export default function ShowPlan() {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        setError(`Unable to load trip details (${response.status})`);
+        return;
       }
       
       const responseData = await response.json();
@@ -57,13 +62,25 @@ export default function ShowPlan() {
         }
         
         setTripData(tripData);
+      } else {
+        setError("No trip data available");
       }
     } catch (error) {
       console.error('Error fetching trip:', error);
-      Alert.alert('Error', 'Failed to load trip details');
+      setError("Failed to load trip details");
     } finally {
       setLoading(false);
     }
+  };
+
+  // Format date for display
+  const formatDate = (date) => {
+    if (!date) return '';
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
   };
 
   // Markdown styles for the itinerary display
@@ -122,11 +139,45 @@ export default function ShowPlan() {
       </View>
       
       <ScrollView style={styles.scrollContainer} contentContainerStyle={styles.contentContainer}>
-        <View style={styles.itineraryContainer}>
-          <Markdown style={markdownStyles}>
-            {tripData.aiGeneratedPlan}
-          </Markdown>
-        </View>
+        {loading ? (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#3478F6" />
+            <Text style={styles.loadingText}>Loading trip details...</Text>
+          </View>
+        ) : error ? (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>{error}</Text>
+            <TouchableOpacity 
+              style={styles.retryButton}
+              onPress={fetchTripDetail}
+            >
+              <Text style={styles.retryButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <>
+            {tripData.name && (
+              <View style={styles.tripHeaderContainer}>
+                <Text style={styles.tripName}>{tripData.name}</Text>
+                <View style={styles.tripDates}>
+                  <Text style={styles.tripDatesText}>
+                    {formatDate(tripData.startDate)} - {formatDate(tripData.endDate)}
+                  </Text>
+                </View>
+              </View>
+            )}
+            
+            <View style={styles.itineraryContainer}>
+              {tripData.plan ? (
+                <Markdown style={markdownStyles}>
+                  {tripData.plan}
+                </Markdown>
+              ) : (
+                <Text style={styles.noContentText}>No itinerary details available yet.</Text>
+              )}
+            </View>
+          </>
+        )}
         
         <View style={styles.spacer}></View>
       </ScrollView>
@@ -189,6 +240,68 @@ const styles = StyleSheet.create({
     padding: 20,
     paddingBottom: 100, // Extra padding for footer
   },
+  loadingContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 40,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'outfit',
+  },
+  errorContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 40,
+    backgroundColor: '#fff0f0',
+    borderRadius: 12,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#d32f2f',
+    textAlign: 'center',
+    marginBottom: 16,
+    fontFamily: 'outfit-medium',
+  },
+  retryButton: {
+    backgroundColor: '#3478F6',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  retryButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontFamily: 'outfit-medium',
+  },
+  tripHeaderContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  tripName: {
+    fontSize: 22,
+    fontFamily: 'outfit-bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  tripDates: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  tripDatesText: {
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'outfit',
+  },
   itineraryContainer: {
     backgroundColor: 'white',
     borderRadius: 12,
@@ -198,6 +311,14 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 3,
     elevation: 2,
+    minHeight: 200,
+  },
+  noContentText: {
+    fontSize: 16,
+    color: '#666',
+    fontFamily: 'outfit',
+    textAlign: 'center',
+    marginTop: 60,
   },
   spacer: {
     height: 80, // Space at the bottom for the actions footer

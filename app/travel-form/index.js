@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, Button, ScrollView } from "react-native";
 import axios from "axios";
-import DatePicker from "react-native-datepicker";
-import DropDownPicker from "react-native-dropdown-picker";
 
 const TravelForm = () => {
   const [formData, setFormData] = useState({
@@ -11,9 +9,6 @@ const TravelForm = () => {
     startDate: "",
     endDate: "",
     numPersons: "",
-    travelerType: "",
-    tripPreference: "",
-    transportMode: "",
   });
 
   const handleInputChange = (key, value) => {
@@ -33,19 +28,40 @@ const TravelForm = () => {
   return (
     <ScrollView style={{ padding: 20 }}>
       <Text>Start Location:</Text>
-      <TextInput placeholder="Enter start location" onChangeText={(text) => handleInputChange("startLocation", text)} />
+      <TextInput 
+        placeholder="Enter start location" 
+        onChangeText={(text) => handleInputChange("startLocation", text)} 
+        style={{ borderBottomWidth: 1, marginBottom: 10 }}
+      />
 
       <Text>End Location:</Text>
-      <TextInput placeholder="Enter end location" onChangeText={(text) => handleInputChange("endLocation", text)} />
+      <TextInput 
+        placeholder="Enter end location" 
+        onChangeText={(text) => handleInputChange("endLocation", text)} 
+        style={{ borderBottomWidth: 1, marginBottom: 10 }}
+      />
 
-      <Text>Start Date:</Text>
-      <DatePicker style={{ width: 200 }} date={formData.startDate} mode="date" onDateChange={(date) => handleInputChange("startDate", date)} />
+      <Text>Start Date (YYYY-MM-DD):</Text>
+      <TextInput 
+        placeholder="Enter start date" 
+        onChangeText={(text) => handleInputChange("startDate", text)} 
+        style={{ borderBottomWidth: 1, marginBottom: 10 }} 
+      />
 
-      <Text>End Date:</Text>
-      <DatePicker style={{ width: 200 }} date={formData.endDate} mode="date" onDateChange={(date) => handleInputChange("endDate", date)} />
+      <Text>End Date (YYYY-MM-DD):</Text>
+      <TextInput 
+        placeholder="Enter end date" 
+        onChangeText={(text) => handleInputChange("endDate", text)} 
+        style={{ borderBottomWidth: 1, marginBottom: 10 }} 
+      />
 
       <Text>Number of Persons:</Text>
-      <TextInput keyboardType="numeric" placeholder="Enter number of persons" onChangeText={(text) => handleInputChange("numPersons", text)} />
+      <TextInput 
+        keyboardType="numeric" 
+        placeholder="Enter number of persons" 
+        onChangeText={(text) => handleInputChange("numPersons", text)} 
+        style={{ borderBottomWidth: 1, marginBottom: 10 }} 
+      />
 
       <Button title="Submit" onPress={handleSubmit} />
     </ScrollView>
