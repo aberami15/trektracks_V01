@@ -1,0 +1,50 @@
+name: Expo Auto Deploy
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install Expo CLI & EAS CLI
+        run: npm install -g expo-cli eas-cli
+
+      - name: Authenticate with Expo
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: eas whoami || eas login --token $EXPO_TOKEN
+
+      - name: Build & Publish to Expo
+        run: expo publish --non-interactive
+
+      - name: Set Expo Project URL (Temporary)
+        run: |
+          EXPO_URL="https://expo.dev/@trektracks/trektracks_v01"
+          echo "EXPO_URL=$EXPO_URL" >> $GITHUB_ENV
+
+      - name: Send Email Notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USER }}
+          password: ${{ secrets.EMAIL_PASS }}
+          subject: "🚀 New Expo Deployment Available!"
+          to: ${{ secrets.EMAIL_TO }}
+          from: "Your Project <${{ secrets.EMAIL_USER }}>"
+          body: "Your Expo app has been deployed! 🎉\n\nView it here: ${{ env.EXPO_URL }}"
