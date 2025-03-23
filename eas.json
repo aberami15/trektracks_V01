@@ -4,8 +4,6 @@
   },
   "build": {
     "production": {
-      "workflow": "managed",
-      "platforms": ["android"],
       "android": {
         "buildType": "apk"
       }
@@ -13,10 +11,5 @@
   },
   "submit": {
     "production": {}
-  },
-  "updates": {
-    "production": {
-      "branch": "master"
-    }
   }
 }
