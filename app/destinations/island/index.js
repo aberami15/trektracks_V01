@@ -207,8 +207,6 @@ export default function Island() {
             key={island.id} 
             style={styles.islandCard}
             onPress={() => {
-              // Navigate to individual island detail page (to be implemented)
-              console.log(`Clicked on ${island.name}`);
             }}
           >
             <View style={styles.islandInfo}>

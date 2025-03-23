@@ -166,8 +166,6 @@ export default function Lake() {
             key={lake.id} 
             style={styles.lakeCard}
             onPress={() => {
-              // Navigate to individual lake detail page (to be implemented)
-              console.log(`Clicked on ${lake.name}`);
             }}
           >
             <View style={styles.lakeInfo}>

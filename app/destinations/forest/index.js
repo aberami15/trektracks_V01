@@ -189,8 +189,6 @@ export default function Forest() {
             key={forest.id} 
             style={styles.forestCard}
             onPress={() => {
-              // Navigate to individual forest detail page (to be implemented)
-              console.log(`Clicked on ${forest.name}`);
             }}
           >
             <View style={styles.forestInfo}>

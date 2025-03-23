@@ -51,8 +51,6 @@ export default function TripItinerary() {
   };
 
   const navigateToProfile = () => {
-    // Explicit function for profile navigation
-    console.log("Navigating to profile");
     router.push('/profile');
   }
 

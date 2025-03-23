@@ -228,8 +228,6 @@ export default function Mountain() {
             key={mountain.id} 
             style={styles.mountainCard}
             onPress={() => {
-              // Navigate to individual mountain detail page (to be implemented)
-              console.log(`Clicked on ${mountain.name}`);
             }}
           >
             <View style={styles.mountainInfo}>

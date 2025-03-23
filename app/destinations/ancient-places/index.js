@@ -263,8 +263,6 @@ export default function AncientPlaces() {
             key={place.id} 
             style={styles.placeCard}
             onPress={() => {
-              // Navigate to individual place detail page (to be implemented)
-              console.log(`Clicked on ${place.name}`);
             }}
           >
             <View style={styles.placeInfo}>

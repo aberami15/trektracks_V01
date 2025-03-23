@@ -277,8 +277,6 @@ export default function Sunset() {
             key={sunset.id} 
             style={styles.sunsetCard}
             onPress={() => {
-              // Navigate to individual sunset detail page (to be implemented)
-              console.log(`Clicked on ${sunset.name}`);
             }}
           >
             <View style={styles.sunsetInfo}>

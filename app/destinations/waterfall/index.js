@@ -223,8 +223,6 @@ export default function Waterfall() {
             key={waterfall.id} 
             style={styles.waterfallCard}
             onPress={() => {
-              // Navigate to individual waterfall detail page (to be implemented)
-              console.log(`Clicked on ${waterfall.name}`);
             }}
           >
             <View style={styles.waterfallInfo}>

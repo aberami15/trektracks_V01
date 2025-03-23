@@ -152,8 +152,6 @@ export default function City() {
             key={city.id} 
             style={styles.cityCard}
             onPress={() => {
-              // Navigate to individual city detail page (to be implemented)
-              console.log(`Clicked on ${city.name}`);
             }}
           >
             <View style={styles.cityInfo}>

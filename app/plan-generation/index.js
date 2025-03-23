@@ -56,7 +56,6 @@ export default function PlanGeneration() {
       }
       
       const responseData = await response.json();
-      console.log("Trip details:", responseData.data);
       
       if (responseData.data) {
         setFormData(responseData.data);
@@ -121,7 +120,6 @@ export default function PlanGeneration() {
         }
         
         const responseData = await response.json();
-        console.log(responseData);
         
         router.push(`/show-plan?q=${id}`);
       } catch (error) {

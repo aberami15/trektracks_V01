@@ -225,8 +225,6 @@ export default function Beach() {
             key={beach.id} 
             style={styles.beachCard}
             onPress={() => {
-              // Navigate to individual beach detail page (to be implemented)
-              console.log(`Clicked on ${beach.name}`);
             }}
           >
             <View style={styles.beachInfo}>

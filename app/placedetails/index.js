@@ -82,7 +82,7 @@ export default function PlaceDetails() {
         
         // Fetch from API for real MongoDB IDs
         const response = await fetch(`${Config.BASE_URL}/places/${id}`);
-        console.log(response)
+    
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
         }
@@ -212,8 +212,6 @@ export default function PlaceDetails() {
           reviews: [review]
         });
       }
-      
-      console.log("Review added successfully");
       ToastAndroid.show('Review added successfully', ToastAndroid.SHORT);
       setReview(''); // Clear the input field
     } catch (error) {

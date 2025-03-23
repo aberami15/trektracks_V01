@@ -136,7 +136,6 @@ export default function CreateTrip() {
         userId: userId
       };
       
-      console.log("Creating trip with data:", tripData);
       
       // Make API request
       const response = await fetch(`${Config.BASE_URL}/trips`, {
@@ -153,7 +152,6 @@ export default function CreateTrip() {
       }
       
       const responseData = await response.json();
-      console.log("Trip created successfully:", responseData);
       
       ToastAndroid.show('Trip created successfully!', ToastAndroid.LONG);
       router.push('/trip-itinerary');

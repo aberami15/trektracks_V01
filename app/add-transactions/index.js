@@ -67,7 +67,6 @@ export default function ExpenseEntry() {
         amount: Number(expense.amount),
       };
 
-      console.log('Submitting expense:', expenseData); // Debug log
 
       const response = await fetch(`${Config.BASE_URL}/trips/expense/${id}`, {
         method: 'POST',
@@ -77,9 +76,7 @@ export default function ExpenseEntry() {
         },
         body: JSON.stringify(expenseData),
       });
-      console.log(response)
       const responseData = await response.json();
-      console.log(responseData.data)
       if (!response.ok) {
         throw new Error(responseData.message || 'Failed to save expense');
       }

@@ -39,7 +39,6 @@ export default function Profile() {
       try {
         const tokenPromise = AsyncStorage.getItem('token');
         const token = await tokenPromise;
-        console.log("dd" +token);
         if (!token) {
           console.error("No authentication token found");
           setLoading(false);
@@ -51,13 +50,13 @@ export default function Profile() {
         
         // Make API call to fetch user data
         const response = await fetch(`${Config.BASE_URL}/auth/user/${userId}`);
-        console.log(response)
+       
         if (!response.ok) {
           throw new Error(`API request failed with status ${response.status}`);
         }
         
         const userData = await response.json();
-        console.log(userData);
+       
         setUserData(userData);
         
       } catch (error) {
@@ -82,14 +81,10 @@ export default function Profile() {
   }
 
   const handleBudgetPress = () => {
-    // Navigate to budget details page
-    console.log("Navigating to budget planner");
     router.push('/budget-planner'); // Direct to the budget planner page
   };
 
   const handleEmergencyContacts = () => {
-    // Navigate to emergency contacts page
-    console.log("Navigate to emergency contacts");
     router.push('/emergency-contacts');
   };
 
@@ -294,11 +289,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e8e8e8',
-    paddingTop: 50, // Added to prevent content from being hidden under status bar
-    backgroundColor: 'white',
+    paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 15,
+    backgroundColor: '#43BFC7',
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
+    marginBottom: 20,
+    elevation: 5,
   },
   leftHeader: {
     flexDirection: 'row',

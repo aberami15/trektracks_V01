@@ -48,7 +48,6 @@ export default function ShowPlan() {
       }
       
       const responseData = await response.json();
-      console.log("Trip details:", responseData.data);
       
       if (responseData.data) {
         let tripData = { ...responseData.data };
