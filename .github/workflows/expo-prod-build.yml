@@ -24,12 +24,9 @@ jobs:
       - name: Install Expo CLI & EAS CLI
         run: npm install -g eas-cli
 
-      - name: Authenticate with Expo
+      - name: Build & Publish to Expo using EAS Update
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas login --token $EXPO_TOKEN
-
-      - name: Build & Publish to Expo using EAS Update
         run: eas update --auto
 
       - name: Set Expo Project URL (Temporary)
