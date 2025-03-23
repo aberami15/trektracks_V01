@@ -21,7 +21,7 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Install Expo CLI & EAS CLI
+      - name: Install EAS CLI
         run: npm install -g eas-cli
 
       - name: Build & Publish to Expo using EAS Update
@@ -29,7 +29,7 @@ jobs:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: eas update --auto
 
-      - name: Set Expo Project URL (Temporary)
+      - name: Set Expo Project URL
         run: |
           EXPO_URL="https://expo.dev/@trektracks/trektracks_v01"
           echo "EXPO_URL=$EXPO_URL" >> $GITHUB_ENV
