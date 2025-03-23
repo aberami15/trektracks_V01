@@ -27,7 +27,7 @@ jobs:
       - name: Build & Publish to Expo using EAS Update
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
-        run: eas update --auto
+        run: eas update --auto && eas build --platform android
 
       - name: Debug EXPO_URL
         run: echo "Expo URL is ${{ env.EXPO_URL }}"
