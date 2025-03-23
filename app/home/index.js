@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TextInput, Image, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native'
+import { View, Text, StyleSheet, TextInput, Image, ScrollView, TouchableOpacity, ActivityIndicator, StatusBar } from 'react-native'
 import React, { useEffect, useState } from 'react'
 import { useNavigation, useRouter } from 'expo-router'
 import { signOut } from 'firebase/auth';
@@ -152,18 +152,30 @@ export default function Home() {
 
   return (
     <View style={styles.container}>
+      <StatusBar barStyle="light-content" />
+      
+      {/* Header section */}
+      {/* Header with integrated welcome message and search */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Trektracks!</Text>
-        <TouchableOpacity onPress={handleProfilePress}>
-          <Ionicons name="person-circle" size={40} color="black" />
+        <TouchableOpacity onPress={handleProfilePress} style={styles.profileButton}>
+          <Ionicons name="person-circle" size={40} color="white" />
         </TouchableOpacity>
       </View>
-
+      
+      {/* Welcome message */}
+      <View style={styles.welcomeContainer}>
+        <Text style={styles.welcomeText}>Discover Sri Lanka's</Text>
+        <Text style={styles.welcomeHighlight}>Hidden Treasures</Text>
+      </View>
+      
+      {/* Search section - moved up */}
       <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#777" style={styles.searchIcon} />
+        <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search destinations, activities..."
+          placeholderTextColor="#999"
           value={searchText}
           onChangeText={setSearchText}
           onSubmitEditing={handleSearch}
@@ -185,8 +197,8 @@ export default function Home() {
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
-     
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Plan Adventure Section */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Plan Your Adventure</Text>
@@ -207,11 +219,12 @@ export default function Home() {
               </TouchableOpacity>
             </View>
             <View style={styles.planAdventureImageContainer}>
-              <Ionicons name="map" size={80} color="#3478F6" />
+              <Ionicons name="map" size={80} color="white" />
             </View>
           </View>
         </View>
      
+        {/* Popular Destinations Section */}
         <View style={styles.sectionContainer}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>Popular Destinations</Text>
@@ -220,7 +233,7 @@ export default function Home() {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.destinationsScroll}>
             {loading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#3478F6" />
+                <ActivityIndicator size="large" color="white" />
                 <Text style={styles.loadingText}>Loading categories...</Text>
               </View>
             ) : categories.length > 0 ? (
@@ -234,6 +247,7 @@ export default function Home() {
                     source={getCategoryImage(category)}
                     style={styles.destinationImage}
                   />
+                  <View style={styles.destinationOverlay} />
                   <Text style={styles.destinationName}>{formatCategoryName(category)}</Text>
                 </TouchableOpacity>
               ))
@@ -245,6 +259,7 @@ export default function Home() {
           </ScrollView>
         </View>
 
+        {/* Recommended Places / Search Results Section */}
         <View style={[styles.sectionContainer, { marginBottom: 80 }]}>
           <View style={styles.sectionHeader}>
             <Text style={styles.sectionTitle}>
@@ -264,7 +279,7 @@ export default function Home() {
             {isSearching ? (
               // Show loading indicator while searching
               <View style={styles.searchLoadingContainer}>
-                <ActivityIndicator size="large" color="#3478F6" />
+                <ActivityIndicator size="large" color="white" />
                 <Text style={styles.loadingText}>Searching...</Text>
               </View>
             ) : searchError ? (
@@ -403,92 +418,74 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  loadingContainer: {
-    width: 200,
-    height: 150,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 20,
-  },
-  loadingText: {
-    fontFamily: 'outfit',
-    fontSize: 14,
-    color: '#5D7A96', // Soft blue-gray
-    marginTop: 10,
-  },
-  errorText: {
-    fontFamily: 'outfit-medium',
-    fontSize: 14,
-    color: '#E74C3C', // Softer red
-  },
-  searchLoadingContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 40,
-    backgroundColor: '#EFF4F7', // Light blue-gray
-    borderRadius: 12,
-    marginBottom: 15,
-  },
-  searchErrorContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 30,
-    backgroundColor: '#FDEAEA', // Softer red background
-    borderRadius: 12,
-    marginBottom: 15,
-  },
-  retryButton: {
-    backgroundColor: '#37A794', // Teal (ocean color)
-    paddingHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 20,
-    marginTop: 10,
-  },
-  retryText: {
-    color: 'white',
-    fontFamily: 'outfit-medium',
-    fontSize: 14,
-  },
-  categoryTag: {
-    position: 'absolute',
-    left: 10,
-    top: 10,
-    backgroundColor: 'rgba(55, 167, 148, 0.75)', // Semi-transparent teal
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  categoryText: {
-    color: 'white',
-    fontFamily: 'outfit',
-    fontSize: 12,
-  },
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA', // Very light blue-gray
-    paddingTop: 50,
+    backgroundColor: '#43BFC7', // Changed to a richer teal shade
+  },
+  scrollView: {
+    flex: 1,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    paddingTop: 20,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 15,
+    paddingTop: 50,
+    paddingBottom: 10, // Reduced bottom padding
   },
   headerTitle: {
     fontFamily: 'outfit-bold',
     fontSize: 28,
-    color: '#2C3E50', // Dark blue-gray
+    color: 'white',
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  profileButton: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  welcomeContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 10, // Reduced padding to move search bar up
+  },
+  welcomeText: {
+    fontFamily: 'outfit',
+    fontSize: 22,
+    color: 'white',
+  },
+  welcomeHighlight: {
+    fontFamily: 'outfit-bold',
+    fontSize: 32,
+    color: 'white',
+    textShadowColor: 'rgba(0, 0, 0, 0.1)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
   },
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#E8ECF0', // Light grayish blue
+    backgroundColor: 'white',
     marginHorizontal: 20,
     borderRadius: 25,
     paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginBottom: 20,
+    paddingVertical: 12,
+    marginBottom: 20, // Reduced margin bottom
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)', // Subtle border
   },
   searchIcon: {
     marginRight: 10,
@@ -497,13 +494,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontFamily: 'outfit',
     fontSize: 16,
-    color: '#5D7A96', // Blue-gray
+    color: '#333',
   },
   clearButton: {
     marginRight: 8,
   },
   searchButton: {
-    backgroundColor: '#37A794', // Teal (ocean color)
+    backgroundColor: '#5F9EA0',
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
@@ -515,146 +512,36 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   sectionContainer: {
-    marginBottom: 20,
+    marginBottom: 25,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    marginBottom: 10,
+    marginBottom: 15,
   },
   sectionTitle: {
     fontFamily: 'outfit-medium',
-    fontSize: 20,
-    color: '#2C3E50', // Dark blue-gray
-  },
-  seeAllText: {
-    fontFamily: 'outfit',
-    fontSize: 16,
-    color: '#37A794', // Teal (ocean color)
+    fontSize: 22,
+    color: '#333',
   },
   viewAllText: {
     fontFamily: 'outfit',
     fontSize: 16,
-    color: '#37A794', // Teal (ocean color)
-  },
-  destinationsScroll: {
-    paddingLeft: 20,
-  },
-  destinationCard: {
-    marginRight: 15,
-    width: 120,
-    alignItems: 'center',
-  },
-  destinationImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 12,
-    marginBottom: 5,
-  },
-  destinationName: {
-    fontFamily: 'outfit-medium',
-    fontSize: 16,
-    color: '#2C3E50', // Dark blue-gray
-    textAlign: 'center',
-  },
-  recentlyVisitedScroll: {
-    paddingHorizontal: 20,
-  },
-  locationCard: {
-    backgroundColor: 'white',
-    borderRadius: 15,
-    marginBottom: 15,
-    overflow: 'hidden',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  locationImage: {
-    width: '100%',
-    height: 180,
-  },
-  ratingContainer: {
-    position: 'absolute',
-    right: 10,
-    top: 10,
-    backgroundColor: 'rgba(44, 62, 80, 0.75)', // Semi-transparent dark blue
-    borderRadius: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  ratingText: {
-    color: 'white',
-    fontFamily: 'outfit-medium',
-    fontSize: 14,
-    marginLeft: 3,
-  },
-  locationInfo: {
-    padding: 15,
-  },
-  locationName: {
-    fontFamily: 'outfit-medium',
-    fontSize: 18,
-    color: '#2C3E50', // Dark blue-gray
-    marginBottom: 5,
-  },
-  locationDetail: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  locationDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#37A794', // Teal (ocean color)
-    marginRight: 8,
-  },
-  locationPlace: {
-    fontFamily: 'outfit',
-    fontSize: 14,
-    color: '#5D7A96', // Blue-gray
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 60,
-    backgroundColor: 'white',
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#E8ECF0', // Light grayish blue
-    paddingBottom: 5,
-  },
-  footerItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 8,
-  },
-  footerText: {
-    fontFamily: 'outfit',
-    fontSize: 12,
-    color: '#5D7A96', // Blue-gray
-    marginTop: 4,
+    color: '#2A9D8F',
   },
   planAdventureCard: {
-    backgroundColor: 'white',
-    borderRadius: 15,
+    backgroundColor: '#43BFC7',
+    borderRadius: 20,
     padding: 20,
-    flexDirection: 'row',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
     marginHorizontal: 20,
+    flexDirection: 'row',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
   },
   planAdventureContent: {
     flex: 3,
@@ -666,31 +553,200 @@ const styles = StyleSheet.create({
   },
   planAdventureTitle: {
     fontFamily: 'outfit-bold',
-    fontSize: 18,
-    color: '#333',
-    marginBottom: 8,
+    fontSize: 20,
+    color: 'white',
+    marginBottom: 10,
   },
   planAdventureDescription: {
     fontFamily: 'outfit',
     fontSize: 14,
-    color: '#666',
-    marginBottom: 15,
+    color: 'rgba(255, 255, 255, 0.9)',
+    marginBottom: 20,
     lineHeight: 20,
   },
   planAdventureButton: {
-    backgroundColor: '#3478F6',
+    backgroundColor: 'rgba(255, 255, 255, 0.25)',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
     paddingHorizontal: 20,
-    borderRadius: 8,
+    borderRadius: 12,
     alignSelf: 'flex-start',
+    borderWidth: 1,
+    borderColor: 'white',
   },
   planAdventureButtonText: {
     fontFamily: 'outfit-medium',
     fontSize: 14,
     color: 'white',
     marginRight: 8,
+  },
+  destinationsScroll: {
+    paddingLeft: 20,
+  },
+  destinationCard: {
+    marginRight: 15,
+    width: 140,
+    height: 170,
+    position: 'relative',
+    borderRadius: 16,
+    overflow: 'hidden',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  destinationImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 16,
+  },
+  destinationOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '50%',
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    borderBottomLeftRadius: 16,
+    borderBottomRightRadius: 16,
+  },
+  destinationName: {
+    position: 'absolute',
+    bottom: 10,
+    left: 0,
+    right: 0,
+    fontFamily: 'outfit-medium',
+    fontSize: 16,
+    color: 'white',
+    textAlign: 'center',
+    paddingHorizontal: 5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 3,
+  },
+  loadingContainer: {
+    width: 140,
+    height: 170,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 15,
+    backgroundColor: 'rgba(42, 157, 143, 0.2)',
+    borderRadius: 16,
+  },
+  loadingText: {
+    fontFamily: 'outfit',
+    fontSize: 14,
+    color: '#2A9D8F',
+    marginTop: 10,
+  },
+  errorText: {
+    fontFamily: 'outfit-medium',
+    fontSize: 14,
+    color: '#E74C3C',
+  },
+  recentlyVisitedScroll: {
+    paddingHorizontal: 20,
+  },
+  locationCard: {
+    backgroundColor: 'white',
+    borderRadius: 20,
+    marginBottom: 20,
+    overflow: 'hidden',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  locationImage: {
+    width: '100%',
+    height: 200,
+  },
+  categoryTag: {
+    position: 'absolute',
+    left: 10,
+    top: 10,
+    backgroundColor: '#2A9D8F',
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+  },
+  categoryText: {
+    color: 'white',
+    fontFamily: 'outfit-medium',
+    fontSize: 12,
+  },
+  ratingContainer: {
+    position: 'absolute',
+    right: 10,
+    top: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+  },
+  ratingText: {
+    color: 'white',
+    fontFamily: 'outfit-medium',
+    fontSize: 14,
+    marginLeft: 4,
+  },
+  locationInfo: {
+    padding: 16,
+  },
+  locationName: {
+    fontFamily: 'outfit-medium',
+    fontSize: 20,
+    color: '#333',
+    marginBottom: 8,
+  },
+  locationDetail: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  locationDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#2A9D8F',
+    marginRight: 8,
+  },
+  locationPlace: {
+    fontFamily: 'outfit',
+    fontSize: 14,
+    color: '#666',
+  },
+  searchLoadingContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(42, 157, 143, 0.2)',
+    borderRadius: 20,
+    padding: 40,
+    marginBottom: 20,
+  },
+  searchErrorContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 30,
+    backgroundColor: '#FDEAEA',
+    borderRadius: 20,
+    marginBottom: 20,
+  },
+  retryButton: {
+    backgroundColor: '#2A9D8F',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 15,
+    marginTop: 15,
+  },
+  retryText: {
+    color: 'white',
+    fontFamily: 'outfit-medium',
+    fontSize: 14,
   }
 });

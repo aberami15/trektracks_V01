@@ -14,12 +14,13 @@ import {
   Modal,
   FlatList,
   Image,
-  ActivityIndicator
+  ActivityIndicator,
+  StatusBar
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Calendar } from 'react-native-calendars'; // Import the Calendar component
+import { Calendar } from 'react-native-calendars';
 import Footer from '../footer';
 import Config from '../../config';
 
@@ -51,8 +52,6 @@ export default function CreateTrip() {
 
   // Get today's date in YYYY-MM-DD format for calendar min date
   const today = new Date().toISOString().split('T')[0];
-
-
 
   useEffect(() => {
     navigation.setOptions({
@@ -232,12 +231,12 @@ export default function CreateTrip() {
               setVisible(false);
             }}
             markedDates={{
-              [selectedDate]: {selected: true, marked: true, selectedColor: '#3478F6'}
+              [selectedDate]: {selected: true, marked: true, selectedColor: '#2A9D8F'}
             }}
             theme={{
-              selectedDayBackgroundColor: '#3478F6',
-              todayTextColor: '#3478F6',
-              arrowColor: '#3478F6',
+              selectedDayBackgroundColor: '#2A9D8F',
+              todayTextColor: '#2A9D8F',
+              arrowColor: '#2A9D8F',
             }}
           />
         </View>
@@ -266,12 +265,14 @@ export default function CreateTrip() {
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header with profile photo */}
+      <StatusBar barStyle="dark-content" />
+      
+      {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/trip-itinerary')} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={20} color="#333" />
+        <TouchableOpacity onPress={handleBack} style={styles.backButton}>
+          <Ionicons name="arrow-back" size={24} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.headerTitle}>Fill This Out!</Text>
+        <Text style={styles.headerTitle}>Create Your Trip</Text>
         <TouchableOpacity onPress={() => router.push('/profile')}>
           <Image
             source={require('../../assets/images/profile.png')}
@@ -288,89 +289,84 @@ export default function CreateTrip() {
         <ScrollView 
           contentContainerStyle={styles.content}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
         >
-          {/* Search Text */}
+          {/* Current Location */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Current Location</Text>
-            <View style={styles.searchInputContainer}>
-              <TextInput
-                style={styles.searchInput}
-                placeholder="Enter your current location"
-                value={currentLocation}
-                onChangeText={setCurrentLocation}
-              />
-              <Ionicons name="search" size={20} color="#999" style={styles.searchIcon} />
-            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your current location"
+              value={currentLocation}
+              onChangeText={setCurrentLocation}
+            />
           </View>
 
           {/* Destination */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Destination</Text>
-            <View style={styles.dropdownField}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter destination"
-                value={destination}
-                onChangeText={setDestination}
-              />
-              <Ionicons name="search" size={20} color="#999" style={styles.dropdownIcon} />
+            <TextInput
+              style={styles.input}
+              placeholder="Enter destination"
+              value={destination}
+              onChangeText={setDestination}
+            />
+          </View>
+
+          {/* Date Row */}
+          <View style={styles.dateRow}>
+            {/* Start Date */}
+            <View style={[styles.inputContainer, {flex: 1, marginRight: 10}]}>
+              <Text style={styles.inputLabel}>Start Date</Text>
+              <TouchableOpacity 
+                style={styles.dateInput}
+                onPress={() => setStartCalendarVisible(true)}
+              >
+                <Text style={[styles.dateText, !startDate && styles.placeholderText]}>
+                  {startDate || "Select date"}
+                </Text>
+                <Ionicons name="calendar-outline" size={20} color="#777" />
+              </TouchableOpacity>
             </View>
-          </View>
 
-          {/* Start Date - Calendar */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>Start Date</Text>
-            <TouchableOpacity 
-              style={styles.dropdownField}
-              onPress={() => setStartCalendarVisible(true)}
-            >
-              <Text style={[styles.dropdownText, !startDate && styles.placeholderText]}>
-                {startDate || "Select start date"}
-              </Text>
-              <Ionicons name="calendar" size={20} color="#999" style={styles.dropdownIcon} />
-            </TouchableOpacity>
-          </View>
-
-          {/* End Date - Calendar */}
-          <View style={styles.inputContainer}>
-            <Text style={styles.inputLabel}>End Date</Text>
-            <TouchableOpacity 
-              style={styles.dropdownField}
-              onPress={() => setEndCalendarVisible(true)}
-            >
-              <Text style={[styles.dropdownText, !endDate && styles.placeholderText]}>
-                {endDate || "Select end date"}
-              </Text>
-              <Ionicons name="calendar" size={20} color="#999" style={styles.dropdownIcon} />
-            </TouchableOpacity>
+            {/* End Date */}
+            <View style={[styles.inputContainer, {flex: 1}]}>
+              <Text style={styles.inputLabel}>End Date</Text>
+              <TouchableOpacity 
+                style={styles.dateInput}
+                onPress={() => setEndCalendarVisible(true)}
+              >
+                <Text style={[styles.dateText, !endDate && styles.placeholderText]}>
+                  {endDate || "Select date"}
+                </Text>
+                <Ionicons name="calendar-outline" size={20} color="#777" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Budget */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Budget (LKR)</Text>
-            <View style={styles.dropdownField}>
-              <TextInput
-                style={styles.input}
-                placeholder="Enter your budget"
-                value={budget}
-                onChangeText={setBudget}
-                keyboardType="numeric"
-              />
-              <Ionicons name="wallet-outline" size={20} color="#999" style={styles.dropdownIcon} />
-            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Enter your budget"
+              value={budget}
+              onChangeText={setBudget}
+              keyboardType="numeric"
+            />
           </View> 
 
           {/* Traveler Category */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Traveller Category</Text>
             <TouchableOpacity 
-              style={styles.dropdownField}
+              style={styles.dropdownInput}
               onPress={() => setCategoryModalVisible(true)}
             >
               <Text style={[styles.dropdownText, !travelerCategory && styles.placeholderText]}>
                 {travelerCategory || "Select traveler category"}
               </Text>
-              <Ionicons name="chevron-down" size={20} color="#999" style={styles.dropdownIcon} />
+              <Ionicons name="chevron-down" size={20} color="#777" />
             </TouchableOpacity>
           </View>
 
@@ -378,13 +374,13 @@ export default function CreateTrip() {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Trip Type</Text>
             <TouchableOpacity 
-              style={styles.dropdownField}
+              style={styles.dropdownInput}
               onPress={() => setTripTypeModalVisible(true)}
             >
               <Text style={[styles.dropdownText, !tripType && styles.placeholderText]}>
                 {tripType || "Select trip type"}
               </Text>
-              <Ionicons name="chevron-down" size={20} color="#999" style={styles.dropdownIcon} />
+              <Ionicons name="chevron-down" size={20} color="#777" />
             </TouchableOpacity>
           </View>
 
@@ -392,30 +388,28 @@ export default function CreateTrip() {
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Vehicle</Text>
             <TouchableOpacity 
-              style={styles.dropdownField}
+              style={styles.dropdownInput}
               onPress={() => setVehicleModalVisible(true)}
             >
               <Text style={[styles.dropdownText, !vehicle && styles.placeholderText]}>
                 {vehicle || "Select vehicle"}
               </Text>
-              <Ionicons name="chevron-down" size={20} color="#999" style={styles.dropdownIcon} />
+              <Ionicons name="chevron-down" size={20} color="#777" />
             </TouchableOpacity>
           </View>
 
           {/* Description */}
           <View style={styles.inputContainer}>
             <Text style={styles.inputLabel}>Description</Text>
-            <View style={styles.textAreaContainer}>
-              <TextInput
-                style={styles.textArea}
-                placeholder="Enter trip description"
-                value={description}
-                onChangeText={setDescription}
-                multiline
-                numberOfLines={4}
-                textAlignVertical="top"
-              />
-            </View>
+            <TextInput
+              style={styles.textArea}
+              placeholder="Enter trip description"
+              value={description}
+              onChangeText={setDescription}
+              multiline
+              numberOfLines={4}
+              textAlignVertical="top"
+            />
           </View>
 
           {/* Error message if there's an error */}
@@ -427,15 +421,7 @@ export default function CreateTrip() {
 
           {/* Action Buttons */}
           <View style={styles.actionButtonsContainer}>
-            <TouchableOpacity 
-              style={styles.saveForLaterButton}
-              onPress={handleSaveForLater}
-              disabled={loading}
-            >
-              <Ionicons name="bookmark-outline" size={18} color="#333" />
-              <Text style={styles.saveForLaterText}>Save for Later</Text>
-            </TouchableOpacity>
-
+            
             <TouchableOpacity 
               style={styles.generatePlanButton}
               onPress={handleGeneratePlan}
@@ -450,6 +436,7 @@ export default function CreateTrip() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
       <Footer/>
 
       {/* Calendar Modals */}
@@ -505,121 +492,162 @@ export default function CreateTrip() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'white',
-  },
-  backButton: {
-    top: 50, 
-    left: 20, 
-    zIndex: 10,
+    backgroundColor: '#CFECEC', // Warm, light sand color background
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
+    paddingHorizontal: 20,
     paddingTop: 50,
+    paddingBottom: 15,
+    backgroundColor: '#43BFC7', // Sri Lankan green color
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    elevation: 5,
+  },
+  backButton: {
+    padding: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
+    borderRadius: 12,
   },
   headerTitle: {
-    color: '#333',
-    fontSize: 20,
-    fontWeight: '600',
+    fontSize: 22,
     fontFamily: 'outfit-bold',
-    flex: 1,
-    textAlign: 'center'
+    color: '#FFFFFF',
+    textShadowColor: 'rgba(0, 0, 0, 0.2)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
   },
   profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 45,
+    height: 45,
+    borderRadius: 22.5,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
   },
   content: {
     padding: 20,
     paddingBottom: 100,
   },
   inputContainer: {
-    marginBottom: 20,
+    marginBottom: 22,
   },
   inputLabel: {
+    fontSize: 16,
     fontFamily: 'outfit-medium',
-    fontSize: 16,
+    color: '#333333',
     marginBottom: 8,
-    color: '#333',
-  },
-  searchInputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f2f2f2',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-  },
-  searchInput: {
-    flex: 1,
-    paddingVertical: 12,
-    fontSize: 16,
-    fontFamily: 'outfit',
-  },
-  searchIcon: {
-    marginLeft: 10,
+    marginLeft: 4,
   },
   input: {
-    flex: 1,
-    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 14,
     fontSize: 16,
     fontFamily: 'outfit',
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    elevation: 2,
   },
-  dropdownField: {
+  dateRow: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  dateInput: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#f2f2f2',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    height: 50,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    elevation: 2,
+  },
+  dateText: {
+    fontSize: 16,
+    fontFamily: 'outfit',
+    color: '#333333',
+  },
+  dropdownInput: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 14,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    elevation: 2,
   },
   dropdownText: {
-    flex: 1,
     fontSize: 16,
     fontFamily: 'outfit',
-    color: '#333',
+    color: '#333333',
   },
   placeholderText: {
-    color: '#999',
-  },
-  dropdownIcon: {
-    marginLeft: 10,
-  },
-  textAreaContainer: {
-    backgroundColor: '#f2f2f2',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingTop: 8,
-    paddingBottom: 8,
+    color: '#9E9E9E',
   },
   textArea: {
-    fontFamily: 'outfit',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 14,
     fontSize: 16,
-    minHeight: 100,
-    color: '#333',
+    fontFamily: 'outfit',
+    minHeight: 120,
+    borderWidth: 1,
+    borderColor: '#E5E5E5',
+    textAlignVertical: 'top',
+    elevation: 2,
   },
   errorContainer: {
-    backgroundColor: '#ffebee',
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 15,
+    backgroundColor: '#FFECEC',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: '#FF6B6B',
   },
   errorText: {
-    color: '#d32f2f',
+    color: '#D32F2F',
     fontFamily: 'outfit',
     fontSize: 14,
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+    marginBottom: 30,
+  },
+  generatePlanButton: {
+    backgroundColor: '#5F9EA0', 
+    paddingVertical: 15,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    elevation: 3,
+  },
+  generatePlanText: {
+    fontFamily: 'outfit-bold',
+    fontSize: 16,
+    color: 'white',
   },
   modalOverlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
   },
   modalContent: {
-    backgroundColor: 'white',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    backgroundColor: '#5F9EA0',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     paddingBottom: 20,
     maxHeight: '80%',
   },
@@ -629,12 +657,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f2',
+    borderBottomColor: '#F0F0F0',
   },
   modalTitle: {
     fontFamily: 'outfit-bold',
     fontSize: 18,
-    color: '#333',
+    color: '#333333',
   },
   dropdownList: {
     maxHeight: 300,
@@ -643,48 +671,66 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: '#f2f2f2',
+    borderBottomColor: '#F0F0F0',
   },
   dropdownItemText: {
     fontFamily: 'outfit',
     fontSize: 16,
-    color: '#333',
+    color: '#333333',
   },
-  actionButtonsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 10,
+  dropdownItemSelected: {
+    backgroundColor: 'rgba(0, 153, 112, 0.1)', // Light green background for selected item
   },
-  saveForLaterButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 10,
-    flex: 1,
+  dropdownItemTextSelected: {
+    color: '#009970', // Green text for selected item
+    fontFamily: 'outfit-medium',
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontFamily: 'outfit-bold',
+    color: '#333333',
+    marginBottom: 15,
+    marginTop: 5,
+  },
+  inputIcon: {
     marginRight: 10,
+    color: '#009970',
   },
-  saveForLaterText: {
-    fontFamily: 'outfit-medium',
-    fontSize: 14,
-    color: '#333',
-    marginLeft: 8,
-  },
-  generatePlanButton: {
-    backgroundColor: '#3478F6',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 10,
+  formHeader: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 20,
+    borderLeftWidth: 4,
+    borderLeftColor: '#009970',
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+  },
+  formHeaderText: {
+    fontFamily: 'outfit-medium',
+    fontSize: 16,
+    color: '#333333',
     flex: 1,
   },
-  generatePlanText: {
-    fontFamily: 'outfit-medium',
-    fontSize: 14,
-    color: 'white',
+  calendarTheme: {
+    backgroundColor: '#FFFFFF',
+    calendarBackground: '#FFFFFF',
+    textSectionTitleColor: '#009970',
+    selectedDayBackgroundColor: '#009970',
+    selectedDayTextColor: '#FFFFFF',
+    todayTextColor: '#F7B500',
+    dayTextColor: '#333333',
+    textDisabledColor: '#D9E1E8',
+    dotColor: '#F7B500',
+    selectedDotColor: '#FFFFFF',
+    arrowColor: '#009970',
+    monthTextColor: '#333333',
+    indicatorColor: '#009970',
+    textDayFontFamily: 'outfit',
+    textMonthFontFamily: 'outfit-medium',
+    textDayHeaderFontFamily: 'outfit-medium',
+    textDayFontSize: 16,
+    textMonthFontSize: 16,
+    textDayHeaderFontSize: 14,
   },
 });

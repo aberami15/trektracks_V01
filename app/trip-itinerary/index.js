@@ -236,23 +236,30 @@ export default function TripItinerary() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA', // Light blue-gray background
-    paddingTop: 50,
+    backgroundColor: '#FFFFFF',
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
+    paddingTop: 50,
+    paddingBottom: 15,
+    backgroundColor: '#43BFC7',
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
     marginBottom: 20,
+    elevation: 5,
   },
   headerTitle: {
     fontFamily: 'outfit-bold',
-    fontSize: 28,
-    color: '#2C3E50', // Dark blue-gray
+    fontSize: 24,
+    color: '#FFFFFF',
   },
   profileButton: {
-    padding: 10,
+    padding: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 20,
     zIndex: 10,
   },
   content: {
@@ -272,11 +279,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2,
+    elevation: 3,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#CFECEF',
   },
   tripHeader: {
-    backgroundColor: '#37A794', // Teal (ocean color)
+    backgroundColor: '#43BFC7', 
     padding: 15,
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
@@ -298,6 +307,7 @@ const styles = StyleSheet.create({
   },
   tripDetails: {
     padding: 15,
+    backgroundColor: '#FFFFFF',
   },
   tripDetailRow: {
     flexDirection: 'row',
@@ -312,29 +322,32 @@ const styles = StyleSheet.create({
   detailLabel: {
     fontFamily: 'outfit-medium',
     fontSize: 14,
-    color: '#5D7A96', // Blue-gray
+    color: '#43BFC7',
     marginLeft: 5,
     marginRight: 5,
   },
   detailText: {
     fontFamily: 'outfit',
     fontSize: 14,
-    color: '#2C3E50', // Dark blue-gray
+    color: '#333333',
   },
   descriptionContainer: {
     marginTop: 5,
     marginBottom: 15,
+    backgroundColor: '#CFECEF20', // Very light teal with opacity
+    padding: 10,
+    borderRadius: 8,
   },
   descriptionLabel: {
     fontFamily: 'outfit-medium',
     fontSize: 14,
-    color: '#5D7A96', // Blue-gray
+    color: '#43BFC7',
     marginBottom: 3,
   },
   descriptionText: {
     fontFamily: 'outfit',
     fontSize: 14,
-    color: '#2C3E50', // Dark blue-gray
+    color: '#333333',
     lineHeight: 20,
   },
   actionButtons: {
@@ -342,53 +355,153 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     marginTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#EFF4F7', // Light blue-gray
+    borderTopColor: '#CFECEF',
     paddingTop: 15,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     marginLeft: 20,
+    padding: 8,
+    borderRadius: 8,
   },
   actionButtonText: {
     fontFamily: 'outfit-medium',
     fontSize: 14,
-    color: '#37A794', // Teal (ocean color)
     marginLeft: 5,
   },
   emptyState: {
     alignItems: 'center',
     justifyContent: 'center',
     paddingTop: 120,
+    backgroundColor: '#CFECEF20', // Very light teal with opacity
+    borderRadius: 15,
+    padding: 30,
+    marginTop: 20,
   },
   emptyTitle: {
     fontFamily: 'outfit-medium',
     fontSize: 22,
-    color: '#2C3E50', // Dark blue-gray
+    color: '#43BFC7',
     marginTop: 20,
     marginBottom: 10,
   },
   emptyText: {
     fontFamily: 'outfit',
     fontSize: 16,
-    color: '#5D7A96', // Blue-gray
+    color: '#555555',
     textAlign: 'center',
     marginBottom: 30,
     paddingHorizontal: 20,
   },
   createButtonContainer: {
     alignItems: 'center',
-    marginBottom: 30,
+    marginVertical: 30,
   },
   createButton: {
-    backgroundColor: '#1C6E85', // Deep ocean blue
-    paddingHorizontal: 24,
-    paddingVertical: 14,
+    backgroundColor: '#43BFC7',
+    paddingHorizontal: 28,
+    paddingVertical: 15,
     borderRadius: 12,
+    elevation: 3,
   },
   createButtonText: {
     fontFamily: 'outfit-medium',
     color: 'white',
     fontSize: 16,
+  },
+  loadingIndicator: {
+    marginTop: 50,
+  },
+  iconStyle: {
+    color: '#43BFC7',
+  },
+  warningDeleteText: {
+    color: '#FF3B30',
+  },
+  // Calendar styles
+  calendarContainer: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 15,
+    padding: 15,
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: '#CFECEF',
+  },
+  // Filter section
+  filterContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+    backgroundColor: '#CFECEF30',
+    borderRadius: 10,
+    padding: 10,
+  },
+  filterButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#CFECEF',
+    marginRight: 8,
+  },
+  filterButtonActive: {
+    backgroundColor: '#43BFC7',
+    borderColor: '#43BFC7',
+  },
+  filterText: {
+    fontFamily: 'outfit',
+    fontSize: 14,
+    color: '#43BFC7',
+  },
+  filterTextActive: {
+    color: '#FFFFFF',
+  },
+  sectionTitle: {
+    fontFamily: 'outfit-bold',
+    fontSize: 18,
+    color: '#333333',
+    marginTop: 20,
+    marginBottom: 10,
+    paddingHorizontal: 5,
+  },
+  noTripsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  noTripsImage: {
+    width: 120,
+    height: 120,
+    marginBottom: 20,
+    tintColor: '#CFECEF',
+  },
+  floatingButton: {
+    position: 'absolute',
+    bottom: 80,
+    right: 20,
+    backgroundColor: '#43BFC7',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 5,
+  },
+  badge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: '#CFECEF',
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  badgeText: {
+    fontFamily: 'outfit-medium',
+    fontSize: 12,
+    color: '#43BFC7',
   }
 });
