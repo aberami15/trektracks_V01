@@ -1,13 +1,22 @@
 {
   "cli": {
-    "version": ">=0.69.0"
+    "version": ">=0.49.0"
   },
   "build": {
-    "release": {
-      "distribution": "store",
+    "production": {
+      "workflow": "managed",
+      "platforms": ["android"],
       "android": {
         "buildType": "apk"
       }
+    }
+  },
+  "submit": {
+    "production": {}
+  },
+  "updates": {
+    "production": {
+      "branch": "master"
     }
   }
 }
