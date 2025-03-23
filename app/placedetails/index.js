@@ -2,8 +2,10 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, StatusBar,
 import React, { useEffect, useState } from 'react'
 import { useNavigation, useRouter, useLocalSearchParams } from 'expo-router'
 import Ionicons from '@expo/vector-icons/Ionicons';
+import {jwtDecode} from 'jwt-decode';
 import { MaterialIcons } from '@expo/vector-icons';
 import Config from '../../config';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function PlaceDetails() {
   const navigation = useNavigation();
@@ -220,6 +222,40 @@ export default function PlaceDetails() {
     }
   };
 
+  const addFavourite = async() => {
+
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      ToastAndroid.show('Authentication required. Please login again.', ToastAndroid.LONG);
+      router.replace('/auth/sign-in');
+      return;
+    }
+    
+    const tokenPromise = AsyncStorage.getItem('token');
+          const token2 = await tokenPromise;
+          if (!token2) {
+            console.error("No authentication token found");
+            setLoading(false);
+            return;
+          }
+          const decodedToken = jwtDecode(token2);
+          const x = decodedToken.id;
+          const userId = x;
+    const response = await fetch(`${Config.BASE_URL}/places/favourite/${place._id}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        id: userId,
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API request failed with status ${response.status}`);
+    }
+
+  }
 
 
   // Get image source - use first image from API or fallback to local image
@@ -410,7 +446,7 @@ export default function PlaceDetails() {
         </TouchableOpacity>
         
         {/* Add to Itinerary Button */}
-        <TouchableOpacity style={styles.addButton}>
+        <TouchableOpacity style={styles.addButton} onPress={addFavourite}>
           <Text style={styles.addButtonText}>Add to Favourite</Text>
           <Ionicons name="heart" size={20} color="white" style={styles.addIcon} />
         </TouchableOpacity>

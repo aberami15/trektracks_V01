@@ -21,7 +21,7 @@ export default function BudgetPlanner() {
   }, []);
 
   const handleBudgetOverview = () => {
-    router.push('/budget-overview'); // Direct to the budget planner page
+    router.push(`/budget-overview?q=${encodeURIComponent(id)}`); // Direct to the budget planner page
   };
 
   const handleBack = () => {
@@ -78,7 +78,7 @@ export default function BudgetPlanner() {
         
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.title}>Expense Planner</Text>
+          <Text style={styles.title}>Trip Plan Overview</Text>
           <Feather name="settings" size={24} color="#2cc3e5" />
         </View>
 
@@ -99,6 +99,19 @@ export default function BudgetPlanner() {
               <Text style={styles.progressText}>LKR {tripDetail.totalExpense} / LKR {tripDetail.budget}</Text>
             </View>
           </TouchableOpacity>
+        </View>
+
+        {/* generate button */}
+        <View style={styles.section}>
+          
+          <View style={styles.buttonRow}>
+            <TouchableOpacity 
+              style={styles.actionButton} 
+              onPress={() => router.push(`/plan-generation?q=${id}`)}>
+              <Feather name="calendar" size={20} color="#fff" />
+              <Text style={styles.buttonText}>Generate Plan</Text>
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Budget Summary */}
@@ -160,13 +173,6 @@ export default function BudgetPlanner() {
               onPress={() => router.push(`/add-transactions?q=${encodeURIComponent(id)}`)}>
               <Feather name="plus" size={20} color="#fff" />
               <Text style={styles.buttonText}>Add Transactions</Text>
-            </TouchableOpacity>
-            
-            <TouchableOpacity 
-              style={styles.actionButton} 
-              onPress={() => router.push(`/plan-generation?q=${id}`)}>
-              <Feather name="calendar" size={20} color="#fff" />
-              <Text style={styles.buttonText}>Generate Plan</Text>
             </TouchableOpacity>
           </View>
         </View>

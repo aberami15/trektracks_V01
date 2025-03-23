@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "fccd4c0f-5aff-4acf-a92a-710036701121"
+      }
+    },
+    "owner": "trektracks",
+    "android": {
+      "package": "com.trektracks.trektracks_v01"
+    }
+  }
+}
